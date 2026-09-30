@@ -3491,10 +3491,16 @@ img.work-project__media-img--shadow {
 
 .page-nav {
   view-transition-name: page-nav;
-  position: absolute;
+  /* Fixed, not absolute: it should hold its position on screen while the
+     page scrolls underneath it (initPageNavFade() in main.js shrinks/fades
+     it in place, like it's retreating away from the viewer, rather than
+     traveling with the scroll). z-index high enough to stay above the
+     glass card as that scrolls up underneath it during the fade. */
+  position: fixed;
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 200;
   display: inline-flex;
   height: 22px;
   align-items: center;
