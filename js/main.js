@@ -76,11 +76,15 @@ function initScrollspy() {
 // Case-study white frames (the hero title/CTA card plus each .case-section)
 // scale up a touch while the reader is on them. Separate from initScrollspy
 // above -- that one only tracks sections with a sidebar nav entry, which
-// left out .case-hero__card entirely, and needed its own (later) reference
-// line for a different purpose (its 30% threshold matches the sidebar dots
-// switching; this one triggers sooner -- 15% down -- so a frame reads as
-// "focused" closer to when it first comes into view instead of after
-// you've already scrolled well into it).
+// left out .case-hero__card entirely, and needed its own reference line for
+// a different purpose. A frame counts as current once its own top has
+// scrolled up to/past the line, so a line further DOWN the viewport (a
+// bigger percentage) means less scrolling is needed to cross it -- it
+// triggers sooner, while the frame's still mostly below the fold, not
+// later. (Got this backwards on the first pass: went 30%->15% meaning to
+// make it earlier and actually made it later, since a smaller number is a
+// line closer to the top. 65% -- most of the way down the viewport --
+// actually triggers early.)
 function initCaseFrameFocus() {
   const frames = document.querySelectorAll(".case-hero__card, .case-section.case-section--built");
   if (!frames.length) return;
@@ -88,7 +92,7 @@ function initCaseFrameFocus() {
   let ticking = false;
   function update() {
     ticking = false;
-    const line = window.innerHeight * 0.15;
+    const line = window.innerHeight * 0.65;
     let current = frames[0];
     for (const frame of frames) {
       if (frame.getBoundingClientRect().top <= line) current = frame;
