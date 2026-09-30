@@ -2593,7 +2593,6 @@ img.work-project__media-img--shadow {
 .case-section .case-concept__version img {
   width: 100%;
   margin: 0;
-  border: 1px solid rgba(95, 95, 95, 0.1);
   border-radius: 8px;
 }
 .case-concept__version-label {
