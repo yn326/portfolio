@@ -1592,6 +1592,15 @@ img.work-project__media-img--shadow {
   align-items: flex-start;
   gap: 40px;
   font-family: "Figtree", sans-serif;
+  /* initScrollspy() in main.js toggles .is-focused on whichever section the
+     reader is currently on (same detection that drives the sidebar nav
+     dots). The 40px gap between sections (set on .glass-card, the flex
+     parent) comfortably absorbs the few px this adds on each edge, so no
+     neighboring frame ever gets touched. */
+  transition: transform 0.3s ease;
+}
+.case-section.case-section--built.is-focused {
+  transform: scale(1.02);
 }
 .case-section__group {
   display: flex;

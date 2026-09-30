@@ -41,7 +41,11 @@ function initAboutPhotoHover() {
 }
 
 // Case-study scrollspy: marks whichever section's top has most recently
-// crossed a reference line (30% down the viewport) as .is-current.
+// crossed a reference line (30% down the viewport) as .is-current on its
+// sidebar nav dot, and .is-focused on the section itself (see style.css --
+// that one gets a subtle scale-up so the white frame the reader is
+// currently looking at reads as "in focus" against the others). Same
+// current-section detection drives both, no separate observer needed.
 function initScrollspy() {
   const nav = document.querySelector(".scrollspy");
   if (!nav) return;
@@ -60,6 +64,7 @@ function initScrollspy() {
     }
     for (const pair of pairs) {
       pair.item.classList.toggle("is-current", pair === current);
+      pair.section.classList.toggle("is-focused", pair === current);
     }
   }
   function onScroll() {
