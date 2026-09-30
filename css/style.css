@@ -3787,10 +3787,8 @@ img.work-project__media-img--shadow {
     font-size: 16px;
     line-height: normal;
   }
-  .page-canvas--work .site-footer,
-  .page-canvas--about .site-footer {
-    padding: 40px 24px;
-  }
+  /* Footer keeps its 40px side padding at every width, unlike the glass
+     card above -- deliberately not narrowed to 24px here. */
 }
 
 .page-canvas--about {
