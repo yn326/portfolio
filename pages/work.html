@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script src="../js/case-transition.js?v=8"></script>
+  <script>
+    (function () {
+      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
+      var supported = { "home-to-work": 1, "work-to-home": 1, "about-to-home": 1, "home-to-about": 1, "work-to-about": 1, "about-to-work": 1 };
+      function keyFor(url) {
+        try {
+          var file = new URL(url, location.href).pathname.split("/").pop();
+          return nameFor.hasOwnProperty(file) ? nameFor[file] : null;
+        } catch (e) {
+          return null;
+        }
+      }
+      var cur = keyFor(location.href);
+      var prev = document.referrer ? keyFor(document.referrer) : null;
+      if (cur && prev && cur !== prev) {
+        var pair = prev + "-to-" + cur;
+        if (supported[pair]) document.documentElement.setAttribute("data-transition", pair);
+      }
+    })();
+
+    // Strip backdrop-filter off the glass card for the duration of a cross-document
+    // view transition: it can't be baked into the static snapshot images, so the UA
+    // keeps it live on the group wrapper instead, and that live re-sampling of a
+    // fast-changing background (two overlapping cards) shows up as a heavy blur
+    // smear through the middle of the transition. Toggling the real element's own
+    // backdrop-filter off right before each snapshot is captured removes it at the
+    // source -- pageswap covers this (outgoing) page's capture, pagereveal covers
+    // the incoming page's.
+    window.addEventListener("pageswap", function (e) {
+      if (e.viewTransition) document.documentElement.classList.add("vt-no-blur");
+    });
+    window.addEventListener("pagereveal", function (e) {
+      if (e.viewTransition) {
+        document.documentElement.classList.add("vt-no-blur");
+        e.viewTransition.finished.finally(function () {
+          var root = document.documentElement;
+          // .vt-blur-settling carries the transition that eases the blur back
+          // in -- it has to be added *before* vt-no-blur is removed (the
+          // actual value change), or the change happens with no transition
+          // active yet and just pops instantly. See its rule in style.css for
+          // why this can't just be a permanent transition on the card itself.
+          root.classList.add("vt-blur-settling");
+          root.classList.remove("vt-no-blur");
+          setTimeout(function () {
+            root.classList.remove("vt-blur-settling");
+          }, 300);
+        });
+      }
+    });
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raina Ni - Work</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png?v=4" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/favicon-192.png?v=4" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css?v=100" />
+</head>
+<body>
+  <div class="page-bg-gradient"></div>
+
+  <svg class="glass-filters" width="0" height="0" style="position:absolute;overflow:hidden">
+    <defs>
+      <filter id="glass-distortion-card" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.010 0.014" numOctaves="2" seed="8" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="3" result="blurredNoise" />
+
+        <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="64" xChannelSelector="R" yChannelSelector="G" result="dispR" />
+        <feColorMatrix in="dispR" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="chR" />
+
+        <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="50" xChannelSelector="R" yChannelSelector="G" result="dispG" />
+        <feColorMatrix in="dispG" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="chG" />
+
+        <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="36" xChannelSelector="R" yChannelSelector="G" result="dispB" />
+        <feColorMatrix in="dispB" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="chB" />
+
+        <feComposite in="chR" in2="chG" operator="arithmetic" k2="1" k3="1" result="rg" />
+        <feComposite in="rg" in2="chB" operator="arithmetic" k2="1" k3="1" />
+      </filter>
+      <!-- Tier 2: single displacement pass, no per-channel chromatic split -->
+      <filter id="glass-distortion-card-simple" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.010 0.014" numOctaves="2" seed="8" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="3" result="blurredNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="48" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="page-canvas page-canvas--work">
+    <nav class="page-nav">
+      <a href="../index.html" aria-label="Home">
+        <svg width="47" height="13" viewBox="0 0 47 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 12.6V0H1.53V5.418H8.658V0H10.17V12.6H8.658V6.804H1.53V12.6H0Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M17.0816 12.816C16.2056 12.816 15.4256 12.618 14.7416 12.222C14.0696 11.814 13.5416 11.256 13.1576 10.548C12.7736 9.84 12.5816 9.024 12.5816 8.1C12.5816 7.176 12.7676 6.36 13.1396 5.652C13.5236 4.944 14.0516 4.392 14.7236 3.996C15.4076 3.588 16.1816 3.384 17.0456 3.384C17.9336 3.384 18.7136 3.588 19.3856 3.996C20.0696 4.392 20.5976 4.944 20.9696 5.652C21.3536 6.36 21.5456 7.176 21.5456 8.1C21.5456 9.024 21.3536 9.84 20.9696 10.548C20.5976 11.256 20.0756 11.814 19.4036 12.222C18.7316 12.618 17.9576 12.816 17.0816 12.816ZM17.0816 11.484C17.6816 11.484 18.2036 11.34 18.6476 11.052C19.0916 10.764 19.4396 10.368 19.6916 9.864C19.9556 9.36 20.0876 8.772 20.0876 8.1C20.0876 7.428 19.9556 6.84 19.6916 6.336C19.4396 5.832 19.0856 5.436 18.6296 5.148C18.1736 4.86 17.6456 4.716 17.0456 4.716C16.4576 4.716 15.9356 4.86 15.4796 5.148C15.0356 5.436 14.6816 5.832 14.4176 6.336C14.1656 6.84 14.0396 7.428 14.0396 8.1C14.0396 8.76 14.1656 9.348 14.4176 9.864C14.6816 10.368 15.0416 10.764 15.4976 11.052C15.9656 11.34 16.4936 11.484 17.0816 11.484Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M23.545 12.6V3.6H24.895L24.967 4.86C25.243 4.38 25.597 4.014 26.029 3.762C26.461 3.51 26.965 3.384 27.541 3.384C28.261 3.384 28.873 3.552 29.377 3.888C29.893 4.224 30.265 4.734 30.493 5.418C30.745 4.758 31.111 4.254 31.591 3.906C32.083 3.558 32.665 3.384 33.337 3.384C34.345 3.384 35.137 3.72 35.713 4.392C36.301 5.064 36.589 6.084 36.577 7.452V12.6H35.137V7.992C35.137 7.104 35.041 6.426 34.849 5.958C34.669 5.49 34.423 5.172 34.111 5.004C33.799 4.824 33.439 4.734 33.031 4.734C32.323 4.734 31.771 5.016 31.375 5.58C30.979 6.132 30.781 6.918 30.781 7.938V12.6H29.341V7.992C29.341 7.104 29.245 6.426 29.053 5.958C28.873 5.49 28.621 5.172 28.297 5.004C27.985 4.824 27.625 4.734 27.217 4.734C26.521 4.734 25.975 5.016 25.579 5.58C25.183 6.132 24.985 6.918 24.985 7.938V12.6H23.545Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M42.7975 12.816C41.9215 12.816 41.1475 12.618 40.4755 12.222C39.8035 11.814 39.2755 11.256 38.8915 10.548C38.5195 9.84 38.3335 9.024 38.3335 8.1C38.3335 7.176 38.5195 6.36 38.8915 5.652C39.2755 4.944 39.7975 4.392 40.4575 3.996C41.1295 3.588 41.8975 3.384 42.7615 3.384C43.6015 3.384 44.3275 3.594 44.9395 4.014C45.5515 4.422 46.0255 4.998 46.3615 5.742C46.6975 6.486 46.8655 7.362 46.8655 8.37H39.7915C39.8515 9.354 40.1635 10.122 40.7275 10.674C41.2915 11.226 42.0055 11.502 42.8695 11.502C43.5055 11.502 44.0395 11.352 44.4715 11.052C44.9155 10.752 45.2575 10.356 45.4975 9.864L46.7395 10.494C46.5115 10.962 46.2055 11.37 45.8215 11.718C45.4495 12.066 45.0055 12.336 44.4895 12.528C43.9855 12.72 43.4215 12.816 42.7975 12.816ZM39.8995 7.164H45.3175C45.2815 6.648 45.1435 6.204 44.9035 5.832C44.6755 5.46 44.3755 5.172 44.0035 4.968C43.6315 4.764 43.2115 4.662 42.7435 4.662C42.2875 4.662 41.8495 4.764 41.4295 4.968C41.0095 5.16 40.6615 5.448 40.3855 5.832C40.1095 6.204 39.9475 6.648 39.8995 7.164Z" fill="#AE8383" fill-opacity="0.5"/>
+        </svg>
+      </a>
+      <a href="work.html" class="is-active" aria-label="Work">
+        <svg width="42" height="13" viewBox="0 0 42 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3.852 12.6L0 0H1.53L4.68 10.278L7.722 0H9.234L12.222 10.242L15.408 0H16.938L13.032 12.6H11.394L8.478 2.466L5.472 12.6H3.852Z" fill="#AE8383"/>
+          <path d="M21.617 12.816C20.741 12.816 19.961 12.618 19.277 12.222C18.605 11.814 18.077 11.256 17.693 10.548C17.309 9.84 17.117 9.024 17.117 8.1C17.117 7.176 17.303 6.36 17.675 5.652C18.059 4.944 18.587 4.392 19.259 3.996C19.943 3.588 20.717 3.384 21.581 3.384C22.469 3.384 23.249 3.588 23.921 3.996C24.605 4.392 25.133 4.944 25.505 5.652C25.889 6.36 26.081 7.176 26.081 8.1C26.081 9.024 25.889 9.84 25.505 10.548C25.133 11.256 24.611 11.814 23.939 12.222C23.267 12.618 22.493 12.816 21.617 12.816ZM21.617 11.484C22.217 11.484 22.739 11.34 23.183 11.052C23.627 10.764 23.975 10.368 24.227 9.864C24.491 9.36 24.623 8.772 24.623 8.1C24.623 7.428 24.491 6.84 24.227 6.336C23.975 5.832 23.621 5.436 23.165 5.148C22.709 4.86 22.181 4.716 21.581 4.716C20.993 4.716 20.471 4.86 20.015 5.148C19.571 5.436 19.217 5.832 18.953 6.336C18.701 6.84 18.575 7.428 18.575 8.1C18.575 8.76 18.701 9.348 18.953 9.864C19.217 10.368 19.577 10.764 20.033 11.052C20.501 11.34 21.029 11.484 21.617 11.484Z" fill="#AE8383"/>
+          <path d="M28.0804 12.6V3.6H29.5204V5.202C29.8804 4.638 30.3424 4.224 30.9064 3.96C31.4824 3.696 32.0824 3.564 32.7064 3.564V4.914C32.1784 4.914 31.6684 5.004 31.1764 5.184C30.6964 5.352 30.3004 5.634 29.9884 6.03C29.6764 6.426 29.5204 6.966 29.5204 7.65V12.6H28.0804Z" fill="#AE8383"/>
+          <path d="M34.1625 12.6V0H35.6025V7.668L39.4365 3.6H41.2545L37.9065 7.2L41.6145 12.6H39.8325L36.9525 8.244L35.6025 9.666V12.6H34.1625Z" fill="#AE8383"/>
+        </svg>
+      </a>
+      <a href="about.html" aria-label="About">
+        <svg width="50" height="13" viewBox="0 0 50 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 12.6L5.13 0H6.714L11.844 12.6H10.242L8.784 9.018H3.078L1.62 12.6H0ZM3.6 7.65H8.244L5.922 1.908L3.6 7.65Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M17.7616 12.816C17.1016 12.816 16.5136 12.66 15.9976 12.348C15.4816 12.036 15.0556 11.61 14.7196 11.07L14.6476 12.6H13.2796V0H14.7196V5.112C15.0556 4.572 15.4816 4.152 15.9976 3.852C16.5136 3.54 17.1016 3.384 17.7616 3.384C18.5656 3.384 19.2736 3.582 19.8856 3.978C20.4976 4.374 20.9716 4.926 21.3076 5.634C21.6556 6.342 21.8296 7.164 21.8296 8.1C21.8296 9.024 21.6556 9.846 21.3076 10.566C20.9716 11.274 20.4976 11.826 19.8856 12.222C19.2736 12.618 18.5656 12.816 17.7616 12.816ZM17.4376 11.502C18.0016 11.502 18.4996 11.358 18.9316 11.07C19.3756 10.782 19.7236 10.38 19.9756 9.864C20.2396 9.348 20.3716 8.76 20.3716 8.1C20.3716 7.44 20.2456 6.852 19.9936 6.336C19.7536 5.82 19.4116 5.418 18.9676 5.13C18.5236 4.842 18.0196 4.698 17.4556 4.698C16.9276 4.698 16.4536 4.842 16.0336 5.13C15.6256 5.418 15.3016 5.82 15.0616 6.336C14.8336 6.852 14.7196 7.44 14.7196 8.1C14.7196 8.76 14.8336 9.348 15.0616 9.864C15.3016 10.38 15.6256 10.782 16.0336 11.07C16.4416 11.358 16.9096 11.502 17.4376 11.502Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M27.8045 12.816C26.9285 12.816 26.1485 12.618 25.4645 12.222C24.7925 11.814 24.2645 11.256 23.8805 10.548C23.4965 9.84 23.3045 9.024 23.3045 8.1C23.3045 7.176 23.4905 6.36 23.8625 5.652C24.2465 4.944 24.7745 4.392 25.4465 3.996C26.1305 3.588 26.9045 3.384 27.7685 3.384C28.6565 3.384 29.4365 3.588 30.1085 3.996C30.7925 4.392 31.3205 4.944 31.6925 5.652C32.0765 6.36 32.2685 7.176 32.2685 8.1C32.2685 9.024 32.0765 9.84 31.6925 10.548C31.3205 11.256 30.7985 11.814 30.1265 12.222C29.4545 12.618 28.6805 12.816 27.8045 12.816ZM27.8045 11.484C28.4045 11.484 28.9265 11.34 29.3705 11.052C29.8145 10.764 30.1625 10.368 30.4145 9.864C30.6785 9.36 30.8105 8.772 30.8105 8.1C30.8105 7.428 30.6785 6.84 30.4145 6.336C30.1625 5.832 29.8085 5.436 29.3525 5.148C28.8965 4.86 28.3685 4.716 27.7685 4.716C27.1805 4.716 26.6585 4.86 26.2025 5.148C25.7585 5.436 25.4045 5.832 25.1405 6.336C24.8885 6.84 24.7625 7.428 24.7625 8.1C24.7625 8.76 24.8885 9.348 25.1405 9.864C25.4045 10.368 25.7645 10.764 26.2205 11.052C26.6885 11.34 27.2165 11.484 27.8045 11.484Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M37.5259 12.816C36.8299 12.816 36.2179 12.678 35.6899 12.402C35.1739 12.114 34.7659 11.664 34.4659 11.052C34.1779 10.428 34.0339 9.624 34.0339 8.64V3.6H35.4739V8.208C35.4739 9.096 35.5759 9.774 35.7799 10.242C35.9839 10.71 36.2659 11.034 36.6259 11.214C36.9979 11.382 37.4119 11.466 37.8679 11.466C38.6479 11.466 39.2539 11.184 39.6859 10.62C40.1299 10.056 40.3519 9.27 40.3519 8.262V3.6H41.7919V12.6H40.4419L40.3699 11.25C40.0699 11.754 39.6799 12.144 39.1999 12.42C38.7199 12.684 38.1619 12.816 37.5259 12.816Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M47.689 12.816C46.813 12.816 46.135 12.588 45.655 12.132C45.175 11.676 44.935 11.034 44.935 10.206V4.878H43.369V3.6H44.935V0.792001H46.375V3.6H49.075V4.878H46.375V10.062C46.375 10.518 46.495 10.872 46.735 11.124C46.987 11.364 47.335 11.484 47.779 11.484C47.923 11.484 48.061 11.466 48.193 11.43C48.337 11.382 48.523 11.274 48.751 11.106L49.309 12.276C48.997 12.48 48.715 12.618 48.463 12.69C48.211 12.774 47.953 12.816 47.689 12.816Z" fill="#AE8383" fill-opacity="0.5"/>
+        </svg>
+      </a>
+      <a href="../assets/Raina-Ni-Resume.pdf?v=2" aria-label="Resume" target="_blank" rel="noopener">
+        <svg width="63" height="13" viewBox="0 0 63 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 12.6V0H4.104C4.92 0 5.64 0.162 6.264 0.486C6.9 0.81 7.392 1.26 7.74 1.836C8.1 2.412 8.28 3.072 8.28 3.816C8.28 4.644 8.04 5.37 7.56 5.994C7.092 6.606 6.474 7.056 5.706 7.344L8.784 12.6H7.11L4.212 7.632C4.128 7.644 4.044 7.65 3.96 7.65C3.876 7.65 3.792 7.65 3.708 7.65H1.53V12.6H0ZM1.53 6.246H4.32C4.776 6.246 5.184 6.144 5.544 5.94C5.904 5.724 6.192 5.436 6.408 5.076C6.636 4.704 6.75 4.284 6.75 3.816C6.75 3.096 6.498 2.514 5.994 2.07C5.502 1.614 4.86 1.386 4.068 1.386H1.53V6.246Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M14.7956 12.816C13.9196 12.816 13.1456 12.618 12.4736 12.222C11.8016 11.814 11.2736 11.256 10.8896 10.548C10.5176 9.84 10.3316 9.024 10.3316 8.1C10.3316 7.176 10.5176 6.36 10.8896 5.652C11.2736 4.944 11.7956 4.392 12.4556 3.996C13.1276 3.588 13.8956 3.384 14.7596 3.384C15.5996 3.384 16.3256 3.594 16.9376 4.014C17.5496 4.422 18.0236 4.998 18.3596 5.742C18.6956 6.486 18.8636 7.362 18.8636 8.37H11.7896C11.8496 9.354 12.1616 10.122 12.7256 10.674C13.2896 11.226 14.0036 11.502 14.8676 11.502C15.5036 11.502 16.0376 11.352 16.4696 11.052C16.9136 10.752 17.2556 10.356 17.4956 9.864L18.7376 10.494C18.5096 10.962 18.2036 11.37 17.8196 11.718C17.4476 12.066 17.0036 12.336 16.4876 12.528C15.9836 12.72 15.4196 12.816 14.7956 12.816ZM11.8976 7.164H17.3156C17.2796 6.648 17.1416 6.204 16.9016 5.832C16.6736 5.46 16.3736 5.172 16.0016 4.968C15.6296 4.764 15.2096 4.662 14.7416 4.662C14.2856 4.662 13.8476 4.764 13.4276 4.968C13.0076 5.16 12.6596 5.448 12.3836 5.832C12.1076 6.204 11.9456 6.648 11.8976 7.164Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M23.8298 12.816C23.1698 12.816 22.5937 12.72 22.1017 12.528C21.6097 12.324 21.1958 12.06 20.8598 11.736C20.5358 11.412 20.3017 11.058 20.1577 10.674L21.4177 10.152C21.6217 10.56 21.9278 10.89 22.3358 11.142C22.7438 11.394 23.1938 11.52 23.6858 11.52C24.2498 11.52 24.7237 11.412 25.1077 11.196C25.4918 10.968 25.6838 10.65 25.6838 10.242C25.6838 9.87 25.5397 9.57 25.2517 9.342C24.9757 9.114 24.5618 8.928 24.0098 8.784L23.1458 8.55C22.3298 8.334 21.6937 8.01 21.2377 7.578C20.7817 7.134 20.5537 6.636 20.5537 6.084C20.5537 5.232 20.8298 4.572 21.3818 4.104C21.9458 3.624 22.7798 3.384 23.8838 3.384C24.4118 3.384 24.8917 3.462 25.3237 3.618C25.7557 3.774 26.1278 3.996 26.4398 4.284C26.7518 4.56 26.9798 4.89 27.1238 5.274L25.8638 5.832C25.7078 5.424 25.4498 5.13 25.0898 4.95C24.7298 4.77 24.2918 4.68 23.7758 4.68C23.2238 4.68 22.7917 4.8 22.4797 5.04C22.1677 5.268 22.0117 5.592 22.0117 6.012C22.0117 6.252 22.1377 6.48 22.3897 6.696C22.6537 6.9 23.0377 7.068 23.5417 7.2L24.4417 7.434C25.0297 7.578 25.5218 7.794 25.9178 8.082C26.3138 8.358 26.6138 8.676 26.8178 9.036C27.0218 9.396 27.1238 9.78 27.1238 10.188C27.1238 10.728 26.9797 11.196 26.6917 11.592C26.4037 11.988 26.0137 12.294 25.5217 12.51C25.0297 12.714 24.4658 12.816 23.8298 12.816Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M32.3225 12.816C31.6265 12.816 31.0145 12.678 30.4865 12.402C29.9705 12.114 29.5625 11.664 29.2625 11.052C28.9745 10.428 28.8305 9.624 28.8305 8.64V3.6H30.2705V8.208C30.2705 9.096 30.3725 9.774 30.5765 10.242C30.7805 10.71 31.0625 11.034 31.4225 11.214C31.7945 11.382 32.2085 11.466 32.6645 11.466C33.4445 11.466 34.0505 11.184 34.4825 10.62C34.9265 10.056 35.1485 9.27 35.1485 8.262V3.6H36.5885V12.6H35.2385L35.1665 11.25C34.8665 11.754 34.4765 12.144 33.9965 12.42C33.5165 12.684 32.9585 12.816 32.3225 12.816Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M39.1016 12.6V3.6H40.4516L40.5236 4.86C40.7996 4.38 41.1536 4.014 41.5856 3.762C42.0176 3.51 42.5216 3.384 43.0976 3.384C43.8176 3.384 44.4296 3.552 44.9336 3.888C45.4496 4.224 45.8216 4.734 46.0496 5.418C46.3016 4.758 46.6676 4.254 47.1476 3.906C47.6396 3.558 48.2216 3.384 48.8936 3.384C49.9016 3.384 50.6936 3.72 51.2696 4.392C51.8576 5.064 52.1456 6.084 52.1336 7.452V12.6H50.6936V7.992C50.6936 7.104 50.5976 6.426 50.4056 5.958C50.2256 5.49 49.9796 5.172 49.6676 5.004C49.3556 4.824 48.9956 4.734 48.5876 4.734C47.8796 4.734 47.3276 5.016 46.9316 5.58C46.5356 6.132 46.3376 6.918 46.3376 7.938V12.6H44.8976V7.992C44.8976 7.104 44.8016 6.426 44.6096 5.958C44.4296 5.49 44.1776 5.172 43.8536 5.004C43.5416 4.824 43.1816 4.734 42.7736 4.734C42.0776 4.734 41.5316 5.016 41.1356 5.58C40.7396 6.132 40.5416 6.918 40.5416 7.938V12.6H39.1016Z" fill="#AE8383" fill-opacity="0.5"/>
+          <path d="M58.3542 12.816C57.4782 12.816 56.7042 12.618 56.0322 12.222C55.3602 11.814 54.8322 11.256 54.4482 10.548C54.0762 9.84 53.8902 9.024 53.8902 8.1C53.8902 7.176 54.0762 6.36 54.4482 5.652C54.8322 4.944 55.3542 4.392 56.0142 3.996C56.6862 3.588 57.4542 3.384 58.3182 3.384C59.1582 3.384 59.8842 3.594 60.4962 4.014C61.1082 4.422 61.5822 4.998 61.9182 5.742C62.2542 6.486 62.4222 7.362 62.4222 8.37H55.3482C55.4082 9.354 55.7202 10.122 56.2842 10.674C56.8482 11.226 57.5622 11.502 58.4262 11.502C59.0622 11.502 59.5962 11.352 60.0282 11.052C60.4722 10.752 60.8142 10.356 61.0542 9.864L62.2962 10.494C62.0682 10.962 61.7622 11.37 61.3782 11.718C61.0062 12.066 60.5622 12.336 60.0462 12.528C59.5422 12.72 58.9782 12.816 58.3542 12.816ZM55.4562 7.164H60.8742C60.8382 6.648 60.7002 6.204 60.4602 5.832C60.2322 5.46 59.9322 5.172 59.5602 4.968C59.1882 4.764 58.7682 4.662 58.3002 4.662C57.8442 4.662 57.4062 4.764 56.9862 4.968C56.5662 5.16 56.2182 5.448 55.9422 5.832C55.6662 6.204 55.5042 6.648 55.4562 7.164Z" fill="#AE8383" fill-opacity="0.5"/>
+        </svg>
+      </a>
+    </nav>
+
+    <div class="glass-card glass-card--work">
+      <div class="glass-card__top">
+        <div class="traffic-lights">
+          <span class="traffic-light traffic-light--red"></span>
+          <span class="traffic-light traffic-light--white"></span>
+          <span class="traffic-light traffic-light--green"></span>
+        </div>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Row 1: MUJI + Damai -->
+      <div class="work-row">
+        <a class="work-project" href="muji.html" data-case-color="#8B0013">
+          <div class="work-project__media">
+            <div class="work-project__media-imgwrap">
+              <img class="work-project__media-img--top work-project__media-img--shadow" src="../assets/images/work/muji/muji-hero.png?v=2" alt="MUJI USA" width="400" height="251" />
+            </div>
+          </div>
+          <div class="work-project__text">
+            <h2 class="work-project__title">MUJI USA</h2>
+            <p class="work-project__desc">E-commerce site reimagined as a lifestyle brand destination</p>
+          </div>
+        </a>
+
+        <a class="work-project" href="damai.html" data-case-color="#6665FE">
+          <div class="work-project__media work-project__media--cluster work-project__media--damai">
+            <img class="img-slot-a" src="../assets/images/work/damai/damai-3-final.png" alt="Damai Entertainment" />
+            <img class="img-slot-b" src="../assets/images/work/damai/damai-1-final.png" alt="Damai Entertainment" />
+            <img class="img-slot-c" src="../assets/images/work/damai/damai-2-final.png" alt="Damai Entertainment" />
+          </div>
+          <div class="work-project__text">
+            <h2 class="work-project__title">Damai Entertainment (Alibaba Group)</h2>
+            <p class="work-project__desc">B2B mobile app for real-time event ticketing data</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Row 2: Wapoo + Nodus -->
+      <div class="work-row">
+        <a class="work-project" href="wapoo.html" data-case-color="#45DBE9">
+          <div class="work-project__media work-project__media--cluster work-project__media--wapoo">
+            <img class="img-slot-a" src="../assets/images/work/wapoo/wapoo-2-final.png" alt="Wapoo AI" />
+            <img class="img-slot-b" src="../assets/images/work/wapoo/wapoo-1-final.png" alt="Wapoo AI" />
+            <img class="img-slot-c" src="../assets/images/work/wapoo/wapoo-3-final.png" alt="Wapoo AI" />
+          </div>
+          <div class="work-project__text">
+            <h2 class="work-project__title">Wapoo AI</h2>
+            <p class="work-project__desc">AI-powered short-form video social app for Gen-Alpha</p>
+          </div>
+        </a>
+
+        <a class="work-project work-project--no-hover-rise" role="link" aria-disabled="true">
+          <div class="work-project__media">
+            <div class="work-project__media-imgwrap">
+              <img class="work-project__media-img--top work-project__media-img--shadow" src="../assets/images/work/nodus/nodus-dashboard.png" alt="Nodus" width="400" height="251" />
+            </div>
+            <div class="work-project__coming-soon">
+              <span>Coming soon...</span>
+            </div>
+          </div>
+          <div class="work-project__text">
+            <h2 class="work-project__title">Nodus</h2>
+            <p class="work-project__desc">Innovative flashcards platform to ease active recital for students</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Row 3: Gorest AI + invisible spacer -->
+      <div class="work-row">
+        <a class="work-project work-project--no-hover-rise" role="link" aria-disabled="true">
+          <div class="work-project__media">
+            <div class="work-project__media-imgwrap">
+              <img class="work-project__media-img--top work-project__media-img--shadow" src="../assets/images/work/gorest/gorest-3dworld.png" alt="Gorest AI" width="400" height="251" />
+            </div>
+            <div class="work-project__coming-soon">
+              <span>Coming soon...</span>
+            </div>
+          </div>
+          <div class="work-project__text">
+            <h2 class="work-project__title">Gorest AI</h2>
+            <p class="work-project__desc">AI 3D game engine for the next generation of game creators</p>
+          </div>
+        </a>
+        <div class="work-project work-project--spacer" aria-hidden="true"></div>
+      </div>
+    </div>
+    <footer class="site-footer">
+      <div class="site-footer__left">
+        <a class="site-footer__hi" href="mailto:raina.nyy@gmail.com">
+          <span>Say hi to me at <em>raina.nyy@gmail.com</em></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <button class="site-footer__top" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+          <span>Back to top</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M15.8333 10L9.99994 4.16669L4.16661 10M9.99994 4.16669V15.8334" stroke="#5F5F5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="site-footer__cols">
+        <div class="site-footer__col">
+          <p class="site-footer__head">Pages</p>
+          <a href="work.html">Work</a>
+          <a href="about.html">About</a>
+          <a href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume</a>
+        </div>
+        <div class="site-footer__col">
+          <p class="site-footer__head">Projects</p>
+          <a href="muji.html" data-case-color="#8B0013">MUJI USA</a>
+          <a href="damai.html" data-case-color="#6665FE">Damai</a>
+          <a href="wapoo.html" data-case-color="#45DBE9">Wapoo AI</a>
+        </div>
+        <div class="site-footer__col">
+          <p class="site-footer__head">Contact</p>
+          <a href="mailto:raina.nyy@gmail.com">Email</a>
+          <a href="https://www.linkedin.com/in/rainani" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../js/main.js?v=17"></script>
+</body>
+</html>

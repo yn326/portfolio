@@ -1,0 +1,4553 @@
+/* ---- Page-to-page transitions (Home <-> Work, Home <-> About) ----
+   Simplified: plain slides, one easing curve per element, no scale/zoom.
+   The zoom version (matched exactly to a Jitter export) kept surfacing
+   Safari-specific lag that couldn't be pinned down, so this trades that
+   fidelity for something much smaller and more robust: home-tab slides out
+   left, work/about-tab slides in from the right, nav bar drops in from the
+   top. Easing is cubic-bezier(0.65,0,0.35,1) (ease-in-out): a pure ease-out
+   curve launches at full velocity from frame one, which for an element this
+   large read as a jarring flash right as it started moving -- ease-in-out
+   ramps up gently first. Cross-document View Transitions: browsers without
+   support just navigate normally (no error, no transition) -- progressive
+   enhancement. */
+@view-transition {
+  navigation: auto;
+}
+/* Only the named elements below should visibly animate -- neutralize the
+   browser's default full-page cross-fade so nav/background swap instantly
+   instead of ghosting. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* IMPORTANT: never put a custom `animation` on ::view-transition-group() --
+   overriding it silently destroys the UA's own top/left positioning for
+   that box (confirmed via computed-style inspection: top/left both reset
+   to 0px), which caused the earlier "flies to top-left" bug. Motion lives
+   on ::view-transition-old()/::view-transition-new() instead. */
+/* -100vw - 100% (viewport width + the element's own width) guarantees full
+   clearance off either edge no matter how wide the actual browser window is
+   -- a fixed px offset (the original -1200px/1282px) was derived from one
+   assumed viewport size, so on a wider real window the card hadn't fully
+   left before the transition's fill-mode handed off to the live page,
+   showing a visible edge snapping away. */
+@keyframes vt-slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100vw - 100%));
+  }
+}
+@keyframes vt-slide-in-from-right {
+  from {
+    transform: translateX(calc(100vw + 100%));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes vt-slide-in-from-left {
+  from {
+    transform: translateX(calc(-100vw - 100%));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes vt-slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(100vw + 100%));
+  }
+}
+@keyframes vt-nav-drop-in {
+  from {
+    transform: translateY(-102px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes vt-nav-drop-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-102px);
+  }
+}
+
+html[data-transition="home-to-work"]::view-transition-old(home-tab) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-out-left;
+}
+html[data-transition="home-to-work"]::view-transition-new(work-tab),
+html[data-transition="home-to-work"]::view-transition-new(work-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in-from-right;
+}
+html[data-transition="home-to-work"]::view-transition-new(page-nav) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-nav-drop-in;
+}
+
+html[data-transition="work-to-home"]::view-transition-new(home-tab) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in-from-left;
+}
+html[data-transition="work-to-home"]::view-transition-old(work-tab),
+html[data-transition="work-to-home"]::view-transition-old(work-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-out-right;
+}
+html[data-transition="work-to-home"]::view-transition-old(page-nav) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-nav-drop-out;
+}
+
+html[data-transition="about-to-home"]::view-transition-new(home-tab) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in-from-left;
+}
+html[data-transition="about-to-home"]::view-transition-old(about-tab),
+html[data-transition="about-to-home"]::view-transition-old(about-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-out-right;
+}
+html[data-transition="about-to-home"]::view-transition-old(page-nav) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-nav-drop-out;
+}
+
+html[data-transition="home-to-about"]::view-transition-old(home-tab) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-out-left;
+}
+html[data-transition="home-to-about"]::view-transition-new(about-tab),
+html[data-transition="home-to-about"]::view-transition-new(about-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in-from-right;
+}
+html[data-transition="home-to-about"]::view-transition-new(page-nav) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-nav-drop-in;
+}
+
+/* Work <-> About: same card slide, but no home-tab or nav bar involved -- the
+   nav sits at the identical position/size on both pages, so leaving it with
+   no animation rule here lets it just stay put (no drop in/out). */
+html[data-transition="work-to-about"]::view-transition-old(work-tab),
+html[data-transition="work-to-about"]::view-transition-old(work-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-out-left;
+}
+html[data-transition="work-to-about"]::view-transition-new(about-tab),
+html[data-transition="work-to-about"]::view-transition-new(about-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in-from-right;
+}
+
+html[data-transition="about-to-work"]::view-transition-old(about-tab),
+html[data-transition="about-to-work"]::view-transition-old(about-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-out-right;
+}
+html[data-transition="about-to-work"]::view-transition-new(work-tab),
+html[data-transition="about-to-work"]::view-transition-new(work-footer) {
+  animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in-from-left;
+}
+
+/* Scoped to the transition only (the real .glass-card keeps its full glass
+   effect everywhere else). backdrop-filter can't be baked into the static
+   old/new snapshot images, so the UA carries it onto ::view-transition-group()
+   instead -- which stays live and keeps re-sampling whatever's currently
+   behind the moving card, and that shows up as a heavy blur smear through
+   the middle of the transition. That property can't be overridden on the
+   group pseudo-element directly (confirmed: not even with !important -- it's
+   a UA-computed value outside the normal cascade for that pseudo), so instead
+   JS (see the pageswap/pagereveal listeners in each page's inline head script)
+   toggles this class on <html> right before each snapshot is captured, which
+   strips backdrop-filter off the REAL .glass-card element at the source. */
+html.vt-no-blur .glass-card,
+html.vt-no-blur .glass-card--work,
+html.vt-no-blur .glass-card--about,
+html.vt-no-blur .site-footer {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+/* The blur-easing `transition` below only ever applies through this class,
+   never as a permanent property on the cards themselves -- it used to live
+   directly on .glass-card/--work/--about, which meant it *also* applied when
+   vt-no-blur strips the blur on the way OUT (pageswap, leaving this page). A
+   transition on a property change driven by `!important` still transitions,
+   and since a filter list containing a url() reference can't be interpolated,
+   the value stayed frozen at full blur for the first half of the transition
+   (the CSS spec's "flip at 50%" fallback for non-interpolatable values) --
+   so the view-transition snapshot, taken right after pageswap fires, was
+   still capturing the *old*, fully-blurred glass instead of the stripped
+   one, which read as a sudden heavy-blur flash just before the page swiped
+   away. Scoping the transition to only the pagereveal (return) path avoids
+   ever having it active while vt-no-blur is being added.
+   .glass-card (home) additionally needs the url()-free intermediate value
+   from the rule below it: with the url() filter in the mix, "none" -> full
+   filter can't interpolate at all (same reason as above), so it lands here
+   first, at the same blur/saturate but without url(), which *can* interpolate
+   from "none", then swaps to the real rule after this transition finishes
+   (see the pagereveal handler in index.html). .glass-card--work/--about have
+   no url() filter, so for them this class only needs to carry the transition
+   itself -- removing vt-no-blur while it's active is enough to fade them in
+   directly to their own real rule's blur value. */
+html.vt-blur-settling .glass-card,
+html.vt-blur-settling .glass-card--work,
+html.vt-blur-settling .glass-card--about {
+  transition: backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease;
+}
+html.vt-blur-settling .glass-card {
+  backdrop-filter: blur(20px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(130%) !important;
+}
+
+/* ---- Design tokens ---- */
+:root {
+  --ink: #3a3a3a;
+  --ink-soft: #6b6b6b;
+  --cream: #ffffff;
+  --accent: #ef8080;
+  --card-bg: rgba(255, 255, 255, 0.55);
+  --card-bg-solid: #ffffff;
+  --radius-lg: 40px;
+  --radius-md: 24px;
+  --radius-sm: 16px;
+  --max-width: 1200px;
+  --nav-height: 88px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: "Quicksand", "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ---- Blob background canvas ----
+   Fallback gradient (colors sampled directly from blob-background.json's own
+   shape fills) instead of plain white: on a fresh page load -- which is what
+   every cross-document transition target is -- there's a brief window before
+   the Lottie JSON fetches/parses/paints its first frame. With animation:none
+   on ::view-transition-old/new(root) (no cross-fade cushioning it), that gap
+   was showing as a hard white flash the instant the incoming page appears. */
+.blob-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff1e1 0%, #ffe1e1 60%, #ffffff 100%);
+}
+.blob-bg lottie-player,
+.blob-bg .lottie-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Work/About background: same gradient wash as Home, no video/shapes ---- */
+.page-bg-gradient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, #fff6e9 0%, #ffd5d5 100%);
+}
+
+/* ---- Homepage background (Figma "Home" frame, 1440x900) ----
+   5 soft gradient blobs on a warm gradient wash, matching Figma exactly:
+   fill + each shape's x/y/w/h/rotation/gradient/shadow read directly off
+   the Home > Background layer via Dev Mode inspect. The canvas below is
+   fixed at the design's own 1440x900 px so every shape keeps its exact
+   proportions and circles stay circular; it's then scaled up (never down)
+   with the same tan(atan2()) trick used elsewhere in this file to turn a
+   cqw/cqh ratio into a unitless zoom factor -- taking the larger of the
+   width-fit and height-fit ratios makes the canvas cover the viewport the
+   same way `background-size: cover` would, instead of stretching it. */
+.home-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  container-type: size;
+  background: linear-gradient(180deg, #fff6e9 0%, #ffd5d5 100%);
+}
+.home-bg__canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1440px;
+  height: 900px;
+  transform: translate(-50%, -50%)
+    scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px))));
+}
+/* Each shape is split into two layers so a JS-driven exit (see initHomeBgExit
+   in main.js) can read and continue from the float loop's current position
+   without fighting a baked-in rotation:
+     .home-bg__shape       -- position (left/top/width/height) + the only
+                              animated property, a plain translateY (drop-in,
+                              then the continuous float, then -- on nav away
+                              from Work/About -- a JS-driven fall-out that
+                              picks up from wherever the float loop currently
+                              is, via el.getAnimations()).
+     .home-bg__shape-fill  -- fills the parent 100%; holds the constant
+                              rotation (matching Figma's rotate-around-own-
+                              top-left-corner, see the earlier fix) plus the
+                              actual background/shadow/radius. Never animated,
+                              so the translateY above always reads as a clean
+                              number, never a matrix to decompose. */
+.home-bg__shape {
+  position: absolute;
+  will-change: transform;
+}
+.home-bg__shape-fill {
+  position: absolute;
+  inset: 0;
+}
+.home-bg__shape--1 {
+  /* Figma's SVG export rotates each rectangle around its own top-left
+     corner (the rect's x/y), not the CSS default of center -- match that
+     with transform-origin, using the rect's own x/y as given, not the
+     Design panel's bounding-box-relative X/Y (which is a different, larger
+     box once rotated). */
+  left: -67.269px;
+  top: 9.61px;
+  width: 514.973px;
+  height: 514.973px;
+  animation:
+    home-bg-drop-1 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0s 1 both,
+    home-bg-float-1 3.2s ease-in-out 0.8s infinite;
+}
+.home-bg__shape-fill--1 {
+  border-radius: 12.359px;
+  background: linear-gradient(270deg, #ffd7d7 0%, #ffb6b6 100%);
+  box-shadow: 0 3.97px 19.849px 0 rgba(255, 182, 182, 0.5);
+  transform: rotate(-13.177deg);
+  transform-origin: top left;
+}
+.home-bg__shape--2 {
+  left: 760.235px;
+  top: 543px;
+  width: 668.977px;
+  height: 668.977px;
+  animation:
+    home-bg-drop-2 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s 1 both,
+    home-bg-float-2 3.9s ease-in-out 0.93s infinite;
+}
+.home-bg__shape-fill--2 {
+  border-radius: 16.055px;
+  background: linear-gradient(57deg, #ffd7d7 6.87%, #ffb6b6 93.13%);
+  box-shadow: 0 4px 20px 0 rgba(255, 182, 182, 0.5);
+  transform: rotate(13.594deg);
+  transform-origin: top left;
+}
+.home-bg__shape--3 {
+  left: 1043px;
+  top: 198px;
+  width: 408px;
+  height: 408px;
+  animation:
+    home-bg-drop-3 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.16s 1 both,
+    home-bg-float-3 2.8s ease-in-out 0.91s infinite;
+}
+.home-bg__shape-fill--3 {
+  border-radius: 50%;
+  background: linear-gradient(198deg, #ffd7d7 8.32%, #ffe2e2 91.68%);
+  box-shadow: 0 5.006px 25.031px 0 rgba(255, 215, 215, 0.5);
+}
+.home-bg__shape--4 {
+  left: 572px;
+  top: -59px;
+  width: 478px;
+  height: 478px;
+  animation:
+    home-bg-drop-4 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.24s 1 both,
+    home-bg-float-4 3.5s ease-in-out 1.14s infinite;
+}
+.home-bg__shape-fill--4 {
+  border-radius: 50%;
+  background: linear-gradient(250deg, #fff0d7 8.45%, #ffd1b8 91.55%);
+  box-shadow: 0 4px 20px 0 rgba(255, 209, 184, 0.5);
+}
+.home-bg__shape--5 {
+  left: 70px;
+  top: 543px;
+  width: 502px;
+  height: 502px;
+  animation:
+    home-bg-drop-5 0.95s cubic-bezier(0.34, 1.56, 0.64, 1) 0.32s 1 both,
+    home-bg-float-5 4.2s ease-in-out 1.27s infinite;
+}
+.home-bg__shape-fill--5 {
+  border-radius: 50%;
+  background: linear-gradient(203deg, #ffdfd4 8.57%, #ffc4af 91.43%);
+  box-shadow: 0 4px 20px 0 rgba(255, 196, 175, 0.5);
+}
+/* Entrance: each shape falls in from above the frame with a light spring/
+   overshoot landing, staggered slightly per shape. The float animation
+   (below) is chained right after each one's own drop via animation-delay,
+   picking up exactly where the drop lands (translateY(0)) so the handoff
+   from drop to continuous float is seamless. */
+@keyframes home-bg-drop-1 {
+  from { transform: translateY(-1200px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes home-bg-drop-2 {
+  from { transform: translateY(-1200px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes home-bg-drop-3 {
+  from { transform: translateY(-1200px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes home-bg-drop-4 {
+  from { transform: translateY(-1200px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes home-bg-drop-5 {
+  from { transform: translateY(-1200px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+/* Straight up-and-down float, no drift sideways -- different amplitude/
+   duration/delay per shape so the five don't fall into a visible unison. */
+@keyframes home-bg-float-1 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22px); }
+}
+@keyframes home-bg-float-2 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-26px); }
+}
+@keyframes home-bg-float-3 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+@keyframes home-bg-float-4 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+@keyframes home-bg-float-5 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-24px); }
+}
+/* Exit: mirrors the entrance mechanism exactly -- same per-shape duration
+   and delay as its own home-bg-drop-N above, so the fall-out reads as the
+   reverse of the same staggered, organic motion instead of a uniform
+   lockstep drop. The only difference is direction and easing: an "ease-in
+   back" curve (dips slightly past the start before rushing away) gives the
+   same kind of anticipation bump the drop-in gets from its "ease-out back"
+   overshoot-on-landing curve, but for a departure instead of an arrival.
+   --exit-from/--exit-to are set by initHomeBgExit() in main.js right before
+   adding .is-exiting, since the start position (wherever the float loop
+   currently is) and the distance needed to clear the viewport are only
+   knowable at click time, not at CSS-authoring time. */
+.home-bg__shape--1.is-exiting {
+  animation: home-bg-exit-1 0.8s cubic-bezier(0.36, 0, 0.66, -0.56) 0s 1 forwards;
+}
+.home-bg__shape--2.is-exiting {
+  animation: home-bg-exit-2 0.85s cubic-bezier(0.36, 0, 0.66, -0.56) 0.08s 1 forwards;
+}
+.home-bg__shape--3.is-exiting {
+  animation: home-bg-exit-3 0.75s cubic-bezier(0.36, 0, 0.66, -0.56) 0.16s 1 forwards;
+}
+.home-bg__shape--4.is-exiting {
+  animation: home-bg-exit-4 0.9s cubic-bezier(0.36, 0, 0.66, -0.56) 0.24s 1 forwards;
+}
+.home-bg__shape--5.is-exiting {
+  animation: home-bg-exit-5 0.95s cubic-bezier(0.36, 0, 0.66, -0.56) 0.32s 1 forwards;
+}
+@keyframes home-bg-exit-1 {
+  from { transform: translateY(var(--exit-from, 0px)); opacity: 1; }
+  to { transform: translateY(var(--exit-to, 1200px)); opacity: 0; }
+}
+@keyframes home-bg-exit-2 {
+  from { transform: translateY(var(--exit-from, 0px)); opacity: 1; }
+  to { transform: translateY(var(--exit-to, 1200px)); opacity: 0; }
+}
+@keyframes home-bg-exit-3 {
+  from { transform: translateY(var(--exit-from, 0px)); opacity: 1; }
+  to { transform: translateY(var(--exit-to, 1200px)); opacity: 0; }
+}
+@keyframes home-bg-exit-4 {
+  from { transform: translateY(var(--exit-from, 0px)); opacity: 1; }
+  to { transform: translateY(var(--exit-to, 1200px)); opacity: 0; }
+}
+@keyframes home-bg-exit-5 {
+  from { transform: translateY(var(--exit-from, 0px)); opacity: 1; }
+  to { transform: translateY(var(--exit-to, 1200px)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-bg__shape {
+    animation: none;
+  }
+}
+
+/* Same glass tab as everywhere else, minus the outer drop shadow (the video
+   background is busier than the pink blobs, so the shadow was competing with
+   it). The inset highlight stays. Scoped to the homepage card only. */
+.home-stage .glass-card {
+  box-shadow:
+    inset 4px 4px 16px rgba(0, 0, 0, 0.05),
+    inset -4px -4px 16px rgba(255, 255, 255, 0.4);
+}
+
+/* ---- Nav ---- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  padding: 28px 24px 0;
+}
+.site-nav__inner {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+.site-nav a {
+  font-size: 15px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---- Homepage stage ---- */
+.home-stage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.home-stage .glass-card {
+  width: min(1000px, 100%);
+  height: auto;
+  min-height: 600px;
+}
+
+.glass-card {
+  view-transition-name: home-tab;
+  position: relative;
+  display: flex;
+  width: 1000px;
+  height: 600px;
+  padding: 40px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: url(#glass-distortion-card-simple) blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  box-shadow:
+    0 0 100px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 60px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+/* Simulated -45deg light source: soft glow diffusing inward from the rim at both corners */
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.06) 16%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0) 62%,
+    rgba(255, 255, 255, 0.06) 84%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  pointer-events: none;
+}
+/* Diagonal glass rim: bright at top-left AND bottom-right, fading at the other two corners */
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  /* Conic (angle-based) gradient: corner angles computed for this exact 1000x600 box
+     (measured clockwise from top): TR=59.04deg, BR=120.96deg, BL=239.04deg, TL=300.96deg.
+     Bright at TL/BR, dim at TR/BL, with a quick fade at each dim corner. */
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.9) 15.3%,
+    rgba(255, 255, 255, 0) 16.4%,
+    rgba(255, 255, 255, 0.9) 17.5%,
+    rgba(255, 255, 255, 0.9) 65.3%,
+    rgba(255, 255, 255, 0) 66.4%,
+    rgba(255, 255, 255, 0.9) 67.5%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.glass-card__top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+
+.traffic-lights {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.traffic-light {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+}
+.traffic-light::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  pointer-events: none;
+}
+.traffic-light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 0.75px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.traffic-light--red { background: rgba(255, 56, 60, 0.25); }
+.traffic-light--white { background: rgba(255, 255, 255, 0.25); }
+.traffic-light--green { background: rgba(52, 199, 89, 0.25); }
+
+.divider {
+  height: 4px;
+  align-self: stretch;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.glass-card__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 72px;
+  flex: 1 0 0;
+  align-self: stretch;
+}
+
+/* Outer frame: normal auto-layout wrapping the name frame + subtitle */
+.hero-heading {
+  /* Frame 16: R + "aina" + "Ni" + "Product Designer @ Cornell". Natural width is
+     364px (the intro line). Squeezed below that, the intro line shrinks first
+     (it fills this box); the name keeps its 296.2px until the box gets narrower
+     than that, and only then scales down, as a whole. */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 364px;
+}
+
+/* Inner name frame: fixed 296.2 x 96.6, R/aina/Ni positioned exactly within it */
+.hero-name {
+  position: relative;
+  width: min(296.2px, 100cqw);
+  aspect-ratio: 296.2 / 96.6;
+  margin: 0;
+}
+.hero-name__r {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 34.78%; /* 103.015 / 296.2 */
+  height: auto;
+}
+.hero-name__aina {
+  position: absolute;
+  left: 29.27%; /* 86.69 / 296.2 */
+  top: 32.62%; /* 31.51 / 96.6 */
+  width: 43.21%; /* 128 / 296.2 */
+  height: auto;
+}
+.hero-name__ni {
+  position: absolute;
+  left: 79.54%; /* 235.59 / 296.2 */
+  top: 32.62%;
+  width: 18.91%; /* 56 / 296.2 */
+  height: auto;
+}
+
+.hero-intro {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 8px;
+}
+
+.hero-nav {
+  /* Hugs its content (3 x 80px items + 2 x 64px gaps = 368px). Squeezed below
+     that, the gaps shrink down to 8px; squeezed further, the 3 buttons scale
+     down in sync (see .hero-nav__item's font-size) while the gap stays 8px. */
+  container-type: inline-size;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px; /* minimum spacing; space-between hands out the rest */
+  width: 100%;
+  max-width: 368px;
+}
+/* 1em = the item's width: 80px at full size, then (nav width - 2 gaps) / 3 once
+   the gaps hit 8px. Everything inside is sized in em so it scales together. */
+.hero-nav__item {
+  display: flex;
+  font-size: min(80px, calc((100cqw - 16px) / 3));
+  width: 1em;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em; /* 12px at full size: Figma spaces 12px around the vectorized labels */
+}
+.hero-nav__icon {
+  position: relative;
+  display: flex;
+  width: 0.9em; /* 72px at full size */
+  height: 0.9em;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 127.286px;
+  background: rgba(255, 218, 218, 0.5);
+  transition: background 0.2s ease;
+}
+.hero-nav__item:hover .hero-nav__icon {
+  background: rgba(225, 176, 176, 0.5);
+}
+/* Glyph + label widths, as fractions of the 80px item width (Work / About / Resume). */
+.hero-nav__icon svg { display: block; height: auto; }
+.hero-nav__item:nth-child(1) .hero-nav__icon svg { width: 0.3017em; } /* 24.138 */
+.hero-nav__item:nth-child(2) .hero-nav__icon svg { width: 0.2571em; } /* 20.571 */
+.hero-nav__item:nth-child(3) .hero-nav__icon svg { width: 0.3038em; } /* 24.3 */
+.hero-nav__label {
+  display: block;
+  height: auto;
+}
+.hero-nav__item:nth-child(1) .hero-nav__label { width: 0.525em; }  /* 42 */
+.hero-nav__item:nth-child(2) .hero-nav__label { width: 0.625em; }  /* 50 */
+.hero-nav__item:nth-child(3) .hero-nav__label { width: 0.7875em; } /* 63 */
+
+/* Phone layout (Figma: "Homepage - Phone"): the buttons stack as full-width pills
+   (icon + label side by side, left-aligned) instead of three circles in a row,
+   and the gap above them drops from 72px to 48px. */
+@media (max-width: 480px) {
+  .glass-card__content { gap: 48px; }
+  .hero-nav {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 16px;
+    max-width: none;
+  }
+  .hero-nav__item {
+    font-size: 16px;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 99px;
+    background: rgba(255, 218, 218, 0.5);
+    transition: background 0.2s ease;
+  }
+  .hero-nav__item:hover { background: rgba(225, 176, 176, 0.5); }
+  .hero-nav__icon,
+  .hero-nav__item:hover .hero-nav__icon {
+    flex: none;
+    justify-content: flex-start;
+    align-items: flex-start;
+    aspect-ratio: auto;
+    border-radius: 0;
+    background: none;
+  }
+  /* Icon boxes as exported in Figma (glyph at its 1:1 viewBox size, plus padding). */
+  .hero-nav__item:nth-child(1) .hero-nav__icon { width: 31.852px; height: 29.571px; padding: 3.857px 0 0 2.571px; }
+  .hero-nav__item:nth-child(2) .hero-nav__icon { width: 28.286px; height: 33.429px; padding: 3.857px 0 0 2.571px; }
+  .hero-nav__item:nth-child(3) .hero-nav__icon { width: 32.014px; height: 34.586px; padding: 3.928px 0 0 2.642px; }
+  .hero-nav__item:nth-child(1) .hero-nav__icon svg { width: 27px; }
+  .hero-nav__item:nth-child(2) .hero-nav__icon svg { width: 24px; }
+  .hero-nav__item:nth-child(3) .hero-nav__icon svg { width: 27px; }
+  .hero-nav__item:nth-child(1) .hero-nav__label { width: 41.6145px; }
+  .hero-nav__item:nth-child(2) .hero-nav__label { width: 49.309px; }
+  .hero-nav__item:nth-child(3) .hero-nav__label { width: 62.422px; }
+}
+
+
+
+/* ---- Page shell for inner pages ---- */
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 40px 24px 120px;
+}
+.page-title {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+.page-subtitle {
+  color: var(--ink-soft);
+  font-size: 18px;
+  margin-bottom: 56px;
+}
+
+/* ---- Work rows: each row holds 2 project cards side by side ---- */
+/* ---- Work page cards ----
+   Every card is a size container (.work-project), and everything inside its
+   thumbnail is sized in cqw (1cqw = 1% of the card's width). Figma's desktop
+   card is 565px wide, so the px values below are Figma's numbers / 5.65 -- the
+   thumbnail scales as one piece with the card. */
+.work-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  align-self: stretch;
+}
+.work-project {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.work-project--spacer {
+  opacity: 0;
+  pointer-events: none;
+}
+.work-project__media {
+  position: relative;
+  display: flex;
+  width: 100%;
+  aspect-ratio: 565 / 300;
+  padding: 8.673cqw 14.513cqw 0 14.690cqw; /* 49 / 82 / 83 of 565 */
+  justify-content: center;
+  align-items: flex-start;
+  border-radius: 4.248cqw; /* 24 */
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+/* Safari-specific: overflow:hidden clipping a filter:drop-shadow child can
+   leave faint "phantom" edges of the filter's pre-clip bounding box behind
+   (worst at corners) because it doesn't always re-clip the filter region
+   cleanly during a sibling/child transform. Forcing a mask-based clip path
+   (a no-op gradient mask) routes Safari through its correct rendering path
+   instead of the buggy overflow+filter one. */
+.work-project__media:not(.work-project__media--cluster) {
+  -webkit-mask-image: linear-gradient(black, black);
+}
+.work-project__media img {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+img.work-project__media-img--top {
+  width: 70.796cqw; /* 400 */
+  height: 47.965cqw; /* 271 */
+  max-width: none;
+  max-height: none;
+  object-position: top;
+  display: block;
+}
+img.work-project__media-img--shadow {
+  filter: drop-shadow(0 0 1.77cqw rgba(0, 0, 0, 0.25)); /* 10 */
+  -webkit-transform: translateZ(0);
+  will-change: filter;
+}
+/* Transform lives on this filter-free wrapper (not the filtered image itself)
+   -- Safari can leave stale "ghost" corners behind when filter: drop-shadow
+   and an animated transform sit on the same element, since it doesn't always
+   re-rasterize the filter region correctly during the transform. Keeping the
+   filtered image static and only moving its plain wrapper avoids that. */
+.work-project__media-imgwrap {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+.work-project:hover .work-project__media-imgwrap {
+  transform: translateY(-3.54cqw); /* -20 */
+}
+/* TEMP: hover-rise disabled for Nodus/Gorest AI (still placeholder cards,
+   no case study page yet) -- re-enable by removing this rule and the
+   work-project--no-hover-rise class in work.html once they're built out. */
+.work-project--no-hover-rise:hover .work-project__media-imgwrap {
+  transform: none;
+}
+/* "Coming soon" hover overlay (Figma: Rectangle 162 + text, on the Nodus
+   card) -- fades in over the thumbnail on hover. */
+.work-project__coming-soon {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.work-project__coming-soon span {
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+}
+.work-project:hover .work-project__coming-soon {
+  opacity: 1;
+}
+/* Multi-image collage variant: children are absolutely positioned, so drop the flex/padding centering.
+   */
+.work-project__media--cluster {
+  padding: 0;
+  justify-content: normal;
+  align-items: normal;
+}
+.work-project__media--cluster img {
+  position: absolute;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  object-position: top center;
+}
+/* Shared slot positions (confirmed identical across Damai + Wapoo) */
+.work-project__media--cluster .img-slot-a {
+  top: 14.159cqw; /* 80 */
+  left: 12.389cqw; /* 70 */
+}
+.work-project__media--cluster .img-slot-b {
+  top: 8.673cqw; /* 49 */
+  left: 35.752cqw; /* 202 */
+  z-index: 2;
+}
+.work-project__media--cluster .img-slot-c {
+  top: 14.159cqw;
+  left: 59.115cqw; /* 334 */
+}
+/* Damai: iPhone 17 mockups */
+.work-project__media--damai img {
+  width: 28.601cqw; /* 161.593 */
+  height: 62.181cqw; /* 351.325 */
+  border-radius: 2.846cqw; /* 16.079 */
+  box-shadow: 0 0 1.77cqw 0 rgba(0, 0, 0, 0.25);
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.work-project:hover .work-project__media--damai img {
+  transform: translateY(-3.54cqw);
+}
+/* Wapoo: phone mockups */
+.work-project__media--wapoo img {
+  width: 28.601cqw; /* 161.591 */
+  height: 62.181cqw; /* 351.32 */
+  border-radius: 1.866cqw; /* 10.54 */
+  box-shadow: 0 0 1.319cqw 0 rgba(0, 0, 0, 0.25); /* 7.454 */
+  transition: transform 0.3s ease;
+}
+.work-project:hover .work-project__media--wapoo img {
+  transform: translateY(-3.54cqw);
+}
+.work-project__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+}
+.work-project__title,
+.work-project__desc {
+  margin: 0;
+}
+.work-project__title {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 29px; /* Figma's text frames: 29 + 8 + 22 = 59px */
+}
+.work-project__desc {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 22px;
+}
+
+@media (max-width: 800px) {
+  .hero__name { font-size: 40px; }
+  .hero__actions { gap: 32px; }
+}
+
+
+/* ---- Note modal ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+.modal-overlay.is-open {
+  pointer-events: auto;
+}
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.modal-overlay.is-open .modal-backdrop {
+  opacity: 1;
+}
+.modal {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  display: flex;
+  width: 800px;
+  max-width: calc(100% - 48px);
+  height: calc(100vh - 80px);
+  padding: 80px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+  border-radius: 16px 16px 0 0;
+  background: #f9f5ea;
+  overflow-y: auto;
+  /* Swipes up from fully off-screen (below the viewport) into place -- no
+     opacity change, purely a transform, kept in its own sibling from
+     .modal-backdrop so the fade there doesn't bleed into this. */
+  transform: translate(-50%, 100%);
+  transition: transform 0.35s ease;
+}
+.modal-overlay.is-open .modal {
+  transform: translate(-50%, 0);
+}
+.modal__top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  align-self: stretch;
+}
+.modal__close {
+  display: flex;
+  padding: 8px 16px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  border-radius: 99px;
+  border: 1px solid #5f5f5f;
+  background: transparent;
+}
+.modal__close-text {
+  color: #5f5f5f;
+  font-family: "Figtree";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.modal__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+.modal__text p {
+  align-self: stretch;
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: normal;
+}
+.modal__contact {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+}
+.modal__say-hi {
+  display: flex;
+  height: 40px;
+  padding: 8px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 99px;
+  background: #5f5f5f;
+}
+.modal__say-hi-text,
+.modal__say-hi-email {
+  color: #fff;
+  font-family: "Figtree";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.modal__say-hi-email {
+  font-style: italic;
+}
+.modal__say-hi-arrow {
+  width: 20px;
+  height: 20px;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+}
+.modal__linkedin {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  padding: 8px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 99px;
+  background: #5f5f5f;
+}
+.modal__linkedin-icon {
+  width: 17.633px;
+  height: 18px;
+  flex-shrink: 0;
+  aspect-ratio: 48 / 49;
+  /* File is a clean 2x export (36x36) of this ~18x18 icon, so it fills at
+     100% with zero crop -- the leftover Figma zoom/offset was tuned for a
+     different source image in that layer, same issue as photo-3. */
+  background: url("../assets/images/about/linkedin-icon.png") no-repeat 0 0 /
+    100% 100%;
+}
+
+/* ---- Case study page backgrounds ----
+   Each case study gets its OWN static blob background sampled from that
+   brand's palette (MUJI: dark red #8B0002 + tan #C98C72) instead of reusing
+   the shared home/work/about pink blob-bg animation. Exact size/position/
+   blur measured from Figma's "Background" frame (5 blurred circles, no
+   motion -- unlike the animated Lottie blob, this one is a static frame). */
+.case-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #fff;
+}
+.case-bg__blob {
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* Scrollspy (Figma: node 654:2165) -- fixed to the viewport (not the scrolling
+   .page-canvas), vertically centered, 32px from the right edge. Each bar marks
+   a case-study section; the current one is red and longer. Hovering a bar
+   reveals its label in a white pill -- current-section hover keeps it red
+   (Figma: "hover on current section"), any other section's hover turns solid
+   grey (Figma: "hover on next section"). */
+.scrollspy {
+  position: fixed;
+  top: 50%;
+  right: 32px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  z-index: 40;
+}
+.scrollspy__item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 30px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-decoration: none;
+  background: transparent;
+}
+.scrollspy__label {
+  display: none;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.scrollspy__bar {
+  display: block;
+  width: 12px;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(95, 95, 95, 0.5);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+.scrollspy__item.is-current .scrollspy__bar {
+  width: 20px;
+  background: var(--case-accent, #8b0013);
+}
+.scrollspy__item:hover {
+  background: #fff;
+}
+.scrollspy__item:hover .scrollspy__label {
+  display: block;
+}
+.scrollspy__item:hover .scrollspy__bar {
+  background: #5f5f5f;
+}
+.scrollspy__item.is-current:hover .scrollspy__label {
+  color: var(--case-accent, #8b0013);
+}
+.scrollspy__item.is-current:hover .scrollspy__bar {
+  background: var(--case-accent, #8b0013);
+  width: 20px;
+}
+/* Text-based nav used on case study pages (Figma: Frame 26) -- distinct from
+   the icon-based .page-nav on Home/Work/About. */
+.case-nav {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  height: 22px;
+  align-items: center;
+  gap: 40px;
+  z-index: 10;
+}
+.case-nav a,
+.case-nav a svg {
+  display: block;
+}
+
+/* Glass card top bar for case studies (Figma: Frame 229 = Frame 228 back
+   button + Frame 227 fake-URL pill) -- replaces the traffic-lights row used
+   on Home/Work/About. */
+.case-topbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+}
+.case-topbar__back {
+  display: flex;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 99px;
+  background: rgba(95, 95, 95, 0.1);
+}
+.case-topbar__url {
+  display: flex;
+  flex: 1 0 0;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 99px;
+  background: rgba(95, 95, 95, 0.1);
+  margin: 0;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: #5f5f5f;
+}
+.case-topbar__url-em {
+  color: rgba(95, 95, 95, 0.75);
+}
+
+/* ---- Case study pages ----
+   Specs measured directly from Figma Dev Mode (MUJI frame, node 76-1945):
+   outer column is Frame 3 (1250px, 40px padding, 40px gap between children).
+   Lives inside .glass-card--muji, which already supplies that same 1250px
+   width and 40px padding (matching .glass-card--work/--about), so .case-hero
+   itself only needs to be the flex column -- not its own width/padding.
+   Collage (Frame 218, 1096x345) positions its 3 photos with raw coordinates
+   that don't respect the frame's own padding -- measured each image's exact
+   left/top/width/height directly rather than guessing from the padding. */
+.case-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 40px;
+  align-self: stretch;
+  font-family: "Figtree", sans-serif;
+}
+.case-hero__eyebrow {
+  align-self: flex-start;
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* -- Photo collage: exact px positions from Figma, relative to the
+   1096x345 collage box. Z-order (back to front): product, pens, desktop --
+   confirmed live against the design (the MUJI homepage mockup sits above
+   the other two photos). */
+/* Frame 218 in Figma: a real wrapping frame around the collage (not just
+   the collage's own box) -- stretches full width, insets the collage with
+   its own asymmetric padding (35/37/20/37), and centers it. */
+.case-hero__collage-frame {
+  display: flex;
+  padding: 35px 37px 20px 37px;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+}
+.case-hero__collage {
+  position: relative;
+  flex: none;
+  width: 1096px;
+  height: 345px;
+}
+.case-hero__collage-img {
+  position: absolute;
+  object-fit: cover;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+}
+.case-hero__collage-img--desktop {
+  left: 348px;
+  top: 0;
+  width: 400px;
+  height: 345px;
+  border-radius: 9.6px;
+  z-index: 3;
+}
+.case-hero__collage-img--product {
+  left: 696px;
+  top: 31px;
+  width: 400px;
+  height: 300px;
+  border-radius: 9.6px;
+  z-index: 1;
+}
+.case-hero__collage-img--pens {
+  left: 0;
+  top: 30px;
+  width: 400px;
+  height: 300px;
+  border-radius: 12px;
+  z-index: 2;
+}
+
+/* -- Damai hero: Frame 218 (400px tall, 40px radius) has NO fill of its own --
+   it's transparent, so the page's blob background shows through the glass
+   card behind it. Holds a 4-phone-mockup collage (Group 16, 675x380). Each
+   phone is 161.6x351.3px, laid out edge-to-edge (even flex gap, no overlap);
+   the 2 outer phones sit ~26.6px lower than the 2 inner phones. */
+.case-hero__collage-frame--damai {
+  height: 400px;
+  padding: 24px;
+  border-radius: 40px;
+}
+.case-hero__collage--damai {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 675px;
+  height: 380px;
+}
+.case-hero__collage-img--phone {
+  position: static;
+  flex: none;
+  width: 161.6px;
+  height: 351.3px;
+  border-radius: 16px;
+}
+.case-hero__collage-img--phone1,
+.case-hero__collage-img--phone3 {
+  margin-top: 36.58px;
+}
+.case-hero__collage-img--phone2,
+.case-hero__collage-img--phone4 {
+  margin-top: 10px;
+}
+
+/* -- Wapoo hero: Frame 218 (400px tall, 40px radius, also no fill of its
+   own) holds a 4-phone-mockup collage (Group 1, 681.44x350) padded 0
+   244.5px so the row's first/last phone sit flush with the frame edges.
+   Each phone has its own top offset: 25 / 0 / 50 / 25px, left to right. */
+.case-hero__collage-frame--wapoo {
+  height: 400px;
+  padding: 0 244.5px;
+  border-radius: 40px;
+}
+.case-hero__collage--wapoo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 681px;
+  height: 400px;
+}
+.case-hero__collage-img--wapoo {
+  position: static;
+  flex: none;
+  width: 161.5px;
+  height: 350px;
+  border-radius: 16.5px;
+  object-fit: cover;
+  box-shadow: 0 0 7.45px 0 rgba(0, 0, 0, 0.25);
+}
+.case-hero__collage-img--wapoo1 {
+  margin-top: 25px;
+}
+.case-hero__collage-img--wapoo2 {
+  margin-top: 0;
+}
+.case-hero__collage-img--wapoo3 {
+  margin-top: 50px;
+}
+.case-hero__collage-img--wapoo4 {
+  margin-top: 25px;
+}
+
+/* -- White card below the collage (Frame 230, 1090x auto, radius 40) -- */
+.case-hero__card {
+  padding: 40px;
+  border-radius: 40px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.case-hero__titlerow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+.case-hero__title {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-hero__desc {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 29px;
+  max-width: 642px;
+}
+.case-hero__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+  padding: 24px 0;
+  border-top: 1px solid rgba(95, 95, 95, 0.25);
+}
+.case-hero__meta-info {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.case-hero__meta-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.case-hero__meta-info span { display: block; font-family: "Figtree", sans-serif; font-size: 18px; line-height: 22px; color: #5f5f5f; }
+.case-hero__meta-info .label { font-weight: 400; }
+.case-hero__meta-info .value { font-weight: 300; }
+.case-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  background: var(--case-accent, #8b0013);
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.case-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 56px 24px;
+}
+.case-section__eyebrow {
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.case-section h2 { font-size: 26px; margin: 0 0 16px; }
+.case-section p { line-height: 1.7; color: var(--ink-soft); }
+.case-section img { border-radius: var(--radius-sm); margin: 24px 0; }
+
+/* ---- Context section (Figma: Frame 231) -- built version, overrides the
+   generic placeholder rules above via the extra .case-section specificity.
+   Lives inside .glass-card--case like .case-hero, so it only needs to fill
+   the available 1170px content width, not set its own max-width/margin. */
+.case-section.case-section--built {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  padding: 40px;
+  border-radius: 40px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+  font-family: "Figtree", sans-serif;
+}
+.case-section__group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 16px;
+}
+.case-section .case-section__heading-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.case-section .case-section__eyebrow {
+  margin: 0;
+  color: var(--case-accent, #8b0013);
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0.42px;
+  text-transform: uppercase;
+}
+.case-section .case-section__title {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: normal;
+}
+.case-section .case-section__body {
+  align-self: stretch;
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-section__link {
+  color: var(--case-accent, #8b0013);
+  text-decoration: underline;
+}
+.case-section__images {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 16px;
+}
+.case-section__image-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 400px;
+  margin: 0;
+}
+.case-section__image-group img {
+  width: 400px;
+  height: 227px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-section__image-group figcaption {
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+}
+/* -- Portrait phone screenshots (Damai Context: Frame 642, gap 80px) -- */
+.case-section__images--phone {
+  gap: 80px;
+}
+.case-section__image-group--phone {
+  width: 184px;
+}
+.case-section__image-group--phone img {
+  width: 184px;
+  height: 400px;
+}
+.case-section__callout {
+  align-self: stretch;
+  padding: 24px 32px;
+  border-radius: 12px;
+  border-left: 6px solid var(--case-accent, #8b0013);
+  background: var(--case-callout-bg, #f6f3ec);
+}
+.case-section__callout p {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 140%;
+}
+
+/* ---- Competitor analysis section (Figma: Frame 247) ----
+   Same shell as Context, except children are horizontally centered
+   (align-items: center, not flex-start) since the logo row and insight
+   cards are narrower than the full content width. */
+.case-section--centered {
+  align-items: center;
+}
+.case-section__logo-row {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  align-self: stretch;
+}
+.case-section__logo-row::before,
+.case-section__logo-row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 150px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+.case-section__logo-row::before {
+  left: -40px;
+  background: linear-gradient(90deg, #FFF 0%, rgba(255, 255, 255, 0) 100%);
+}
+.case-section__logo-row::after {
+  right: -40px;
+  background: linear-gradient(270deg, #FFF 0%, rgba(255, 255, 255, 0) 100%);
+}
+.case-section .case-section__logo {
+  flex: none;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  border-radius: 0;
+  margin: 0;
+}
+.case-section__insights {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 24px;
+}
+.case-section__insight {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f6f3ec;
+}
+.case-section__insight-badge {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  background: var(--case-accent, #8b0013);
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-section__insight-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 8px;
+}
+.case-section__insight-text h3 {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: normal;
+}
+.case-section__insight-text p {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+/* ---- Competitor & secondary research (Figma: Frame 232) ---- */
+.case-competitor-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 24px;
+}
+.case-competitor-labels {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 40px;
+}
+.case-competitor-label {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4px;
+  border-radius: 12px;
+}
+.case-competitor-label--lavender { background: #e9e8ff; }
+.case-competitor-label--blue { background: #cad7ff; }
+.case-competitor-label__inner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+/* Figma stroke is a dashed rounded rect (10px dash / 10px gap) -- same
+   pattern as .case-favorites__verdict-inner (Damai). */
+.case-competitor-label__inner svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.case-competitor-label__inner svg rect {
+  x: 1px;
+  y: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  rx: 11px;
+  fill: none;
+  stroke-width: 2px;
+  stroke-dasharray: 10 10;
+  stroke: rgba(0, 49, 201, 0.25);
+}
+.case-competitor-label__inner span {
+  position: relative;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-competitor-cards {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-self: stretch;
+}
+.case-competitor-card {
+  display: flex;
+  width: 250px;
+  padding: 16px 16px 20px 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+  border-radius: 12px;
+  background: #e2f5f7;
+}
+.case-competitor-card__app {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.case-section .case-competitor-card__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin: 0;
+}
+.case-section .case-competitor-card__name {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-competitor-card__media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  gap: 8px;
+}
+.case-section .case-competitor-card__screenshot {
+  width: 218px;
+  height: 264px;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+  margin: 0;
+}
+
+/* ---- Design decisions / requirements grid (Figma: Frame 265) ---- */
+.case-requirements {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+.case-requirements__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+.case-requirements__card {
+  display: flex;
+  flex: 1 0 0;
+  padding: 16px 16px 20px 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 12px;
+}
+.case-requirements__card--01 { background: #e2f5f7; }
+.case-requirements__card--02 { background: #c5eaee; }
+.case-requirements__card--03 { background: #e9e8ff; }
+.case-requirements__card--04 { background: #cad7ff; }
+.case-requirements__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+}
+.case-requirements__label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+.case-section .case-requirements__number {
+  margin: 0;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-requirements__card--01 .case-requirements__number { color: #45dbe9; }
+.case-requirements__card--02 .case-requirements__number { color: #55a7b0; }
+.case-requirements__card--03 .case-requirements__number { color: #4a42df; }
+.case-requirements__card--04 .case-requirements__number { color: #0031c9; }
+.case-section .case-requirements__title {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-requirements__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+.case-requirements__card--01 .case-requirements__icon { background: rgba(69, 219, 233, 0.25); }
+.case-requirements__card--02 .case-requirements__icon { background: rgba(85, 167, 176, 0.25); }
+.case-requirements__card--03 .case-requirements__icon { background: rgba(74, 66, 223, 0.25); }
+.case-requirements__card--04 .case-requirements__icon { background: rgba(0, 49, 201, 0.25); }
+.case-section .case-requirements__icon img {
+  width: 33px;
+  height: 33px;
+  margin: 0;
+}
+
+/* ---- Redesign explorations (Figma: Frame 259 etc) ---- */
+.case-section--translucent {
+  opacity: 0.9;
+}
+.case-redesign__gallery {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+.case-redesign__shot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 184px;
+}
+.case-redesign__shot-frame {
+  width: 184px;
+  height: 400px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  overflow: hidden;
+}
+.case-section .case-redesign__shot-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 0;
+}
+.case-redesign__callout {
+  position: absolute;
+  display: flex;
+  width: 200px;
+  padding: 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  background: #e2f5f7;
+}
+/* Figma stroke is a dashed rounded rect (10px dash / 10px gap) -- same
+   pattern as .case-favorites__verdict-inner (Damai). */
+.case-redesign__callout svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.case-redesign__callout svg rect {
+  x: 1px;
+  y: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  rx: 11px;
+  fill: none;
+  stroke-width: 2px;
+  stroke-dasharray: 10 10;
+  stroke-linecap: round;
+  stroke: #91bdc2;
+}
+.case-section .case-redesign__callout p {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-redesign__callout--1 { left: 0; top: 12px; }
+.case-redesign__callout--2 { left: 0; bottom: 25px; }
+.case-redesign__callout--3 { left: 0; top: 154px; }
+.case-redesign__callout--4 { right: 0; top: 105px; }
+.case-redesign__callout--5 { right: 0; bottom: 107px; }
+.case-redesign__callout--r2-1 { right: 0; top: 154px; }
+.case-redesign__callout--r2-2 { left: 0; bottom: 25px; }
+.case-redesign__callout--r2-3 { left: 0; bottom: 135px; }
+.case-redesign__callout--r3-1 { right: 0; top: 103px; }
+.case-redesign__callout--r3-2 { left: 0; top: 58px; }
+.case-redesign__callout--r3-3 { left: 0; bottom: 110px; }
+.case-redesign__callout--r4-1 { left: 0; top: 20px; width: 125px; }
+.case-redesign__callout--r4-2 { left: 0; bottom: 92px; width: 125px; }
+.case-redesign__callout--r4-3 { right: 0; bottom: 107px; width: 125px; }
+.case-redesign__dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #91bdc2;
+}
+.case-redesign__line {
+  position: absolute;
+  height: 2px;
+  overflow: visible;
+}
+.case-redesign__line line {
+  stroke: #91bdc2;
+  stroke-width: 2px;
+  stroke-dasharray: 10 10;
+  stroke-linecap: round;
+}
+.case-redesign__dot--1 { left: 352px; top: 55.5px; }
+.case-redesign__dot--2 { left: 244px; top: 340px; }
+.case-redesign__dot--3 { left: 244px; top: 186px; }
+.case-redesign__dot--4 { right: 495px; top: 132.5px; }
+.case-redesign__dot--5 { right: 250px; top: 269.9px; }
+.case-redesign__line--1 { left: 200px; top: 58.5px; width: 156px; }
+.case-redesign__line--2 { left: 200px; top: 343px; width: 47px; }
+.case-redesign__line--3 { left: 200px; top: 189px; width: 47px; }
+.case-redesign__line--4 { left: 592px; top: 135.5px; width: 298px; }
+.case-redesign__line--5 { left: 837px; top: 272.9px; width: 53px; }
+.case-redesign__dot--r2-1 { right: 250px; top: 208px; }
+.case-redesign__dot--r2-2 { left: 248px; top: 341px; }
+.case-redesign__dot--r2-3 { left: 248px; top: 275px; }
+.case-redesign__line--r2-1 { left: 840px; top: 211px; width: 51px; }
+.case-redesign__line--r2-2 { left: 200px; top: 344px; width: 51px; }
+.case-redesign__line--r2-3 { left: 200px; top: 278px; width: 51px; }
+.case-redesign__dot--r3-1 { right: 359px; top: 210px; }
+.case-redesign__dot--r3-2 { left: 412px; top: 113.111px; }
+.case-redesign__dot--r3-3 { left: 353px; top: 278.774px; }
+.case-redesign__line--r3-1 { left: 728.994px; top: 213px; width: 161.012px; }
+.case-redesign__line--r3-2 { left: 199.998px; top: 116.111px; width: 216.002px; }
+.case-redesign__line--r3-3 { left: 199.997px; top: 281.774px; width: 155.004px; }
+.case-redesign__dot--r4-1 { left: 237px; top: 89.4px; }
+.case-redesign__dot--r4-2 { left: 156px; top: 204.35px; }
+.case-redesign__dot--r4-3 { right: 206px; top: 262.5px; }
+.case-redesign__line--r4-1 { left: 125px; top: 92.4px; width: 114px; }
+.case-redesign__line--r4-2 { left: 125px; top: 207.35px; width: 32px; }
+.case-redesign__line--r4-3 { left: 882px; top: 265.5px; width: 83px; }
+
+/* ---- Choosing a design (Figma: Frame 264) ---- */
+.case-choosing__funnel {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  align-self: stretch;
+}
+.case-choosing__group {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.case-choosing__arrow {
+  width: 100px;
+  height: 23px;
+  flex-shrink: 0;
+}
+.case-section .case-choosing__shot img {
+  width: 90px;
+  height: 196px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-choosing__captions {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+.case-choosing__caption {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 0 0;
+}
+.case-choosing__number {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  aspect-ratio: 1 / 1;
+  border-radius: 99px;
+  background: #45dbe9;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: normal;
+}
+.case-section .case-choosing__captions p {
+  flex: 1 0 0;
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+/* ---- 6 interfaces row (Figma: Frame 266) ---- */
+.case-interfaces__row {
+  position: relative;
+  width: 969px;
+  height: 363px;
+  margin: 0 auto;
+}
+.case-interfaces__item {
+  position: absolute;
+  width: 115px;
+}
+.case-interfaces__item--1 { left: 9px; top: 40px; }
+.case-interfaces__item--2 { left: 174px; top: 73px; }
+.case-interfaces__item--3 { left: 339px; top: 40px; }
+.case-interfaces__item--4 { left: 504px; top: 73px; }
+.case-interfaces__item--5 { left: 669px; top: 40px; }
+.case-interfaces__item--6 { left: 834px; top: 73px; }
+.case-section .case-interfaces__shot img {
+  width: 115px;
+  height: 250px;
+  aspect-ratio: 23 / 50;
+  margin: 0;
+  border-radius: 7.5px;
+  border: 0.625px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-interfaces__badge {
+  position: absolute;
+  display: flex;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  border-radius: 99px;
+  background: #45dbe9;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: normal;
+}
+.case-interfaces__badge--1 { left: 55px; top: 0; }
+.case-interfaces__badge--2 { left: 220px; top: 339px; }
+.case-interfaces__badge--3 { left: 385px; top: 0; }
+.case-interfaces__badge--4 { left: 550px; top: 339px; }
+.case-interfaces__badge--5 { left: 715px; top: 0; }
+.case-interfaces__badge--6 { left: 879px; top: 339px; }
+.case-section .case-interfaces__caption {
+  position: absolute;
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-interfaces__caption--1 { width: 133px; left: 0; top: 298px; }
+.case-interfaces__caption--2 { width: 149px; left: 157px; top: 31px; }
+.case-interfaces__caption--3 { width: 175px; left: 309px; top: 298px; }
+.case-interfaces__caption--4 { width: 155px; left: 484px; top: 31px; }
+.case-interfaces__caption--5 { width: 151px; left: 651px; top: 298px; }
+.case-interfaces__caption--6 { width: 155px; left: 814px; top: 31px; }
+
+/* ---- Onboarding flow option comparison (Figma: Frame 267) ---- */
+.case-options {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 40px;
+}
+.case-options__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex: 1 0 0;
+}
+.case-options__shots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.case-section .case-options__shots img {
+  width: 184px;
+  height: 400px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-section .case-options__shots--short img {
+  height: 293px;
+}
+.case-options__points {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: stretch;
+}
+.case-options__points--fixed-line .case-decision__line {
+  height: 36px;
+  align-self: auto;
+}
+
+/* ---- Team card version comparison (Figma: Frame 268 / Frame 808) ----
+   Frame 808 itself clips + scrolls horizontally. Frame 268 (the heading and
+   body text above it) is not part of that scroll area at all. */
+.case-team-card {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 32px;
+  overflow-x: auto;
+  margin-right: -40px;
+  padding-right: 40px;
+}
+.case-team-card__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex: 0 0 525px;
+  width: 525px;
+}
+.case-team-card__shots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: stretch;
+}
+.case-section .case-team-card__shots img {
+  width: auto;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-team-card__shots--1 img { height: 140px; }
+.case-team-card__shots--2 img { height: 120px; }
+.case-team-card__shots--3 img { height: 188px; }
+.case-team-card__shots--4 img { height: 192px; }
+.case-team-card__shots--5 img { height: 203px; }
+.case-team-card__shots--6 img { height: 164px; }
+.case-team-card__points {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: stretch;
+}
+
+/* ---- Final showcase grid (Figma: Frame 258, cyan accent card) ---- */
+.case-section.case-section--accent {
+  background: var(--case-accent, #45dbe9);
+}
+.case-section--accent .case-section__eyebrow {
+  color: #fff;
+}
+.case-section--accent .case-section__title {
+  color: #fff;
+}
+.case-final-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-self: stretch;
+  gap: 40px 24px;
+}
+.case-final-grid__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 184px;
+}
+.case-final-grid__item img {
+  width: 184px;
+  height: 400px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-final-grid__item p {
+  align-self: stretch;
+  margin: 0;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+.case-persona-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  align-self: stretch;
+}
+.case-persona-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  align-self: stretch;
+}
+.case-persona-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1 0 0;
+}
+.case-persona-card__avatar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100px;
+  height: 100px;
+  flex: none;
+  border-radius: 999px;
+  border: 2.5px dashed var(--case-accent, #8b0013);
+  overflow: hidden;
+}
+.case-persona-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.case-persona-card__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.case-persona-card__text h3 {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: normal;
+}
+.case-persona-card__text p {
+  margin: 0;
+  align-self: stretch;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-persona-divider {
+  width: 1px;
+  height: 100px;
+  flex: none;
+  background: rgba(95, 95, 95, 0.25);
+}
+.case-persona-credit {
+  align-self: center;
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+.case-research {
+  position: relative;
+}
+.case-research__images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  align-self: stretch;
+}
+.case-section .case-research__image {
+  width: 550px;
+  height: 313px;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+  margin: 0;
+}
+.case-research__callout {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 250px;
+  padding: 16px 16px 20px 16px;
+  border-radius: 12px;
+  background: #f6f3ec;
+}
+.case-research__callout--1 {
+  left: 40px;
+  top: 185px;
+}
+.case-research__callout--2 {
+  right: 40px;
+  top: 537px;
+}
+.case-research__callout--3 {
+  left: 40px;
+  top: 702px;
+}
+.case-research__callout--4 {
+  right: 40px;
+  bottom: 252.747px;
+}
+.case-research__callout--5 {
+  left: 40px;
+  bottom: 90.747px;
+}
+.case-research__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+}
+.case-research__number {
+  color: var(--case-accent, #8b0013);
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-research__header h3 {
+  margin: 0;
+  align-self: stretch;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-research__divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(95, 95, 95, 0.25);
+}
+.case-research__callout p {
+  margin: 0;
+  align-self: stretch;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+.case-concept__stages {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-self: stretch;
+}
+.case-concept__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 300px;
+  flex: none;
+}
+.case-concept__stage-title {
+  margin: 0;
+  align-self: stretch;
+  text-align: center;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.case-concept__stage-title strong {
+  color: var(--case-accent, #8b0013);
+  font-weight: 400;
+}
+.case-concept__version {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+.case-section .case-concept__version img {
+  width: 100%;
+  margin: 0;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  border-radius: 8px;
+}
+.case-concept__version-label {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+}
+.case-concept__note {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  padding: 4px;
+  border-radius: 12px;
+}
+.case-concept__note--bad {
+  background: #f5e4e4;
+}
+.case-concept__note--good {
+  background: #e3f3e7;
+}
+.case-concept__note-inner {
+  position: relative;
+  display: flex;
+  padding: 8px 12px;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+  border-radius: 12px;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  text-align: left;
+}
+.case-concept__note-inner svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.case-concept__note-inner svg rect {
+  x: 1px;
+  y: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  rx: 11px;
+  fill: none;
+  stroke-width: 2px;
+  stroke-dasharray: 10 10;
+}
+.case-concept__note--bad .case-concept__note-inner svg rect {
+  stroke: rgba(139, 0, 19, 0.25);
+}
+.case-concept__note--good .case-concept__note-inner svg rect {
+  stroke: rgba(31, 87, 45, 0.25);
+}
+.case-concept__note-inner span {
+  position: relative;
+}
+
+.case-section.case-section--decision {
+  gap: 24px;
+}
+.case-decision__compare {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 72px;
+}
+.case-decision__col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  flex: none;
+}
+.case-decision__col--current {
+  width: 493px;
+}
+.case-decision__col--redesign {
+  width: 525px;
+}
+.case-decision__image-group img {
+  height: 280px;
+  object-fit: cover;
+}
+.case-decision__image-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}
+.case-section .case-decision__image-group img {
+  width: 100%;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+}
+.case-decision__image-group--tall img,
+.case-decision__image-group--tall .case-decision__collage {
+  height: 334px;
+}
+.case-decision__collage {
+  position: relative;
+  width: 100%;
+}
+.case-section img.case-decision__collage-base {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 330.754px;
+  height: 282px;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-section img.case-decision__collage-popup {
+  position: absolute;
+  top: 134px;
+  left: 256px;
+  width: 237.143px;
+  height: 200.226px;
+  border-radius: 8.571px;
+  border: 0.714px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-decision__caption {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+}
+.case-decision__points {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+}
+.case-decision__point {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+}
+.case-decision__line-wrap {
+  display: flex;
+  padding: 4px 0;
+  align-items: center;
+  align-self: stretch;
+  flex: none;
+}
+.case-decision__line-wrap--fixed {
+  align-self: auto;
+  height: 44px;
+}
+.case-decision__line {
+  width: 3px;
+  align-self: stretch;
+  border-radius: 99px;
+  flex: none;
+}
+.case-decision__line--bad {
+  background: #d99193;
+}
+.case-decision__line--good {
+  background: #8dcf9e;
+}
+.case-decision__point-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1 0 0;
+}
+.case-decision__point-text p {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-decision__tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.case-decision__icon {
+  flex: none;
+  color: #5f5f5f;
+}
+.case-decision__point-text p.case-decision__tag {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* -- Damai "Project Gallery Page" decision (Frame 749): current shot |
+   callout points | redesign shot, three columns instead of MUJI's two. -- */
+.case-pgallery__row {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 40px;
+}
+.case-pgallery__shot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  width: max-content;
+}
+.case-section .case-pgallery__shot img {
+  width: 184px;
+  height: 400px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-pgallery__callouts {
+  flex: 1 0 0;
+  align-self: center;
+}
+
+/* -- Damai "Layout Design - Favorited Projects" decision (Frame 642):
+   2 redesign options, each with a shot + point list + a dashed verdict
+   badge underneath. -- */
+.case-favorites__row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 80px;
+}
+.case-favorites__group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: none;
+  gap: 24px;
+}
+.case-favorites__content {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+.case-favorites__shot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  width: max-content;
+}
+.case-section .case-favorites__shot img {
+  width: 184px;
+  height: 197px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+}
+.case-section .case-favorites__shot--short img {
+  height: 176px;
+}
+.case-favorites__points {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 220px;
+  flex: none;
+  gap: 16px;
+}
+.case-favorites__point-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 0 0;
+}
+.case-favorites__point-text p {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-favorites__verdict {
+  display: flex;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--case-callout-bg, #f4f5fd);
+  align-self: stretch;
+}
+.case-favorites__verdict-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 0 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  gap: 12px;
+}
+.case-favorites__verdict-inner svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.case-favorites__verdict-inner svg rect {
+  x: 1px;
+  y: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  rx: 11px;
+  fill: none;
+  stroke-width: 2px;
+  stroke-dasharray: 10 10;
+  stroke: rgba(102, 101, 254, 0.25);
+}
+.case-favorites__verdict-inner span {
+  position: relative;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+/* -- Damai "Project Details Page" decision (Frame 642): just 2 shots,
+   current vs redesign, no callout points. -- */
+.case-pdetails__row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 80px;
+}
+
+.case-final {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 40px;
+  border-radius: 40px;
+  background: var(--case-accent, #8b0013);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  font-family: "Figtree", sans-serif;
+}
+/* Breaks up banding/dithering that large, flat, deeply saturated fills
+   show on most displays -- a subtle noise grain gives the GPU something
+   to dither against instead of a perfectly uniform color. */
+.case-final::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 40px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.case-final__heading-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+}
+.case-final__eyebrow {
+  margin: 0;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0.42px;
+  text-transform: uppercase;
+}
+.case-final__title {
+  margin: 0;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: normal;
+}
+.case-final__summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+.case-final__summary p {
+  margin: 0;
+  flex: 1 0 0;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-final__divider {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.25);
+  flex: none;
+}
+.case-final__compare {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+.case-final__current {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 400px;
+  flex: none;
+}
+.case-final__current img {
+  width: 400px;
+  height: 227px;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+  margin: 0;
+}
+.case-final__redesign {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 0 0;
+}
+.case-final__shot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}
+.case-final__shot img {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+  display: block;
+  margin: 0;
+}
+.case-final__shot--hero img { height: 577.87px; }
+.case-final__shot--photos img { height: 323px; }
+.case-final__shot--stories img { height: 243.41px; border-width: 1.4px; }
+.case-final__shot--materials img { height: 399.67px; border-width: 1.4px; }
+.case-final__caption {
+  margin: 0;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-final__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+}
+.case-final__body {
+  margin: 0;
+  align-self: stretch;
+  color: #fff;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-final__compare--nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-self: stretch;
+}
+.case-final__nav-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+}
+.case-final__nav-col img {
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+  height: 123px;
+}
+.case-final__nav-col--current { width: 327px; }
+.case-final__nav-col--current img { width: 327px; }
+.case-final__nav-col--redesign { width: 729px; }
+.case-final__nav-col--redesign img { width: 729px; }
+
+.case-final__cat-current {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 400px;
+  flex: none;
+}
+.case-final__cat-current img {
+  width: 400px;
+  height: 222px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+}
+.case-final__cat-redesign {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 0 0;
+}
+.case-final__cat-shot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}
+.case-final__cat-shot img {
+  width: 100%;
+  height: 355.2px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+}
+.case-final__cat-shot--keyinfo img { height: 471.7px; }
+.case-final__cat-shot--supplementary img { height: 364.38px; }
+
+.case-final__item-current {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 400px;
+  flex: none;
+}
+.case-final__item-shot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.case-final__item-shot img {
+  width: 400px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+}
+.case-final__item-shot--info img { height: 170px; }
+.case-final__item-shot--details img { height: 187px; }
+.case-final__item-shot--popup img { height: 226px; border: 0.714px solid rgba(95, 95, 95, 0.1); }
+.case-final__item-shot--address img { height: 227px; border: 1px solid rgba(95, 95, 95, 0.1); }
+.case-final__cat-shot--cartdrawer img { height: 355.28px; border: 1px solid rgba(95, 95, 95, 0.1); }
+.case-final__cat-shot--shoppingcart img { height: 423.7px; border: 1px solid rgba(95, 95, 95, 0.1); }
+.case-final__cat-shot--address img { height: 355.28px; border: 1px solid rgba(95, 95, 95, 0.1); }
+
+/* -- Damai User Groups section (Frame 232): 2 persona blocks + a row of
+   4 pain-point cards, measured from Figma. -- */
+.case-usergroups__personas {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  align-self: stretch;
+}
+.case-usergroups__persona {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 0 0;
+}
+.case-usergroups__avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.case-usergroups__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.case-usergroups__avatar-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.case-usergroups__avatar-ring circle {
+  stroke: var(--case-accent, #8b0013);
+}
+.case-usergroups__persona-text h3 {
+  margin: 0 0 8px;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: normal;
+}
+.case-usergroups__persona-text p {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-usergroups__divider {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(95, 95, 95, 0.25);
+  flex: none;
+}
+.case-usergroups__painpoints {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  align-self: stretch;
+}
+.case-usergroups__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 250px;
+  height: 253px;
+  flex: none;
+  padding: 16px 16px 20px 16px;
+  border-radius: 12px;
+  background: var(--case-callout-bg, #f4f5fd);
+}
+.case-usergroups__card .case-usergroups__number {
+  margin: 0;
+  color: var(--case-accent, #8b0013);
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-usergroups__card h3 {
+  margin: 0 0 8px;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-usergroups__card .case-usergroups__desc {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+.case-usergroups__tags {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 35px;
+  gap: 8px;
+}
+.case-usergroups__tag-icon {
+  width: 35px;
+  height: 35px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--case-accent, #8b0013);
+  object-fit: cover;
+}
+.case-usergroups__tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+/* -- Damai Concept Ideation section (Frame 235): heading + wireframe
+   screenshot + feedback body copy + a row of 3 event-type cards. -- */
+.case-section .case-concept__screenshot {
+  width: 100%;
+  margin: 0;
+  border-radius: 12px;
+}
+.case-concept-types {
+  display: flex;
+  align-items: stretch;
+  align-self: stretch;
+  gap: 32px;
+}
+.case-concept-types__card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 0 0;
+  padding: 16px 16px 20px 16px;
+  border-radius: 12px;
+  background: var(--case-callout-bg, #f4f5fd);
+  gap: 16px;
+}
+.case-concept-types__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}
+.case-concept-types__icon {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: #e9ebfb;
+  color: var(--case-accent, #8b0013);
+}
+.case-concept-types__icon svg {
+  width: 24px;
+  height: 24px;
+}
+.case-concept-types__header h3 {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140%;
+}
+.case-concept-types__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 8px;
+}
+.case-concept-types__body p {
+  margin: 0;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: normal;
+}
+
+/* -- Damai "Final Designs" (Frame 259): a single prototype video centered
+   in the closing case-final banner, instead of MUJI's image compare grid. -- */
+.case-final__video {
+  align-self: center;
+}
+.case-final__video video {
+  display: block;
+  width: 278px;
+  height: 529px;
+  border-radius: 40px;
+  object-fit: cover;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* ---- Inner pages: absolute-positioned canvas (Work, etc.) ---- */
+.page-canvas {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+}
+/* Case-study accent color, cascades down to every element that reads
+   var(--case-accent, #8b0013) -- eyebrows, CTA, callouts, etc. */
+.page-canvas--damai {
+  --case-accent: #6665fe;
+  --case-callout-bg: #f4f5fd;
+}
+.page-canvas--wapoo {
+  --case-accent: #45dbe9;
+  --case-callout-bg: #e2f5f7;
+}
+
+/* -- Wapoo Context section media row (Frame 642): logo + caption on the
+   left, a tight row of 4 App Store screenshots + a shared caption on the
+   right. -- */
+.case-wapoo-context__media {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 80px;
+  align-self: stretch;
+}
+.case-wapoo-context__logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.case-wapoo-context__logo img {
+  width: 104px;
+  height: 105px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin: 0;
+}
+.case-wapoo-context__gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.case-wapoo-context__gallery-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.case-wapoo-context__gallery-row img {
+  width: 184px;
+  height: 400px;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 95, 95, 0.1);
+  object-fit: cover;
+  margin: 0;
+}
+/* Invisible spacer that extends the scrollable page 80px past the footer's
+   bottom edge (footer top + 192px + 80px). Recompute if the footer top changes.
+   (Work no longer needs one: its tab and footer flow, and the canvas has 80px of
+   bottom padding.) */
+/* Invisible spacer 80px past the footer's bottom edge (footer top + 192px + 80px). */
+.page-canvas--wapoo::after {
+  content: "";
+  position: absolute;
+  top: 12553.97px;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+/* Invisible spacer 80px past the footer's bottom edge (footer top + 192px + 80px). */
+.page-canvas--damai::after {
+  content: "";
+  position: absolute;
+  top: 8041.78px;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+/* Invisible spacer 80px past the footer's bottom edge (footer top + 192px + 80px). */
+.page-canvas--muji::after {
+  content: "";
+  position: absolute;
+  top: 14058.65px;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+/* Invisible spacer 80px past the footer's bottom edge (footer top + 192px + 80px). */
+
+.page-nav {
+  view-transition-name: page-nav;
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  height: 22px;
+  align-items: center;
+  gap: 40px;
+}
+.page-nav a {
+  display: block;
+}
+.page-nav a svg {
+  display: block;
+}
+
+/* Footer (Figma: Frame 28), 32px below the glass card's bottom edge. The card is
+   absolutely positioned, so each page's top = card top (142px) + rendered card
+   height + 32px. The page's ::after spacer then sits 80px below the footer.
+   Recompute both if the card's content height changes. */
+.site-footer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1250px;
+  height: 192px;
+  padding: 40px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  /* Same two-layer inset shadow as the glass tabs (see .home-stage .glass-card):
+     dark top-left, light bottom-right, no outer drop shadow. */
+  box-shadow:
+    inset 4px 4px 16px rgba(0, 0, 0, 0.05),
+    inset -4px -4px 16px rgba(255, 255, 255, 0.4);
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  z-index: 1;
+}
+.page-canvas--work .site-footer,
+.page-canvas--about .site-footer {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: min(1250px, 100%);
+  height: auto;
+  min-height: 192px;
+  margin: 32px auto 0;
+}
+.page-canvas--work .site-footer { view-transition-name: work-footer; }
+.page-canvas--about .site-footer { view-transition-name: about-footer; }
+.page-canvas--wapoo .site-footer { top: 12281.97px; }
+.page-canvas--muji .site-footer { top: 13786.65px; }
+.page-canvas--damai .site-footer { top: 7769.78px; }
+.site-footer__left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: stretch;
+  align-items: flex-start;
+}
+.site-footer__hi {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 24px;
+  color: #5f5f5f;
+}
+.site-footer__hi svg {
+  display: block;
+  transform: rotate(-90deg);
+}
+.site-footer__top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 99px;
+  background: rgba(95, 95, 95, 0.15);
+  color: #5f5f5f;
+  font: inherit;
+  cursor: pointer;
+}
+.site-footer__top svg {
+  display: block;
+}
+.site-footer__cols {
+  display: flex;
+  align-items: flex-start;
+  gap: 56px;
+}
+.site-footer__col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.site-footer__col p,
+.site-footer__col a,
+.site-footer__col span {
+  margin: 0;
+  color: #5f5f5f;
+  font-weight: 300;
+  line-height: normal;
+}
+.site-footer__col .site-footer__head {
+  font-weight: 400;
+}
+.site-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.06) 16%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0) 62%,
+    rgba(255, 255, 255, 0.06) 84%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  pointer-events: none;
+}
+/* Ring angles computed for the 1250x192 box: TR = arctan(625/96) = 81.24deg = 22.6%,
+   BL = 261.24deg = 72.6%. */
+.site-footer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.9) 21.5%,
+    rgba(255, 255, 255, 0) 22.6%,
+    rgba(255, 255, 255, 0.9) 23.7%,
+    rgba(255, 255, 255, 0.9) 71.5%,
+    rgba(255, 255, 255, 0) 72.6%,
+    rgba(255, 255, 255, 0.9) 73.7%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.page-canvas--work {
+  /* 142px = nav (80) + nav height (22) + 40 gap; 24px side margins are the floor --
+     above 1298px the tab stops growing (1250px) and the margins grow instead;
+     80px below the footer. */
+  padding: 142px 24px 80px;
+}
+.glass-card--work {
+  view-transition-name: work-tab;
+  position: relative;
+  width: min(1250px, 100%);
+  height: auto;
+  margin: 0 auto;
+  /* Tier 1 (blur only, no displacement) — this card is large enough that the
+     Tier 2 SVG filter chain was still causing noticeable lag in Chrome. */
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  /* Same two-layer inset shadow as the homepage tab (see .home-stage .glass-card):
+     dark top-left, light bottom-right, no outer drop shadow. */
+  box-shadow:
+    inset 4px 4px 16px rgba(0, 0, 0, 0.05),
+    inset -4px -4px 16px rgba(255, 255, 255, 0.4);
+}
+/* Ring corner angles depend on the tab's aspect ratio, which now changes with the
+   viewport: initWorkRing() in main.js sets --ring-tr / --ring-bl (TR = arctan(halfW /
+   halfH) as a % of the circle, BL = TR + 50%). The fallbacks are the 1250 x 1369
+   desktop values (42.40deg = 11.8%, 222.40deg = 61.8%). */
+.glass-card--work::after {
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.9) calc(var(--ring-tr, 11.8%) - 1.1%),
+    rgba(255, 255, 255, 0) var(--ring-tr, 11.8%),
+    rgba(255, 255, 255, 0.9) calc(var(--ring-tr, 11.8%) + 1.1%),
+    rgba(255, 255, 255, 0.9) calc(var(--ring-bl, 61.8%) - 1.1%),
+    rgba(255, 255, 255, 0) var(--ring-bl, 61.8%),
+    rgba(255, 255, 255, 0.9) calc(var(--ring-bl, 61.8%) + 1.1%),
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+
+/* Work page responsive layout:
+   1. > 1298px: margins around the tab grow (tab stays 1250px).
+   2. Margins stay 24px, the tab narrows and the two cards per row scale down with it.
+   3. One card per row once the space between the tab's padding (viewport - 2x24px
+      margin - 2x40px padding) drops below a single card's 565px, i.e. viewport < 693px.
+   4. <= 480px: Figma "Work - Phone" (tighter tab padding, smaller text, tighter nav). */
+@media (max-width: 692.98px) {
+  /* The diagonal glow is a % of the tab's diagonal; on a tab this tall it would
+     wash out the bottom cards (same reason it's off on the case-study tabs). */
+  .glass-card--work::before {
+    content: none;
+  }
+  .work-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  .work-row .work-project {
+    flex: none;
+    width: min(565px, 100%);
+  }
+  .work-project--spacer {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .page-canvas--work .site-footer,
+  .page-canvas--about .site-footer {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 32px;
+  }
+  .page-canvas--work .site-footer__left,
+  .page-canvas--about .site-footer__left {
+    gap: 24px;
+  }
+  .page-canvas--work .site-footer__cols,
+  .page-canvas--about .site-footer__cols {
+    align-self: stretch;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .page-canvas--work .site-footer__hi svg,
+  .page-canvas--about .site-footer__hi svg {
+    flex: none;
+  }
+}
+@media (max-width: 480px) {
+  .page-canvas--work .page-nav {
+    gap: 24px;
+  }
+  .glass-card--work {
+    padding: 40px 24px;
+  }
+  .glass-card--work .glass-card__top {
+    padding: 0 12px;
+  }
+  .work-project__title {
+    font-size: 22px;
+    line-height: normal;
+  }
+  .work-project__desc {
+    font-size: 16px;
+    line-height: normal;
+  }
+  .page-canvas--work .site-footer,
+  .page-canvas--about .site-footer {
+    padding: 40px 24px;
+  }
+}
+
+.page-canvas--about {
+  /* Same shell as Work: 142px = nav (80) + nav height (22) + 40 gap; 24px side
+     margins are the floor (above 1298px the tab stops at 1250px and the margins
+     grow instead); 80px below the footer. */
+  padding: 142px 24px 80px;
+}
+.glass-card--about {
+  view-transition-name: about-tab;
+  position: relative;
+  width: min(1250px, 100%);
+  height: auto;
+  margin: 0 auto;
+  /* The tab's content box is the size container the .about-scale zoom reads. */
+  container-type: inline-size;
+  /* Tier 1 (blur only, no displacement), same as Work. */
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  /* Same two-layer inset shadow as the homepage tab (see .home-stage .glass-card):
+     dark top-left, light bottom-right, no outer drop shadow. */
+  box-shadow:
+    inset 4px 4px 16px rgba(0, 0, 0, 0.05),
+    inset -4px -4px 16px rgba(255, 255, 255, 0.4);
+}
+/* Edge ring: corner angles follow the tab's aspect ratio (see initWorkRing in
+   main.js, which sets --ring-tr / --ring-bl). Fallbacks = the 1250 x 1830 desktop
+   values (arctan(625/915) = 34.3deg = 9.5%). */
+.glass-card--about::after {
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.9) calc(var(--ring-tr, 9.5%) - 1.1%),
+    rgba(255, 255, 255, 0) var(--ring-tr, 9.5%),
+    rgba(255, 255, 255, 0.9) calc(var(--ring-tr, 9.5%) + 1.1%),
+    rgba(255, 255, 255, 0.9) calc(var(--ring-bl, 59.5%) - 1.1%),
+    rgba(255, 255, 255, 0) var(--ring-bl, 59.5%),
+    rgba(255, 255, 255, 0.9) calc(var(--ring-bl, 59.5%) + 1.1%),
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+/* Desktop layout is a fixed 1170px-wide artboard (the tab's inner width at 1250px)
+   that zooms down uniformly as the tab narrows: tan(atan2(a, b)) = a / b as a
+   unitless number, which plain calc() can't do. It keeps scaling until the inner
+   width is exactly that of 2 full-size (279px) cards + the gap = 598px, i.e. a
+   726px viewport; there it switches to 2 cards per row, filling the width exactly --
+   see the media queries at the end of the About section. */
+.about-scale {
+  --dw: 1170px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: var(--dw);
+  align-self: center;
+  zoom: min(1, tan(atan2(100cqw, var(--dw))));
+}
+
+/* Case study sub-pages (MUJI, Damai, Wapoo, ...) reuse the same glass-card
+   shell as Work/About -- no view-transition-name, since these aren't part
+   of the cross-document transition pairs. */
+.glass-card--case {
+  position: absolute;
+  left: 50%;
+  top: 142px;
+  transform: translateX(-50%);
+  width: 1250px;
+  height: auto;
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  /* Same two-layer inset shadow as the homepage tab (see .home-stage .glass-card):
+     dark top-left, light bottom-right, no outer drop shadow. */
+  box-shadow:
+    inset 4px 4px 16px rgba(0, 0, 0, 0.05),
+    inset -4px -4px 16px rgba(255, 255, 255, 0.4);
+}
+/* ::before is a diagonal white glow whose stops are percentages along the
+   box's own diagonal -- fine at any aspect ratio EXCEPT that on a card this
+   tall, "the last 16% of the diagonal" covers a couple thousand px of real
+   estate at the bottom, so it visibly washes out whatever section lands
+   there. Disable it for --case; ::after (the corner ring, see below) is a
+   thin border-only effect and doesn't have this problem, so each page gets
+   its own recomputed ring instead, same as Work/About. */
+.glass-card--case::before {
+  content: none;
+}
+
+/* Ring re-computed for Wapoo's actual rendered size (1250 x 12108px):
+   halfW=625, halfH=6054 -> angle_TR = arctan(625/6054) = 5.90deg = 1.6%,
+   angle_BL = 180+5.90 = 185.90deg = 51.6%. Recompute again if content
+   height changes. */
+.glass-card--wapoo::after {
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.9) 0.5%,
+    rgba(255, 255, 255, 0) 1.6%,
+    rgba(255, 255, 255, 0.9) 2.7%,
+    rgba(255, 255, 255, 0.9) 50.5%,
+    rgba(255, 255, 255, 0) 51.6%,
+    rgba(255, 255, 255, 0.9) 52.7%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+
+/* ---- About page ---- */
+.about-profile,
+.about-header__verb--click {
+  display: none;
+}
+.story-card__comics-media {
+  display: contents;
+}
+.about-photo-strip {
+  position: relative;
+  align-self: stretch;
+  height: 412px;
+  border-radius: 24px;
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: none; /* TEMP: page-wide blur-off perf test */
+  -webkit-backdrop-filter: none; /* TEMP */
+  overflow: hidden;
+}
+
+.about-header__title {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  text-align: center;
+  font-family: "Figtree", sans-serif;
+  font-size: 30px;
+  font-weight: 300;
+  color: #5f5f5f;
+  margin: 0;
+}
+.about-header__subtitle {
+  position: absolute;
+  top: 94px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  text-align: center;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: #5f5f5f;
+  margin: 0;
+}
+
+.photo-space__img {
+  position: absolute;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease;
+}
+.photo-space__img--1 {
+  width: 200px;
+  height: 267px;
+  /* Figma reports 176/189 as the post-rotation bounding-box position; these
+     top/left values are the pre-rotation frame offset needed so the rendered
+     (rotated) bounding box lands at that exact 176/189 spot. */
+  top: 187.2px;
+  left: 204.5px;
+  transform: rotate(-7deg);
+  z-index: 2;
+  background-image: url("../assets/images/about/photo-1.jpg");
+  background-position: 50%;
+  background-size: cover;
+}
+.photo-space__img--1:hover {
+  transform: translate(-5px, -5px) rotate(-10deg);
+}
+.photo-space__img--2 {
+  width: 200px;
+  height: 269.896px;
+  top: 155.4px;
+  left: 394.7px;
+  transform: rotate(-2deg);
+  z-index: 3;
+  background-image: url("../assets/images/about/photo-2.jpg");
+  background-position: 50%;
+  background-size: cover;
+}
+.photo-space__img--2:hover {
+  transform: translate(5px, -5px) rotate(1deg);
+}
+.photo-space__img--3 {
+  width: 200.25px;
+  height: 267px;
+  top: 201.057px;
+  left: 577.855px;
+  transform: rotate(1deg);
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  z-index: 1;
+  /* Frame is exactly 3:4 (200.25x267), matching this image's native 801x1068
+     aspect ratio exactly -- so it fills at 100% with zero crop, no need for
+     Figma's leftover non-uniform zoom/offset (those were tuned for a
+     different image in that frame). */
+  background: url("../assets/images/about/photo-3.jpg") no-repeat 0 0 / 100% 100%;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+  filter: none;
+}
+.photo-space__img--3:hover {
+  transform: translate(5px, -5px) rotate(4deg);
+}
+.photo-space__img--4 {
+  width: 200px;
+  height: 300px;
+  top: 161.6px;
+  left: 770.2px;
+  transform: rotate(4deg);
+  z-index: 2;
+  background-image: url("../assets/images/about/photo-4.jpg");
+  background-position: 50%;
+  background-size: cover;
+}
+.photo-space__img--4:hover {
+  transform: translate(5px, -5px) rotate(7deg);
+}
+
+.about-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  align-self: stretch;
+}
+.about-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  align-self: stretch;
+}
+.story-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 0 0;
+  min-width: 0;
+  height: 378px;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: none; /* TEMP: page-wide blur-off perf test */
+  -webkit-backdrop-filter: none; /* TEMP */
+  overflow: visible;
+}
+.story-card--comics {
+  overflow: hidden;
+}
+.story-card--spacer {
+  opacity: 0;
+  pointer-events: none;
+}
+.story-card__desc {
+  align-self: stretch;
+  font-family: "Figtree", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: #5f5f5f;
+  margin: 0;
+}
+.story-card--note {
+  /* Keep the normal 24px card padding (setting it to 0 here triggers a
+     reproducible flex-sizing bug where this card's row-mates get stretched
+     wider at this card's expense -- confirmed via isolated testing, cause
+     not fully understood). Since absolutely-positioned children reference
+     the padding box, not the card's true edge, every envelope shape below
+     has its bottom/right/left offset shifted by -24px to compensate and
+     still land flush with the card's true outer edge. */
+  clip-path: inset(0 round 24px);
+  cursor: pointer;
+}
+.story-card--note .story-card__desc {
+  text-align: center;
+}
+.story-card__media {
+  position: relative;
+  flex: 1 0 0;
+  align-self: stretch;
+  overflow: visible;
+  min-height: 0;
+}
+
+/* Org cards (DCC / CVEC / CUSD): logo + team/event photo, both absolutely
+   positioned within the media frame, both rendered as full-bleed background
+   images (no inset padding/border around the logo). */
+.story-card__logo--dcc { background-image: url("../assets/images/about/dcc-logo.png"); }
+.story-card__logo--cvec { background-image: url("../assets/images/about/cvec-logo.png"); }
+.story-card__logo--cusd { background-image: url("../assets/images/about/cusd-logo.png"); }
+.story-card__logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 125px;
+  height: 125px;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-size: cover;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+.story-card__photo {
+  position: absolute;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+.story-card__photo--dcc,
+.story-card__photo--cusd {
+  width: 294px;
+  height: 200px;
+  top: 62px;
+  left: 13px;
+}
+.story-card__photo--dcc {
+  background-image: url("../assets/images/about/dcc-photo.jpg");
+  background-position: 50%;
+  background-size: cover;
+}
+.story-card__photo--cusd {
+  left: 21.3px;
+  background-image: url("../assets/images/about/cusd-photo.jpg");
+  background-position: 50%;
+  background-size: cover;
+}
+.story-card__photo--cvec {
+  width: 218px;
+  height: 228px;
+  top: 34px;
+  left: 97.7px;
+  background-image: url("../assets/images/about/cvec-photo.jpg");
+  background-position: 50%;
+  background-size: cover;
+}
+
+/* Tote card: 2 photos side by side */
+.story-card__media--pair {
+  display: flex;
+  align-items: stretch;
+  align-self: flex-start; /* width: hug contents, not stretched to card width */
+  gap: 8px;
+  min-height: 0;
+}
+.story-card__media--pair img {
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+
+/* Comics card: 4 photos absolutely positioned directly in the media frame (no wrapper) */
+.story-card__comic {
+  position: absolute;
+  width: 176.04px;
+  height: 175.32px;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-size: cover;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+.story-card__comic--1 {
+  left: 24px;
+  top: 87px;
+  background-image: url("../assets/images/about/comics-1.jpg");
+}
+.story-card__comic--2 {
+  left: 208px;
+  top: 87px;
+  background-image: url("../assets/images/about/comics-2.jpg");
+}
+.story-card__comic--3 {
+  left: 208px;
+  top: 270px;
+  background-image: url("../assets/images/about/comics-3.jpg");
+}
+.story-card__comic--4 {
+  left: 391px;
+  top: 270px;
+  background-image: url("../assets/images/about/comics-4.jpg");
+}
+
+/* Single-photo cards (hometown) */
+.story-card__media--single img {
+  width: 100%;
+  object-fit: cover;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+
+/* Robot card: 2 photos stacked */
+.story-card__media--stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 8px;
+}
+.story-card__media--stack img {
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+.story-card__media--stack img:first-child {
+  height: 143px;
+  align-self: stretch;
+  width: 100%;
+  object-fit: cover;
+}
+.story-card__media--stack img:last-child {
+  height: calc(100% - 151px); /* container height minus image 1 (143px) + gap (8px) */
+  width: auto;
+  aspect-ratio: 107 / 59;
+  flex-shrink: 0;
+}
+
+/* Envelope note card: built entirely from CSS/SVG shapes, no image asset.
+   All pieces sit directly on .story-card--note (position:relative on the
+   base .story-card), not inside their own wrapper frame. Paint order (DOM
+   order) back to front: rect (body) -> poly2/poly3 (side flaps) -> poly1
+   (top flap) -> card (peeking letter). */
+.envelope-shape {
+  position: absolute;
+}
+/* All pieces are positioned inside .envelope (280 x 230, centered on the card's
+   bottom edge) so the whole envelope can be resized as one unit on narrow layouts. */
+.envelope {
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 280px;
+  height: 230px;
+  margin-left: -140px;
+}
+.envelope-shape--rect {
+  width: 280px;
+  height: 230px;
+  right: 0;
+  bottom: 0;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+.envelope-shape--poly1 {
+  width: 260px;
+  height: 88px;
+  right: 10px;
+  bottom: 0;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+}
+.envelope-shape--poly2 {
+  width: 142px;
+  height: 233px;
+  transform: rotate(-90deg);
+  right: 45.5px;
+  bottom: -47.868px;
+  filter: drop-shadow(4px 0 10px rgba(0, 0, 0, 0.15));
+}
+.envelope-shape--poly3 {
+  width: 142px;
+  height: 233px;
+  transform: scaleX(-1) rotate(-90deg);
+  left: 45.506px;
+  bottom: -47.868px;
+  filter: drop-shadow(-4px 0 10px rgba(0, 0, 0, 0.15));
+}
+.envelope__card {
+  position: absolute;
+  left: 30.013px;
+  top: 89px;
+  width: 220px;
+  height: 120px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+  transform: translate(0, 0) rotate(0deg);
+  will-change: transform;
+  transition: transform 0.3s ease;
+}
+.story-card--note:hover .envelope__card {
+  transform: translate(-0.01px, -109px) rotate(5deg);
+}
+.envelope__card-text {
+  color: #5f5f5f;
+  font-family: "Homemade Apple", cursive;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.envelope__card-icon-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  align-self: stretch;
+}
+.envelope__card-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* ---- About page: narrow layouts (Figma "About - Phone") ----
+   A layout keeps scaling down until the tab's inner width is exactly that of the cards
+   the next layout needs at full size, then switches -- so there is never a stretch where
+   the space inside the tab's padding shrinks while the card count stays the same:
+     > 725px          : 3 cards per row -- the desktop artboard, zoomed (1170px -> 598px
+                        inner, where 2 full-size 279px cards + gap fit exactly).
+                        Hero = rotated photo collage.
+     725px and below  : 2 cards per row -- the phone-designed cards (279px wide, 231px media
+                        frames, 18px text), 598px design, zoomed to fill the inner width.
+                        Hero = horizontal photo.
+     480px and below  : 1 card per row -- the "About - Phone" frame (fluid up to 384px, zoomed
+                        below 279px), phone shell (24px tab padding, tighter top bar and nav).
+                        Hero = vertical photo. */
+@media (max-width: 725.98px) {
+  /* the diagonal glow is a % of the tab's diagonal -- it would wash out a tall tab */
+  .glass-card--about::before {
+    content: none;
+  }
+  .about-scale {
+    --dw: 598px;
+  }
+
+  /* Header: title + subtitle + one profile photo replace the rotated photo collage */
+  .about-photo-strip {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .about-header__title,
+  .about-header__subtitle {
+    position: static;
+    transform: none;
+    width: auto;
+    text-align: left;
+    line-height: normal;
+  }
+  .about-header__title {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .about-header__subtitle {
+    font-size: 18px;
+    margin-bottom: 24px;
+  }
+  .about-header__verb--hover,
+  .photo-space__img {
+    display: none;
+  }
+  .about-header__verb--click {
+    display: inline;
+  }
+  .about-profile {
+    display: block;
+    width: 100%;
+    aspect-ratio: 598 / 390; /* horizontal version of the photo */
+    border-radius: 16px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+    background: url("../assets/images/about/phone/profile.jpg") 50% 50% / cover no-repeat;
+  }
+
+  /* Grid: rows dissolve into one flow, 2 columns of 279px cards */
+  .about-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 279px);
+    gap: 40px;
+    align-items: stretch;
+  }
+  .about-row {
+    display: contents;
+  }
+  .story-card {
+    flex: none;
+    width: auto;
+    height: auto;
+    padding: 24px;
+    gap: 24px;
+    overflow: hidden;
+  }
+  .story-card--note {
+    order: 1; /* robot comes before the note on narrow layouts */
+  }
+  .story-card--hometown,
+  .story-card--robot {
+    height: auto;
+    min-height: 378px;
+  }
+
+  /* Org cards (DCC / CVEC / CUSD): 231 x 191.93 media frame */
+  .story-card__media {
+    flex: none;
+    align-self: flex-start;
+    width: 231px;
+    height: 191.93px;
+  }
+  .story-card__logo {
+    width: 91.57px;
+    height: 91.57px;
+    border-radius: 16px;
+    box-shadow: 0 0 7.326px 0 rgba(0, 0, 0, 0.25);
+    filter: none;
+  }
+  .story-card__logo--cvec {
+    background-color: #faf5ee;
+    background-image: url("../assets/images/about/phone/cvec-logo.png");
+    background-size: 88%;
+  }
+  .story-card__logo--cusd {
+    background-color: #faf5ee;
+    background-image: url("../assets/images/about/phone/cusd-logo.png");
+    background-size: 80%;
+  }
+  .story-card__photo {
+    border-radius: 16px;
+    box-shadow: 0 0 7.326px 0 rgba(0, 0, 0, 0.25);
+    filter: none;
+  }
+  .story-card__photo--dcc {
+    width: 215.372px;
+    height: 146.512px;
+    top: 45.42px;
+    left: 15.388px;
+    background-image: url("../assets/images/about/phone/dcc-photo.jpg");
+    background-size: 109.75% 121%;
+    background-position: 48.51% 50%;
+  }
+  .story-card__photo--cvec {
+    width: 159.698px;
+    height: 167.023px;
+    top: 24.91px;
+    left: 71.542px;
+    background-image: url("../assets/images/about/phone/cvec-photo.jpg");
+    background-size: 162.76% 103.97%;
+    background-position: 67.24% 55.42%;
+  }
+  .story-card__photo--cusd {
+    width: 215.372px;
+    height: 146.512px;
+    top: 45.42px;
+    left: 15.628px;
+    background-image: url("../assets/images/about/phone/cusd-photo.jpg");
+    background-size: 102.19% 100%;
+    background-position: 49.77% 0;
+  }
+
+  /* Tote: two photos, 147px tall, spread across the 231px frame */
+  .story-card__media--pair {
+    height: 147px;
+    justify-content: space-between;
+    gap: 0;
+  }
+  .story-card__media--pair img {
+    height: 100%;
+    width: auto;
+    border-radius: 16.434px;
+    box-shadow: 0 0 18.106px 0 rgba(0, 0, 0, 0.25);
+    filter: none;
+  }
+
+  /* Comics: all 4 screenshots as a 2 x 2 grid (it zooms with the rest of the card);
+     the 1-card-per-row phone layout below drops to 2 */
+  .story-card__comics-media {
+    display: grid;
+    grid-template-columns: 109px 109px;
+    justify-content: space-between;
+    align-items: start;
+    gap: 13px 0;
+    width: 231px;
+  }
+  .story-card__comic {
+    position: static;
+    width: 109px;
+    height: 109px;
+    border-radius: 9.924px;
+    box-shadow: 0 0 6.203px 0 rgba(0, 0, 0, 0.25);
+    filter: none;
+  }
+
+  /* Hometown: full-width photo filling what's left of the 378px card */
+  .story-card__media--single {
+    flex: 1 0 0;
+    align-self: stretch;
+    width: auto;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+    background: url("../assets/images/about/phone/hometown.jpg") 50% 50.26% / cover no-repeat;
+  }
+  .story-card__media--single img {
+    display: none;
+  }
+
+  /* Robot: 143px photo above a second one that fills the rest */
+  .story-card--robot {
+    justify-content: flex-end;
+  }
+  .story-card__media--stack {
+    flex: 1 0 0;
+    align-self: stretch;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .story-card__media--stack img {
+    border-radius: 12.96px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+    filter: none;
+    object-fit: cover;
+  }
+  .story-card__media--stack img:first-child {
+    flex: none;
+    height: 143px;
+    width: 100%;
+  }
+  .story-card__media--stack img:last-child {
+    flex: 1 0 0;
+    height: auto;
+    min-height: 0;
+    width: auto;
+    aspect-ratio: 214 / 118;
+  }
+
+  /* Note: the desktop envelope at 82.5% (280 -> 231px), flush with the card bottom */
+  .story-card--note {
+    padding: 24px 24px 0;
+    gap: 48px;
+    align-items: center;
+  }
+  .envelope {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    flex: none;
+    margin: auto auto -1px; /* auto top margin keeps it flush with the card bottom when the card stretches */
+    zoom: 0.825;
+  }
+}
+@media (max-width: 480px) {
+  /* 1 card per row: cards fill the tab. Text stays 18px; each card's images scale as
+     one group so their width fills the card's inner width (see .story-card below), and
+     card heights hug their content. */
+  .about-scale {
+    width: 100%;
+    zoom: 1;
+  }
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+  /* Each card is a size container: 100cqw = the card's inner width. Every media group is
+     designed 231px wide (Figma phone frame; the envelope 280px), and tan(atan2(a, b)) = a / b
+     gives the unitless zoom that stretches that group to the inner width -- exactly 1 at a
+     375px viewport. */
+  .story-card {
+    container-type: inline-size;
+  }
+  .story-card__media,
+  .story-card__media--pair,
+  .story-card__comics-media {
+    zoom: tan(atan2(100cqw, 231px));
+  }
+  .about-profile {
+    aspect-ratio: 289 / 390; /* vertical version of the photo */
+  }
+  /* Hug: hometown and robot are no longer a fixed 378px. Their media frames become fixed
+     231px-wide groups (the 378px card's leftover height at 279px: 241.2px) that zoom like the rest. */
+  .story-card--hometown,
+  .story-card--robot {
+    height: auto;
+    min-height: 0;
+  }
+  .story-card__media--single,
+  .story-card__media--stack {
+    flex: none;
+    align-self: flex-start;
+    width: 231px;
+    height: 241.2px;
+  }
+  .story-card__media--stack img:last-child {
+    flex: none;
+    height: 90.2px; /* 241.2 - 143 - 8 gap */
+    width: auto;
+  }
+  /* The envelope stretches to the inner width too (280px design -> 82.5% at 375px) */
+  .envelope {
+    zoom: tan(atan2(100cqw, 280px));
+  }
+  /* Comics: the phone frame shows 2 of the 4 screenshots, side by side */
+  .story-card__comics-media {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .story-card__comic--2 {
+    width: 109.191px;
+    height: 108.745px;
+  }
+  .story-card__comic--3 {
+    width: 108.745px;
+    height: 108.521px;
+  }
+  .story-card__comic--1,
+  .story-card__comic--4 {
+    display: none;
+  }
+  .page-canvas--about .page-nav {
+    gap: 24px;
+  }
+  .glass-card--about {
+    padding: 40px 24px;
+  }
+  .glass-card--about .glass-card__top {
+    padding: 0 12px;
+  }
+}
