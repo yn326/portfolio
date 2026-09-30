@@ -91,23 +91,25 @@ function initWorkRing() {
 // Work/About page nav (the small Home/Work/About icon row above the glass
 // tab): it's plain position:absolute inside .page-canvas, so by default it
 // just scrolls off with everything else at the same rate as the tab below
-// it -- reads as stiff/mechanical. Fading its opacity and nudging it up a
-// little extra as the page scrolls (rather than 1:1 with scroll) makes it
-// read as retreating out of the way instead of just sliding off screen.
+// it -- reads as stiff/mechanical. Shrinking it down and fading it out as
+// the page scrolls (still scrolling normally underneath that, just also
+// scaling/fading) makes it read as retreating rather than just sliding off
+// screen at a fixed size.
 function initPageNavFade() {
   const nav = document.querySelector(".page-nav");
   if (!nav) return;
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const FADE_DISTANCE = 120; // scrollY (px) at which the nav is fully faded
-  const RETREAT_PX = 28; // extra upward drift added on top of the normal scroll, at full fade
+  const FADE_DISTANCE = 120; // scrollY (px) at which the nav is fully faded/shrunk
+  const MIN_SCALE = 0.75; // scale at full fade
   let ticking = false;
 
   function update() {
     ticking = false;
     const progress = Math.min(Math.max(window.scrollY / FADE_DISTANCE, 0), 1);
+    const scale = 1 - progress * (1 - MIN_SCALE);
     nav.style.opacity = String(1 - progress);
-    nav.style.transform = `translate(-50%, ${(-progress * RETREAT_PX).toFixed(2)}px)`;
+    nav.style.transform = `translateX(-50%) scale(${scale.toFixed(3)})`;
     nav.style.pointerEvents = progress >= 0.99 ? "none" : "";
   }
   function onScroll() {
