@@ -100,7 +100,11 @@ function initPageNavFade() {
   if (!nav) return;
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const FADE_DISTANCE = 120; // scrollY (px) at which the nav is fully faded/shrunk
+  // .glass-card's top edge reaches .page-nav's fixed position after ~40px
+  // of scroll on both Work and About (measured directly, not assumed) --
+  // finishing the fade a little before that keeps the card from ever
+  // scrolling up underneath a still-visible nav.
+  const FADE_DISTANCE = 32; // scrollY (px) at which the nav is fully faded/shrunk
   const MIN_SCALE = 0.75; // scale at full fade
   let ticking = false;
 
