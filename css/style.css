@@ -2414,6 +2414,7 @@ img.work-project__media-img--shadow {
   flex: 1 0 0;
 }
 .case-persona-card__avatar {
+  position: relative;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -2421,8 +2422,21 @@ img.work-project__media-img--shadow {
   height: 100px;
   flex: none;
   border-radius: 999px;
-  border: 2.5px dashed var(--case-accent, #8b0013);
   overflow: hidden;
+}
+/* Dashed ring drawn as a masked pseudo-element instead of a plain CSS border --
+   a border's dash length/gap isn't controllable, so this uses an SVG circle
+   stroke (dasharray 10 10, matching the Figma stroke) as an alpha mask over a
+   solid fill, keeping the color tied to --case-accent for theming. */
+.case-persona-card__avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  pointer-events: none;
+  background-color: var(--case-accent, #8b0013);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='48.75' fill='none' stroke='white' stroke-width='2.5' stroke-dasharray='10 10'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='48.75' fill='none' stroke='white' stroke-width='2.5' stroke-dasharray='10 10'/%3E%3C/svg%3E");
 }
 .case-persona-card__avatar img {
   width: 100%;
