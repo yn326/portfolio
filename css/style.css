@@ -3584,10 +3584,21 @@ img.work-project__media-img--shadow {
 }
 .site-footer__hi {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   font-size: 24px;
   color: #5f5f5f;
+}
+/* Email + arrow grouped so responsive wrapping never splits them apart --
+   "Say hi to me at" can wrap onto its own line, but the email and the arrow
+   that points at it always move as one unit (Figma: the two are now
+   explicitly framed together, see node 920-5880). */
+.site-footer__hi-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
 }
 .site-footer__hi svg {
   display: block;

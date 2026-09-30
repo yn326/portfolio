@@ -61,7 +61,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&family=Homemade+Apple&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=157" />
+  <link rel="stylesheet" href="../css/style.css?v=158" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -236,10 +236,13 @@
     <footer class="site-footer">
       <div class="site-footer__left">
         <a class="site-footer__hi" href="mailto:raina.nyy@gmail.com">
-          <span>Say hi to me at <em>raina.nyy@gmail.com</em></span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <span>Say hi to me at</span>
+          <span class="site-footer__hi-email">
+            <em>raina.nyy@gmail.com</em>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
         </a>
         <button class="site-footer__top" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">
           <span>Back to top</span>
