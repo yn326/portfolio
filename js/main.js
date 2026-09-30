@@ -89,9 +89,16 @@ function initCaseFrameFocus() {
   const frames = document.querySelectorAll(".case-hero__card, .case-section.case-section--built");
   if (!frames.length) return;
 
+  // Don't focus anything until the reader actually scrolls -- otherwise the
+  // hero card pops in already-expanded on load, before they've done
+  // anything, which reads as pre-decided rather than a response to where
+  // they're looking.
+  let hasScrolled = window.scrollY > 0;
   let ticking = false;
+
   function update() {
     ticking = false;
+    if (!hasScrolled) return;
     const line = window.innerHeight * 0.65;
     let current = frames[0];
     for (const frame of frames) {
@@ -101,14 +108,17 @@ function initCaseFrameFocus() {
       frame.classList.toggle("is-focused", frame === current);
     }
   }
-  function onScroll() {
+  function scheduleUpdate() {
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(update);
   }
+  function onScroll() {
+    hasScrolled = true;
+    scheduleUpdate();
+  }
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll);
-  update();
+  window.addEventListener("resize", scheduleUpdate);
 }
 
 // Work/About tab edge ring: the two "dim" corners of the ring gradient sit at
