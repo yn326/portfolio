@@ -42,10 +42,7 @@ function initAboutPhotoHover() {
 
 // Case-study scrollspy: marks whichever section's top has most recently
 // crossed a reference line (30% down the viewport) as .is-current on its
-// sidebar nav dot, and .is-focused on the section itself (see style.css --
-// that one gets a subtle scale-up so the white frame the reader is
-// currently looking at reads as "in focus" against the others). Same
-// current-section detection drives both, no separate observer needed.
+// sidebar nav dot.
 function initScrollspy() {
   const nav = document.querySelector(".scrollspy");
   if (!nav) return;
@@ -64,7 +61,40 @@ function initScrollspy() {
     }
     for (const pair of pairs) {
       pair.item.classList.toggle("is-current", pair === current);
-      pair.section.classList.toggle("is-focused", pair === current);
+    }
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  update();
+}
+
+// Case-study white frames (the hero title/CTA card plus each .case-section)
+// scale up a touch while the reader is on them. Separate from initScrollspy
+// above -- that one only tracks sections with a sidebar nav entry, which
+// left out .case-hero__card entirely, and needed its own (later) reference
+// line for a different purpose (its 30% threshold matches the sidebar dots
+// switching; this one triggers sooner -- 15% down -- so a frame reads as
+// "focused" closer to when it first comes into view instead of after
+// you've already scrolled well into it).
+function initCaseFrameFocus() {
+  const frames = document.querySelectorAll(".case-hero__card, .case-section.case-section--built");
+  if (!frames.length) return;
+
+  let ticking = false;
+  function update() {
+    ticking = false;
+    const line = window.innerHeight * 0.15;
+    let current = frames[0];
+    for (const frame of frames) {
+      if (frame.getBoundingClientRect().top <= line) current = frame;
+    }
+    for (const frame of frames) {
+      frame.classList.toggle("is-focused", frame === current);
     }
   }
   function onScroll() {
@@ -261,6 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initNoteModal();
   initAboutPhotoHover();
   initScrollspy();
+  initCaseFrameFocus();
   initHomeBgEntrance();
   initHomeBgExit();
 });

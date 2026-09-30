@@ -1500,6 +1500,12 @@ img.work-project__media-img--shadow {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  /* initCaseFrameFocus() in main.js -- same treatment as .case-section--
+     built below, see the comment there. */
+  transition: transform 0.3s ease;
+}
+.case-hero__card.is-focused {
+  transform: scale(1.02);
 }
 .case-hero__titlerow {
   display: flex;
@@ -1592,10 +1598,10 @@ img.work-project__media-img--shadow {
   align-items: flex-start;
   gap: 40px;
   font-family: "Figtree", sans-serif;
-  /* initScrollspy() in main.js toggles .is-focused on whichever section the
-     reader is currently on (same detection that drives the sidebar nav
-     dots). The 40px gap between sections (set on .glass-card, the flex
-     parent) comfortably absorbs the few px this adds on each edge, so no
+  /* initCaseFrameFocus() in main.js toggles .is-focused on whichever white
+     frame (this, or .case-hero__card) the reader is currently on. The 40px
+     gap between frames (set on .glass-card/.case-hero, their flex parents)
+     comfortably absorbs the few px this adds on each edge, so no
      neighboring frame ever gets touched. */
   transition: transform 0.3s ease;
 }
