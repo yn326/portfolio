@@ -88,6 +88,45 @@ function initWorkRing() {
   update();
 }
 
+// Home background shapes: the drop-in used to run unconditionally from the
+// moment style.css was parsed, which meant a slow first paint (bad network,
+// a cold cache) ate into the animation's own timeline -- the shapes could
+// already be mid-fall, or done, by the time the page was actually visible.
+// Gating the animation behind a class added once the page is genuinely
+// ready to be looked at decouples "how long the shapes take to fall" from
+// "how long the page took to load": whatever that load time was, the visitor
+// always sees the complete drop starting from the top, once.
+//
+// The class goes directly onto each .home-bg__shape element (not <html> or
+// a wrapper) so the CSS rule that keys off it (.home-bg__shape--N.home-bg-
+// ready in style.css) has a genuinely identical specificity to .home-bg__
+// shape--N.is-exiting -- both are just two classes on the same element, no
+// type/id selectors involved. Two earlier attempts got this wrong: a
+// wrapper class made the entrance rule MORE specific outright, and using
+// <html> as the flag host looked equal (two classes either way) but "html"
+// is itself a type selector that silently adds its own specificity point.
+// With a true tie, the cascade falls back to source order, and .is-exiting
+// is declared later in style.css, so it correctly wins whenever both
+// classes are present during exit.
+function initHomeBgEntrance() {
+  const shapes = document.querySelectorAll(".home-bg__shape");
+  if (!shapes.length) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    shapes.forEach((shape) => shape.classList.add("home-bg-ready"));
+    return;
+  }
+  const MAX_WAIT_MS = 1200;
+  const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  const cap = new Promise((resolve) => setTimeout(resolve, MAX_WAIT_MS));
+  Promise.race([fontsReady, cap]).then(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        shapes.forEach((shape) => shape.classList.add("home-bg-ready"));
+      });
+    });
+  });
+}
+
 // Home background shapes: before leaving for Work/About, let each shape keep
 // falling out the bottom of the screen the same way it fell in on load --
 // literally the same mechanism, not a lookalike. The drop-in is a plain CSS
@@ -140,6 +179,17 @@ function initHomeBgExit() {
         running.forEach((a) => a.pause());
         const y = new DOMMatrixReadOnly(getComputedStyle(shape).transform).m42;
         const top = shape.getBoundingClientRect().top;
+        // Cancelling the running drop/float animation makes the shape fall
+        // back to its plain (non-animated) CSS value for the instant before
+        // .is-exiting's animation takes over -- and since .home-bg__shape's
+        // own base rule now defaults to hidden (translateY(-1200px), opacity
+        // 0), that's a real flash to invisible, not just a theoretical one.
+        // Pinning the current position as an inline style first papers over
+        // that gap: inline styles lose to any CSS animation regardless of
+        // specificity, so this has zero effect once .is-exiting's animation
+        // is running, it only fills the brief window where none is.
+        shape.style.transform = `translateY(${y}px)`;
+        shape.style.opacity = "1";
         running.forEach((a) => a.cancel());
 
         const realDistanceNeeded = Math.max(0, window.innerHeight - top) + CLEAR_MARGIN;
@@ -173,5 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initNoteModal();
   initAboutPhotoHover();
   initScrollspy();
+  initHomeBgEntrance();
   initHomeBgExit();
 });

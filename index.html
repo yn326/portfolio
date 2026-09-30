@@ -67,11 +67,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <!-- Loaded non-render-blocking: this is a cross-origin stylesheet, and on a
        cold cache the fetch (plus the font files it then requests) could take
-       long enough to delay first paint -- which, on this page specifically,
-       would eat into the home-bg shapes' drop-in animation's own timeline
-       before the user ever sees a frame, making it look like it starts
-       partway through. The preload+onload swap starts the fetch immediately
-       without blocking rendering; <noscript> covers browsers with JS off. -->
+       long enough to delay first paint. The preload+onload swap starts the
+       fetch immediately without blocking rendering; <noscript> covers
+       browsers with JS off. -->
   <link
     rel="preload"
     as="style"
@@ -80,8 +78,34 @@
   />
   <noscript>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:wght@300;400;500&display=swap" />
+    <!-- initHomeBgEntrance() in main.js is what adds .home-bg-ready to
+         <html> to start the shapes' drop-in; without JS that never happens,
+         so show them at rest immediately instead of leaving them stuck
+         invisible. -->
+    <style>.home-bg__shape { animation: none !important; transform: none !important; opacity: 1 !important; }</style>
   </noscript>
-  <link rel="stylesheet" href="css/style.css?v=70" />
+  <link rel="stylesheet" href="css/style.css?v=72" />
+  <!-- Work/About both reference several multi-megabyte images. On a first-
+       ever visit to one of them in a session, the browser can still be busy
+       fetching those when the cross-document view transition's incoming
+       page is supposed to be ready -- Chrome gives up waiting and just
+       flashes to the new page instead of transitioning, but only the FIRST
+       time (afterwards those images are cached and it's fast). "moderate"
+       eagerness starts fully preparing the destination page, images
+       included, as soon as the visitor's cursor lingers over or presses
+       down on the link -- combined with the ~1s the shapes already spend
+       falling out before initHomeBgExit actually navigates (see main.js),
+       that's normally enough lead time for the page to be fully warm by
+       the time navigation happens. Chromium-only; other browsers ignore
+       this tag with no ill effect, same as today. -->
+  <script type="speculationrules">
+    {
+      "prerender": [
+        { "where": { "href_matches": "/pages/work.html" }, "eagerness": "moderate" },
+        { "where": { "href_matches": "/pages/about.html" }, "eagerness": "moderate" }
+      ]
+    }
+  </script>
 </head>
 <body>
   <div class="home-bg">
@@ -233,6 +257,6 @@
     </div>
   </main>
 
-  <script src="js/main.js?v=17"></script>
+  <script src="js/main.js?v=19"></script>
 </body>
 </html>

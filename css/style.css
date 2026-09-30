@@ -305,6 +305,20 @@ button { font-family: inherit; cursor: pointer; }
 .home-bg__shape {
   position: absolute;
   will-change: transform;
+  /* Sits here, matching home-bg-drop-N's own "from" keyframe, until
+     initHomeBgEntrance() in main.js adds .home-bg-ready directly onto each
+     shape element (not a wrapper/ancestor -- an ancestor combinator like
+     "html.home-bg-ready .home-bg__shape--N" LOOKS like it'd tie with
+     ".home-bg__shape--N.is-exiting" on class count, but "html" is a type
+     selector and silently adds its own specificity point, so it always won
+     regardless of source order -- learned that the hard way). Putting both
+     classes on the same element as .is-exiting (two classes each, same
+     element, no type/id selectors anywhere) gives a genuinely identical
+     specificity, so the tie is broken purely by source order -- and
+     .is-exiting is declared later in this file, so it correctly wins
+     whenever both classes are present during exit. */
+  transform: translateY(-1200px);
+  opacity: 0;
 }
 .home-bg__shape-fill {
   position: absolute;
@@ -320,6 +334,8 @@ button { font-family: inherit; cursor: pointer; }
   top: 9.61px;
   width: 514.973px;
   height: 514.973px;
+}
+.home-bg__shape--1.home-bg-ready {
   animation:
     home-bg-drop-1 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0s 1 both,
     home-bg-float-1 3.2s ease-in-out 0.8s infinite;
@@ -336,6 +352,8 @@ button { font-family: inherit; cursor: pointer; }
   top: 543px;
   width: 668.977px;
   height: 668.977px;
+}
+.home-bg__shape--2.home-bg-ready {
   animation:
     home-bg-drop-2 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s 1 both,
     home-bg-float-2 3.9s ease-in-out 0.93s infinite;
@@ -352,6 +370,8 @@ button { font-family: inherit; cursor: pointer; }
   top: 198px;
   width: 408px;
   height: 408px;
+}
+.home-bg__shape--3.home-bg-ready {
   animation:
     home-bg-drop-3 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.16s 1 both,
     home-bg-float-3 2.8s ease-in-out 0.91s infinite;
@@ -366,6 +386,8 @@ button { font-family: inherit; cursor: pointer; }
   top: -59px;
   width: 478px;
   height: 478px;
+}
+.home-bg__shape--4.home-bg-ready {
   animation:
     home-bg-drop-4 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.24s 1 both,
     home-bg-float-4 3.5s ease-in-out 1.14s infinite;
@@ -380,6 +402,8 @@ button { font-family: inherit; cursor: pointer; }
   top: 543px;
   width: 502px;
   height: 502px;
+}
+.home-bg__shape--5.home-bg-ready {
   animation:
     home-bg-drop-5 0.95s cubic-bezier(0.34, 1.56, 0.64, 1) 0.32s 1 both,
     home-bg-float-5 4.2s ease-in-out 1.27s infinite;
@@ -485,6 +509,8 @@ button { font-family: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .home-bg__shape {
     animation: none;
+    transform: none;
+    opacity: 1;
   }
 }
 
