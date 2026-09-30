@@ -3946,6 +3946,7 @@ img.work-project__media-img--shadow {
   left: 204.5px;
   transform: rotate(-7deg);
   z-index: 2;
+  border-radius: 16px;
   background-image: url("../assets/images/about/photo-1.jpg");
   background-position: 50%;
   background-size: cover;
@@ -3960,6 +3961,7 @@ img.work-project__media-img--shadow {
   left: 394.7px;
   transform: rotate(-2deg);
   z-index: 3;
+  border-radius: 16px;
   background-image: url("../assets/images/about/photo-2.jpg");
   background-position: 50%;
   background-size: cover;
@@ -3994,6 +3996,7 @@ img.work-project__media-img--shadow {
   left: 770.2px;
   transform: rotate(4deg);
   z-index: 2;
+  border-radius: 16px;
   background-image: url("../assets/images/about/photo-4.jpg");
   background-position: 50%;
   background-size: cover;
@@ -4086,6 +4089,7 @@ img.work-project__media-img--shadow {
 }
 .story-card__photo {
   position: absolute;
+  border-radius: 16px;
   background-repeat: no-repeat;
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
 }
@@ -4128,6 +4132,7 @@ img.work-project__media-img--shadow {
 .story-card__media--pair img {
   height: 100%;
   width: auto;
+  border-radius: 16px;
   object-fit: cover;
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
 }
@@ -4137,6 +4142,7 @@ img.work-project__media-img--shadow {
   position: absolute;
   width: 176.04px;
   height: 175.32px;
+  border-radius: 16px;
   background-repeat: no-repeat;
   background-position: 50%;
   background-size: cover;
@@ -4166,6 +4172,7 @@ img.work-project__media-img--shadow {
 /* Single-photo cards (hometown) */
 .story-card__media--single img {
   width: 100%;
+  border-radius: 16px;
   object-fit: cover;
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
 }
@@ -4179,6 +4186,7 @@ img.work-project__media-img--shadow {
   gap: 8px;
 }
 .story-card__media--stack img {
+  border-radius: 16px;
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
 }
 .story-card__media--stack img:first-child {
