@@ -89,39 +89,21 @@ function initWorkRing() {
 }
 
 // Work/About page nav (the small Home/Work/About icon row above the glass
-// tab): it's plain position:absolute inside .page-canvas, so by default it
-// just scrolls off with everything else at the same rate as the tab below
-// it -- reads as stiff/mechanical. Shrinking it down and fading it out as
-// the page scrolls (still scrolling normally underneath that, just also
-// scaling/fading) makes it read as retreating rather than just sliding off
-// screen at a fixed size.
+// tab): fades out as the page scrolls, on top of scrolling normally with
+// everything else (position:absolute, unchanged) -- no shrink, no extra
+// drift beyond the normal scroll motion, just opacity.
 function initPageNavFade() {
   const nav = document.querySelector(".page-nav");
   if (!nav) return;
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  // .glass-card's top edge reaches .page-nav's fixed position after ~40px
-  // of scroll on both Work and About (measured directly, not assumed) --
-  // finishing the fade a little before that keeps the card from ever
-  // scrolling up underneath a still-visible nav.
-  const FADE_DISTANCE = 38; // scrollY (px) at which the nav is fully faded/shrunk -- the
-  // hard ceiling here is ~40px (where .glass-card's top reaches the nav's fixed
-  // position, measured directly); staying under that keeps the fade finishing
-  // before any overlap, per earlier feedback
-  const MIN_SCALE = 0.9; // scale at full fade
+  const FADE_DISTANCE = 120; // scrollY (px) at which the nav is fully faded
   let ticking = false;
 
   function update() {
     ticking = false;
     const progress = Math.min(Math.max(window.scrollY / FADE_DISTANCE, 0), 1);
-    // Eased (progress^2) rather than linear: stays closer to fully visible
-    // through the early/middle part of the scroll and only rushes toward
-    // transparent right at the end, instead of dropping off at a constant
-    // rate across the whole (necessarily short) window.
-    const eased = progress * progress;
-    const scale = 1 - eased * (1 - MIN_SCALE);
-    nav.style.opacity = String(1 - eased);
-    nav.style.transform = `translateX(-50%) scale(${scale.toFixed(3)})`;
+    nav.style.opacity = String(1 - progress);
     nav.style.pointerEvents = progress >= 0.99 ? "none" : "";
   }
   function onScroll() {

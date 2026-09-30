@@ -3491,25 +3491,17 @@ img.work-project__media-img--shadow {
 
 .page-nav {
   view-transition-name: page-nav;
-  /* Fixed, not absolute: it should hold its position on screen while the
-     page scrolls underneath it (initPageNavFade() in main.js shrinks/fades
-     it in place, like it's retreating away from the viewer, rather than
-     traveling with the scroll). z-index high enough to stay above the
-     glass card as that scrolls up underneath it during the fade. */
-  position: fixed;
+  position: absolute;
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
-  transform-origin: center center;
-  z-index: 200;
   display: inline-flex;
   height: 22px;
   align-items: center;
   gap: 40px;
-  /* initPageNavFade() in main.js drives opacity/transform directly on
-     scroll -- will-change keeps that compositor-driven instead of
-     triggering layout/paint on every scroll tick. */
-  will-change: transform, opacity;
+  /* initPageNavFade() in main.js fades opacity on scroll -- will-change
+     keeps that compositor-driven instead of triggering paint every tick. */
+  will-change: opacity;
 }
 .page-nav a {
   display: block;
