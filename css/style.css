@@ -3500,6 +3500,7 @@ img.work-project__media-img--shadow {
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
+  transform-origin: center center;
   z-index: 200;
   display: inline-flex;
   height: 22px;
