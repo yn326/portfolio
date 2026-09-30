@@ -104,15 +104,23 @@ function initPageNavFade() {
   // of scroll on both Work and About (measured directly, not assumed) --
   // finishing the fade a little before that keeps the card from ever
   // scrolling up underneath a still-visible nav.
-  const FADE_DISTANCE = 32; // scrollY (px) at which the nav is fully faded/shrunk
+  const FADE_DISTANCE = 38; // scrollY (px) at which the nav is fully faded/shrunk -- the
+  // hard ceiling here is ~40px (where .glass-card's top reaches the nav's fixed
+  // position, measured directly); staying under that keeps the fade finishing
+  // before any overlap, per earlier feedback
   const MIN_SCALE = 0.9; // scale at full fade
   let ticking = false;
 
   function update() {
     ticking = false;
     const progress = Math.min(Math.max(window.scrollY / FADE_DISTANCE, 0), 1);
-    const scale = 1 - progress * (1 - MIN_SCALE);
-    nav.style.opacity = String(1 - progress);
+    // Eased (progress^2) rather than linear: stays closer to fully visible
+    // through the early/middle part of the scroll and only rushes toward
+    // transparent right at the end, instead of dropping off at a constant
+    // rate across the whole (necessarily short) window.
+    const eased = progress * progress;
+    const scale = 1 - eased * (1 - MIN_SCALE);
+    nav.style.opacity = String(1 - eased);
     nav.style.transform = `translateX(-50%) scale(${scale.toFixed(3)})`;
     nav.style.pointerEvents = progress >= 0.99 ? "none" : "";
   }
