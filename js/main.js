@@ -88,14 +88,15 @@ function initWorkRing() {
   update();
 }
 
-// Work/About page nav (the small Home/Work/About icon row above the glass
-// tab): fades out as the page scrolls, and travels upward a bit faster than
-// the normal 1:1 scroll rate on top of that (position:absolute, so it's
-// already moving with scroll -- this adds extra drift on top, a small
-// parallax against the glass tab scrolling underneath it at the normal
-// rate) -- no shrink.
+// Small Home/Work/About(/back) icon row above the glass tab -- .page-nav on
+// Work/About, .case-nav on the Muji/Wapoo/Damai case studies (same
+// component, different class per page). Fades out as the page scrolls, and
+// travels upward a bit faster than the normal 1:1 scroll rate on top of
+// that (position:absolute, so it's already moving with scroll -- this adds
+// extra drift on top, a small parallax against the glass tab scrolling
+// underneath it at the normal rate) -- no shrink.
 function initPageNavFade() {
-  const nav = document.querySelector(".page-nav");
+  const nav = document.querySelector(".page-nav, .case-nav");
   if (!nav) return;
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
