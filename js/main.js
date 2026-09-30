@@ -89,21 +89,25 @@ function initWorkRing() {
 }
 
 // Work/About page nav (the small Home/Work/About icon row above the glass
-// tab): fades out as the page scrolls, on top of scrolling normally with
-// everything else (position:absolute, unchanged) -- no shrink, no extra
-// drift beyond the normal scroll motion, just opacity.
+// tab): fades out as the page scrolls, and travels upward a bit faster than
+// the normal 1:1 scroll rate on top of that (position:absolute, so it's
+// already moving with scroll -- this adds extra drift on top, a small
+// parallax against the glass tab scrolling underneath it at the normal
+// rate) -- no shrink.
 function initPageNavFade() {
   const nav = document.querySelector(".page-nav");
   if (!nav) return;
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   const FADE_DISTANCE = 120; // scrollY (px) at which the nav is fully faded
+  const RETREAT_PX = 28; // extra upward drift added on top of the normal scroll, at full fade
   let ticking = false;
 
   function update() {
     ticking = false;
     const progress = Math.min(Math.max(window.scrollY / FADE_DISTANCE, 0), 1);
     nav.style.opacity = String(1 - progress);
+    nav.style.transform = `translate(-50%, ${(-progress * RETREAT_PX).toFixed(2)}px)`;
     nav.style.pointerEvents = progress >= 0.99 ? "none" : "";
   }
   function onScroll() {
