@@ -929,6 +929,12 @@ img.work-project__media-img--top {
   max-height: none;
   object-position: top;
   display: block;
+  /* These three thumbnails (Muji/Nodus/Gorest) used to have this rounding
+     baked into the source PNG's own alpha channel; converting them to JPEG
+     for file size (see the Muji optimization pass) flattened that away, so
+     it needs to be explicit in CSS now instead -- more robust anyway,
+     independent of the image file's own format. */
+  border-radius: 2.124cqw 2.124cqw 0 0; /* 12 12 0 0 */
 }
 img.work-project__media-img--shadow {
   filter: drop-shadow(0 0 1.77cqw rgba(0, 0, 0, 0.25)); /* 10 */
