@@ -3499,6 +3499,10 @@ img.work-project__media-img--shadow {
   height: 22px;
   align-items: center;
   gap: 40px;
+  /* initPageNavFade() in main.js drives opacity/transform directly on
+     scroll -- will-change keeps that compositor-driven instead of
+     triggering layout/paint on every scroll tick. */
+  will-change: transform, opacity;
 }
 .page-nav a {
   display: block;

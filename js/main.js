@@ -88,6 +88,37 @@ function initWorkRing() {
   update();
 }
 
+// Work/About page nav (the small Home/Work/About icon row above the glass
+// tab): it's plain position:absolute inside .page-canvas, so by default it
+// just scrolls off with everything else at the same rate as the tab below
+// it -- reads as stiff/mechanical. Fading its opacity and nudging it up a
+// little extra as the page scrolls (rather than 1:1 with scroll) makes it
+// read as retreating out of the way instead of just sliding off screen.
+function initPageNavFade() {
+  const nav = document.querySelector(".page-nav");
+  if (!nav) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const FADE_DISTANCE = 120; // scrollY (px) at which the nav is fully faded
+  const RETREAT_PX = 28; // extra upward drift added on top of the normal scroll, at full fade
+  let ticking = false;
+
+  function update() {
+    ticking = false;
+    const progress = Math.min(Math.max(window.scrollY / FADE_DISTANCE, 0), 1);
+    nav.style.opacity = String(1 - progress);
+    nav.style.transform = `translate(-50%, ${(-progress * RETREAT_PX).toFixed(2)}px)`;
+    nav.style.pointerEvents = progress >= 0.99 ? "none" : "";
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  update();
+}
+
 // Home background shapes: the drop-in used to run unconditionally from the
 // moment style.css was parsed, which meant a slow first paint (bad network,
 // a cold cache) ate into the animation's own timeline -- the shapes could
@@ -220,6 +251,7 @@ function initHomeBgExit() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initWorkRing();
+  initPageNavFade();
   initNoteModal();
   initAboutPhotoHover();
   initScrollspy();
