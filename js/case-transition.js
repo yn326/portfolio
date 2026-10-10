@@ -1,13 +1,9 @@
 // Work <-> case study page transitions, loaded synchronously in <head> on Work
 // and on every case page.
-//  Work -> case: a circle of the case study's theme color grows from the click
-//    point until it covers the screen.
-//  Case -> Work, About or Home: an overlay in the case page's theme color closes in from the
-//    corners (hole shrinks to 0), the browser navigates while covered, then Work
-//    opens covered and the covering shrinks down to a small circle at the click
-//    point, revealing Work.
-// Work -> case additionally navigates while covered, then the new page opens a
-// growing hole in the same overlay from the same point.
+//  Any link into or out of a case study: the page-transition Lottie fills the screen with pink, the browser
+//  navigates while covered, then the new page opens covered in the same pink and the pink slab lowers (its top
+//  edge drops to the bottom) to reveal the page from the top.
+//  Fallback when lottie-web or the JSON isn't loaded yet: a growing circle in, a closing/shrinking circle out.
 // ---- Cache warm-up ----
 // A cross-page transition is dropped by Chrome when the destination isn't ready almost immediately, which is
 // exactly what happens on a first visit with an empty cache (HTML, CSS, JS and the Lottie library all download
@@ -148,7 +144,7 @@
   var LOTTIE_COVER_FRAME = 140; // first frame where the screen is solid
   var lottieJson = null;
   function loadLottieAssets() {
-    if (!document.querySelector('a[data-case-color]:not([data-case-color="exit"])')) return;
+    if (!document.querySelector("a[data-case-color]")) return;
     var base = /\/pages\//.test(location.pathname) ? "../" : "";
     if (!window.lottie) {
       var sc = document.createElement("script");
@@ -327,7 +323,7 @@
     try {
       sessionStorage.setItem(
         KEY,
-        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: ownTheme, mode: "shrink", t: Date.now() })
+        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme, t: Date.now() })
       );
     } catch (err) {}
     if (e.viewTransition) e.viewTransition.skipTransition();
@@ -364,6 +360,9 @@
       window.location.href = link.href;
     }
 
+    // Anywhere -> anywhere: the Lottie shapes cover the screen; the next page then lowers the slab.
+    if (playLottieCover(color, function () { color = LOTTIE_COLOR || color; go(); })) return;
+
     if (raw === "exit") {
       // Case -> Work/About/Home: a full-screen overlay closes in from the corners (hole
       // shrinks from the max radius to 0), then Work opens covered and the
@@ -388,9 +387,6 @@
       });
       return;
     }
-
-    // Anywhere -> case: the Lottie shapes cover the screen (falls back to a growing circle).
-    if (playLottieCover(color, function () { color = LOTTIE_COLOR || color; go(); })) return;
 
     // Fallback: circle of the theme color grows from the click point.
     var overlay = makeOverlay(color);
