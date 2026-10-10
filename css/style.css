@@ -259,10 +259,6 @@ html[data-transition="work-to-home"]::view-transition-group(work-glass-1) {
 html[data-transition="work-to-home"]::view-transition-old(work-glass-1),
 html[data-transition="work-to-home"]::view-transition-old(work-glass-2),
 html[data-transition="work-to-home"]::view-transition-old(work-glass-3) { animation: none; }
-/* Glass layers (work-glass-N) are separate groups; keep them under the card contents (work-tab-N) so the glass's
-   live backdrop blur never smears the cards themselves. Leaving to Home/About the rules come from those pages. */
-::view-transition-group(work-glass-1), ::view-transition-group(work-glass-2), ::view-transition-group(work-glass-3) { z-index: 1; }
-::view-transition-group(work-tab-1), ::view-transition-group(work-tab-2), ::view-transition-group(work-tab-3) { z-index: 2; }
 /* ---- Work 4.0 -> About (the about page gets html.from-work-v2) ----
    Mirror image of the way back to Home: the cards slide out to the LEFT, left-most first
    (so a card behind never catches the one in front), and the About tab, which arrives from
