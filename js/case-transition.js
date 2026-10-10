@@ -140,9 +140,10 @@
 
   // ---- Lottie cover (assets/lottie/page-transition1.json) ----
   // Leaving for a case study plays this animation (shapes fill the screen) instead of the plain growing
-  // circle. It is drawn in the case study's theme color so the case page, which opens covered in that same
-  // color, picks up seamlessly. If lottie-web or the JSON isn't loaded yet the circle is used instead.
+  // circle. The case page then opens covered in the same
+  // color (LOTTIE_COLOR) so the handoff is seamless. If lottie-web or the JSON isn't loaded yet the circle is used instead.
   var LOTTIE_SPEED = 2; // 1 = the animation's own 2.5s; it is a click response, so it plays faster
+  var LOTTIE_COLOR = "#FFD5D5"; // the Lottie's own pink; set to null to use each case study's theme color instead
   var LOTTIE_COVER_FRAME = 140; // first frame where the screen is solid
   var lottieJson = null;
   function loadLottieAssets() {
@@ -176,6 +177,7 @@
   }
   // Returns true if the cover started; `done` is called once the screen is fully covered.
   function playLottieCover(color, done) {
+    color = LOTTIE_COLOR || color;
     if (!window.lottie || !lottieJson || !/^#[0-9a-f]{6}$/i.test(color)) return false;
     var data = JSON.parse(lottieJson);
     recolor(data, hexToRgb01(color));
@@ -390,7 +392,7 @@
     }
 
     // Anywhere -> case: the Lottie shapes cover the screen (falls back to a growing circle).
-    if (playLottieCover(color, go)) return;
+    if (playLottieCover(color, function () { color = LOTTIE_COLOR || color; go(); })) return;
 
     // Fallback: circle of the theme color grows from the click point.
     var overlay = makeOverlay(color);
