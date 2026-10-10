@@ -314,16 +314,19 @@
       if (e.viewTransition) e.viewTransition.skipTransition();
       return;
     }
-    // Browser back button / swipe gesture from a case page to Work/About/Home: there's no
-    // click, and the page can't be held back to play the closing animation, so
-    // hand the new page a viewport-center origin for its reveal.
-    if (!onCasePage) return;
+    // Browser back/forward button or swipe gesture into or out of a case study: there's no click and the
+    // old page can't be held back to play the cover, so the new page simply opens already covered in pink
+    // and lowers it (same as after a click).
     var dest = e.activation && e.activation.entry && e.activation.entry.url;
-    if (!dest || !/\/(work|about|index)\.html$|\/$/.test(new URL(dest).pathname)) return;
+    if (!dest) return;
+    var path = new URL(dest).pathname;
+    var toCase = /\/(muji|damai|wapoo)\.html$/.test(path);
+    var toMain = /\/(work|about|index)\.html$|\/$/.test(path);
+    if (!(toCase || (onCasePage && toMain))) return;
     try {
       sessionStorage.setItem(
         KEY,
-        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme, t: Date.now() })
+        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme || "#FFC3C3", t: Date.now() })
       );
     } catch (err) {}
     if (e.viewTransition) e.viewTransition.skipTransition();
@@ -335,6 +338,33 @@
     busy = false;
     var stale = document.querySelectorAll("[data-case-overlay]");
     for (var i = 0; i < stale.length; i++) stale[i].remove();
+    // Restored from the back/forward cache: scripts don't re-run, so play the arrival here.
+    var inc = null;
+    try {
+      inc = JSON.parse(sessionStorage.getItem(KEY));
+      sessionStorage.removeItem(KEY);
+    } catch (err) {}
+    if (!inc || Date.now() - inc.t > 10000 || reduceMotion) return;
+    var ov = makeOverlay(inc.color);
+    ov.setAttribute("data-case-overlay", "");
+    document.body.appendChild(ov);
+    waitUntilReady().then(function () {
+      setTimeout(function () {
+        ov.animate(
+          [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }],
+          { duration: LOWER_MS, easing: EASING, fill: "forwards" }
+        ).finished.then(function () { ov.remove(); });
+      }, PAUSE_MS);
+    });
+  });
+
+  // A restored page would otherwise also run its own cross-fade/slide underneath the pink.
+  window.addEventListener("pagereveal", function (e) {
+    if (!e.viewTransition) return;
+    try {
+      var peek = JSON.parse(sessionStorage.getItem(KEY));
+      if (peek && Date.now() - peek.t <= 10000 && !reduceMotion) e.viewTransition.skipTransition();
+    } catch (err) {}
   });
 
   document.addEventListener("click", function (e) {
