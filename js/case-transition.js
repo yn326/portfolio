@@ -8,6 +8,44 @@
 //    point, revealing Work.
 // Work -> case additionally navigates while covered, then the new page opens a
 // growing hole in the same overlay from the same point.
+// ---- Transition diagnostics (off unless you turn them on) ----
+// In DevTools -> Console, run:  localStorage.vtdebug = "1"   (turn off with: localStorage.removeItem("vtdebug"))
+// then, with "Preserve log" ticked in the Console settings, click through the site. Each page logs one line
+// on the way out and one on arrival saying whether the browser actually ran a view transition, plus the timing
+// and (if it was skipped) the browser's own reason. Nothing is logged for regular visitors.
+(function () {
+  var on = false;
+  try { on = localStorage.getItem("vtdebug") === "1"; } catch (e) {}
+  if (!on) return;
+  var tag = "%c[vt]";
+  var css = "color:#d33;font-weight:bold";
+  var page = location.pathname.split("/").pop() || "index.html";
+  addEventListener("pageswap", function (e) {
+    var vt = e.viewTransition;
+    console.log(tag, css, "LEAVING " + page + " ->", e.activation && e.activation.entry && e.activation.entry.url,
+      vt ? "(transition started)" : "(NO transition on the leaving side)",
+      "visibility=" + document.visibilityState, "focus=" + document.hasFocus(), "dpr=" + devicePixelRatio, "viewport=" + innerWidth + "x" + innerHeight);
+    if (vt) {
+      var t0 = performance.now();
+      vt.ready.then(function () { console.log(tag, css, "ready after " + Math.round(performance.now() - t0) + "ms"); },
+        function (err) { console.warn(tag, css, "READY REJECTED:", err && err.name, err && err.message); });
+      vt.finished.catch(function (err) { console.warn(tag, css, "FINISHED REJECTED:", err && err.name, err && err.message); });
+    }
+  });
+  addEventListener("pagereveal", function (e) {
+    var nav = performance.getEntriesByType("navigation")[0] || {};
+    console.log(tag, css, "ARRIVED " + page, e.viewTransition ? "(transition running)" : "(NO transition: skipped before this page was shown)",
+      "data-transition=" + root0().getAttribute("data-transition"), "prerendered=" + (nav.activationStart > 0),
+      "readyState=" + document.readyState, "t=" + Math.round(performance.now()) + "ms",
+      "responseEnd=" + Math.round(nav.responseEnd || 0) + "ms", "fromCache=" + (nav.transferSize === 0));
+    if (e.viewTransition) {
+      e.viewTransition.ready.catch(function (err) { console.warn(tag, css, "READY REJECTED:", err && err.name, err && err.message); });
+      e.viewTransition.finished.catch(function (err) { console.warn(tag, css, "FINISHED REJECTED:", err && err.name, err && err.message); });
+    }
+  });
+  function root0() { return document.documentElement; }
+})();
+
 (function () {
   var KEY = "caseTransition";
   var OUT_MS = 450;

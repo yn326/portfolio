@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="js/case-transition.js?v=8"></script>
+  <script src="js/case-transition.js?v=9"></script>
   <script>
     (function () {
       var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
@@ -126,27 +126,11 @@
     <style>.home-bg__shape { animation: none !important; transform: none !important; opacity: 1 !important; }</style>
   </noscript>
   <link rel="stylesheet" href="css/style.css?v=93" />
-  <!-- Work/About both reference several multi-megabyte images. On a first-
-       ever visit to one of them in a session, the browser can still be busy
-       fetching those when the cross-document view transition's incoming
-       page is supposed to be ready -- Chrome gives up waiting and just
-       flashes to the new page instead of transitioning, but only the FIRST
-       time (afterwards those images are cached and it's fast). "moderate"
-       eagerness starts fully preparing the destination page, images
-       included, as soon as the visitor's cursor lingers over or presses
-       down on the link -- combined with the ~1s the shapes already spend
-       falling out before initHomeBgExit actually navigates (see main.js),
-       that's normally enough lead time for the page to be fully warm by
-       the time navigation happens. Chromium-only; other browsers ignore
-       this tag with no ill effect, same as today. -->
-  <script type="speculationrules">
-    {
-      "prerender": [
-        { "where": { "href_matches": "/pages/work.html" }, "eagerness": "moderate" },
-        { "where": { "href_matches": "/pages/about.html" }, "eagerness": "moderate" }
-      ]
-    }
-  </script>
+  <!-- Deliberately NO <script type="speculationrules"> (prefetch/prerender) on any page. It used to warm up the
+       heavy Work/About pages, but when Chrome has preloaded the next page the cross-page view transition waits on
+       it, gives up after a fixed 2 seconds and is skipped: every skipped transition in testing showed the new page
+       appearing at exactly 2.0s, and with the hints removed 24 of 24 transitions ran (new page shown in ~0.05s).
+       Don't add preload hints back without re-testing the transitions. -->
 </head>
 <body>
   <div class="home-bg">

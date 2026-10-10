@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="../js/case-transition.js?v=8"></script>
+  <script src="../js/case-transition.js?v=9"></script>
   <script>
     (function () {
       var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
@@ -91,14 +91,6 @@
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
        links to them never got a head start either. -->
-  <script type="speculationrules">
-    {
-      "prerender": [
-        { "where": { "href_matches": "/index.html" }, "eagerness": "moderate" },
-        { "where": { "href_matches": "/pages/work.html" }, "eagerness": "moderate" }
-      ]
-    }
-  </script>
 </head>
 <body>
   <div class="page-bg-gradient"></div>
