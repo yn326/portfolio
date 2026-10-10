@@ -234,10 +234,11 @@ function initHomeBgEntrance() {
 function initHomeBgExit() {
   const canvas = document.querySelector(".home-bg__canvas");
   const shapes = document.querySelectorAll(".home-bg__shape");
-  // Only the old Work page still uses the fall-out. Home -> About and Home -> Work 4.0 (work-v2.html) morph the
-  // shapes into the next page's matching shapes instead (view-transition names, see style.css), so they're not
-  // listed here. To bring the fall-out back for About, add '.hero-nav__item[href$="about.html"]' to this list.
-  const links = document.querySelectorAll('.hero-nav__item[href$="work.html"]');
+  // The fall-out is no longer used by any live link: Home -> About and Home -> Work (Work 4.0) morph the shapes
+  // into the next page's matching shapes instead (view-transition names, see style.css). It's kept for the
+  // archived old Work page (work-v1.html); to bring it back for Work or About, list that link here, e.g.
+  // '.hero-nav__item[href$="work.html"]' or '.hero-nav__item[href$="about.html"]'.
+  const links = document.querySelectorAll('.hero-nav__item[href$="work-v1.html"]');
   if (!canvas || !shapes.length || !links.length) return;
   const CLEAR_MARGIN = 80;
   const FALLBACK_MS = 1500;

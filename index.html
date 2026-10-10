@@ -5,7 +5,7 @@
   <script src="js/case-transition.js?v=8"></script>
   <script>
     (function () {
-      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "work-v2.html": "work", "about.html": "about" };
+      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
       var supported = { "home-to-work": 1, "work-to-home": 1, "about-to-home": 1, "home-to-about": 1, "work-to-about": 1, "about-to-work": 1 };
       function keyFor(url) {
         try {
@@ -23,7 +23,7 @@
       try {
         if (window.navigation && navigation.activation && navigation.activation.from) fromUrl = navigation.activation.from.url;
       } catch (e) {}
-      if (fromUrl && /\/(work-v2|about)\.html/.test(fromUrl)) document.documentElement.classList.add("home-bg-from-v2");
+      if (fromUrl && /\/(work|about)\.html/.test(fromUrl)) document.documentElement.classList.add("home-bg-from-v2");
       var cur = keyFor(location.href);
       var prev = fromUrl ? keyFor(fromUrl) : null;
       if (cur && prev && cur !== prev) {
@@ -44,13 +44,13 @@
       if (!e.viewTransition) return;
       var toWorkV2 = false;
       try {
-        toWorkV2 = !!(e.activation && /\/(work-v2|about)\.html$/.test(new URL(e.activation.entry.url).pathname));
+        toWorkV2 = !!(e.activation && /\/(work|about)\.html$/.test(new URL(e.activation.entry.url).pathname));
       } catch (err) {}
       if (toWorkV2) {
         // Leaving for Work 4.0: name the shapes so they morph into that page's shapes. The card's blur is
         // deliberately NOT stripped here -- that stripped it for one frame before the transition started
         // (sharp shape edges visible through the glass); the transition now carries its own blur on the
-        // card's group and fades it out (see work-v2.html), so the live blur can stay until then.
+        // card's group and fades it out (see pages/work.html), so the live blur can stay until then.
         document.documentElement.classList.add("vt-bg-morph");
       } else {
         document.documentElement.classList.add("vt-no-blur");
@@ -60,7 +60,7 @@
       try {
         var act = window.navigation && navigation.activation;
         var fromPath = act && act.from ? new URL(act.from.url).pathname : "";
-        if (/\/(work-v2|about)\.html$/.test(fromPath)) {
+        if (/\/(work|about)\.html$/.test(fromPath)) {
           document.documentElement.classList.add("home-bg-from-v2");
           document.documentElement.setAttribute("data-transition", /about\.html$/.test(fromPath) ? "about-to-home" : "work-to-home");
         }
@@ -143,7 +143,6 @@
     {
       "prerender": [
         { "where": { "href_matches": "/pages/work.html" }, "eagerness": "moderate" },
-        { "where": { "href_matches": "/pages/work-v2.html" }, "eagerness": "moderate" },
         { "where": { "href_matches": "/pages/about.html" }, "eagerness": "moderate" }
       ]
     }
@@ -252,7 +251,7 @@
         </div>
 
         <nav class="hero-nav">
-          <a class="hero-nav__item" href="pages/work-v2.html">
+          <a class="hero-nav__item" href="pages/work.html">
             <span class="hero-nav__icon">
               <svg width="24.138" height="19.286" viewBox="0 0 27 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M23.7098 15.4118H2.99954M21.069 1.28571C21.751 1.28571 22.405 1.55662 22.8872 2.03886C23.3695 2.5211 23.6404 3.17515 23.6404 3.85713V14.8191C23.6402 15.2195 23.7336 15.6145 23.913 15.9724L25.2861 18.7071C25.3852 18.9038 25.4322 19.1227 25.4224 19.3427C25.4126 19.5628 25.3465 19.7766 25.2303 19.9638C25.1142 20.1509 24.9519 20.3051 24.759 20.4115C24.5662 20.5179 24.3492 20.573 24.129 20.5714H2.5804C2.36014 20.573 2.14318 20.5179 1.95033 20.4115C1.75747 20.3051 1.59518 20.1509 1.47903 19.9638C1.36287 19.7766 1.29674 19.5628 1.28697 19.3427C1.2772 19.1227 1.32413 18.9038 1.42326 18.7071L2.7964 15.9724C2.97581 15.6145 3.06914 15.2195 3.06897 14.8191V3.85713C3.06897 3.17515 3.33989 2.5211 3.82212 2.03886C4.30436 1.55662 4.95841 1.28571 5.6404 1.28571H21.069Z" stroke="#AE8383" stroke-width="2.57143" stroke-linecap="round" stroke-linejoin="round"/>
@@ -299,14 +298,7 @@
     </div>
   </main>
 
-  <script>
-    // Experiment switch: open the home page with ?v2 to send the Work link to the Work 4.0 page.
-    if (/[?&]v2\b/.test(location.search)) {
-      var w = document.querySelector('.hero-nav__item[href$="work.html"]');
-      if (w) w.setAttribute("href", "pages/work-v2.html");
-    }
-  </script>
-  <script src="js/main.js?v=32"></script>
+  <script src="js/main.js?v=33"></script>
   <span id="page-parsed" hidden></span>
 </body>
 </html>

@@ -5,7 +5,7 @@
   <script src="../js/case-transition.js?v=8"></script>
   <script>
     (function () {
-      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "work-v2.html": "work", "about.html": "about" };
+      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
       var supported = { "home-to-work": 1, "work-to-home": 1, "about-to-home": 1, "home-to-about": 1, "work-to-about": 1, "about-to-work": 1 };
       function keyFor(url) {
         try {
@@ -21,7 +21,7 @@
       try {
         if (window.navigation && navigation.activation && navigation.activation.from) fromUrl = navigation.activation.from.url;
       } catch (e) {}
-      if (fromUrl && /\/work-v2\.html/.test(fromUrl)) document.documentElement.classList.add("from-work-v2");
+      if (fromUrl && /\/work\.html/.test(fromUrl)) document.documentElement.classList.add("from-work-v2");
       var prev = fromUrl ? keyFor(fromUrl) : null;
       if (cur && prev && cur !== prev) {
         var pair = prev + "-to-" + cur;
@@ -73,7 +73,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&family=Homemade+Apple&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css?v=170" />
   <style>
-    /* Work 4.0 background shapes (kept in step with the .w4__* rules in work-v2.html). */
+    /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }
     .w4-bg__canvas { position: absolute; top: 50%; left: 50%; width: 1440px; height: 900px;
       transform: translate(-50%, -50%) scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px)))); }
@@ -95,15 +95,14 @@
     {
       "prerender": [
         { "where": { "href_matches": "/index.html" }, "eagerness": "moderate" },
-        { "where": { "href_matches": "/pages/work.html" }, "eagerness": "moderate" },
-        { "where": { "href_matches": "/pages/work-v2.html" }, "eagerness": "moderate" }
+        { "where": { "href_matches": "/pages/work.html" }, "eagerness": "moderate" }
       ]
     }
   </script>
 </head>
 <body>
   <div class="page-bg-gradient"></div>
-  <!-- Work 4.0 background shapes: same four, same positions, as on pages/work-v2.html, so Work 4.0 -> About
+  <!-- Work 4.0 background shapes: same four, same positions, as on pages/work.html, so Work 4.0 -> About
        leaves them exactly where they are. Self-contained block: delete it (and the .w4-bg rules in <head>) to remove. -->
   <div class="w4-bg" aria-hidden="true">
     <div class="w4-bg__canvas">
@@ -124,7 +123,7 @@
           <path d="M42.7975 12.816C41.9215 12.816 41.1475 12.618 40.4755 12.222C39.8035 11.814 39.2755 11.256 38.8915 10.548C38.5195 9.84 38.3335 9.024 38.3335 8.1C38.3335 7.176 38.5195 6.36 38.8915 5.652C39.2755 4.944 39.7975 4.392 40.4575 3.996C41.1295 3.588 41.8975 3.384 42.7615 3.384C43.6015 3.384 44.3275 3.594 44.9395 4.014C45.5515 4.422 46.0255 4.998 46.3615 5.742C46.6975 6.486 46.8655 7.362 46.8655 8.37H39.7915C39.8515 9.354 40.1635 10.122 40.7275 10.674C41.2915 11.226 42.0055 11.502 42.8695 11.502C43.5055 11.502 44.0395 11.352 44.4715 11.052C44.9155 10.752 45.2575 10.356 45.4975 9.864L46.7395 10.494C46.5115 10.962 46.2055 11.37 45.8215 11.718C45.4495 12.066 45.0055 12.336 44.4895 12.528C43.9855 12.72 43.4215 12.816 42.7975 12.816ZM39.8995 7.164H45.3175C45.2815 6.648 45.1435 6.204 44.9035 5.832C44.6755 5.46 44.3755 5.172 44.0035 4.968C43.6315 4.764 43.2115 4.662 42.7435 4.662C42.2875 4.662 41.8495 4.764 41.4295 4.968C41.0095 5.16 40.6615 5.448 40.3855 5.832C40.1095 6.204 39.9475 6.648 39.8995 7.164Z" fill="#AE8383" fill-opacity="0.5"/>
         </svg>
       </a>
-      <a href="work-v2.html" aria-label="Work">
+      <a href="work.html" aria-label="Work">
         <svg width="42" height="13" viewBox="0 0 42 13" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3.852 12.6L0 0H1.53L4.68 10.278L7.722 0H9.234L12.222 10.242L15.408 0H16.938L13.032 12.6H11.394L8.478 2.466L5.472 12.6H3.852Z" fill="#AE8383" fill-opacity="0.5"/>
           <path d="M21.617 12.816C20.741 12.816 19.961 12.618 19.277 12.222C18.605 11.814 18.077 11.256 17.693 10.548C17.309 9.84 17.117 9.024 17.117 8.1C17.117 7.176 17.303 6.36 17.675 5.652C18.059 4.944 18.587 4.392 19.259 3.996C19.943 3.588 20.717 3.384 21.581 3.384C22.469 3.384 23.249 3.588 23.921 3.996C24.605 4.392 25.133 4.944 25.505 5.652C25.889 6.36 26.081 7.176 26.081 8.1C26.081 9.024 25.889 9.84 25.505 10.548C25.133 11.256 24.611 11.814 23.939 12.222C23.267 12.618 22.493 12.816 21.617 12.816ZM21.617 11.484C22.217 11.484 22.739 11.34 23.183 11.052C23.627 10.764 23.975 10.368 24.227 9.864C24.491 9.36 24.623 8.772 24.623 8.1C24.623 7.428 24.491 6.84 24.227 6.336C23.975 5.832 23.621 5.436 23.165 5.148C22.709 4.86 22.181 4.716 21.581 4.716C20.993 4.716 20.471 4.86 20.015 5.148C19.571 5.436 19.217 5.832 18.953 6.336C18.701 6.84 18.575 7.428 18.575 8.1C18.575 8.76 18.701 9.348 18.953 9.864C19.217 10.368 19.577 10.764 20.033 11.052C20.501 11.34 21.029 11.484 21.617 11.484Z" fill="#AE8383" fill-opacity="0.5"/>
@@ -290,7 +289,7 @@
       <div class="site-footer__cols">
         <div class="site-footer__col">
           <p class="site-footer__head">Pages</p>
-          <a href="work-v2.html">Work</a>
+          <a href="work.html">Work</a>
           <a href="about.html">About</a>
           <a href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume</a>
         </div>
@@ -339,14 +338,7 @@
     </div>
   </div>
 
-  <script>
-    // Arrived here from the Work 4.0 experiment page (or opened with ?v2): send the Work links back to it, so
-    // Work 4.0 -> About -> Work 4.0 stays inside the experiment and gets its transitions.
-    if (document.documentElement.classList.contains("from-work-v2") || /[?&]v2\b/.test(location.search)) {
-      document.querySelectorAll('a[href="work.html"]').forEach(function (a) { a.setAttribute("href", "work-v2.html"); });
-    }
-  </script>
-  <script src="../js/main.js?v=35"></script>
+  <script src="../js/main.js?v=36"></script>
   <span id="page-parsed" hidden></span>
 </body>
 </html>

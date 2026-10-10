@@ -16,7 +16,11 @@
         }
       }
       var cur = keyFor(location.href);
-      var prev = document.referrer ? keyFor(document.referrer) : null;
+      var fromUrl = document.referrer;
+      try {
+        if (window.navigation && navigation.activation && navigation.activation.from) fromUrl = navigation.activation.from.url;
+      } catch (e) {}
+      var prev = fromUrl ? keyFor(fromUrl) : null;
       if (cur && prev && cur !== prev) {
         var pair = prev + "-to-" + cur;
         if (supported[pair]) document.documentElement.setAttribute("data-transition", pair);
@@ -32,7 +36,12 @@
     // source -- pageswap covers this (outgoing) page's capture, pagereveal covers
     // the incoming page's.
     window.addEventListener("pageswap", function (e) {
-      if (e.viewTransition) document.documentElement.classList.add("vt-no-blur");
+      if (!e.viewTransition) return;
+      // Heading to About: the exiting cards' blur rides on their transition groups (see style.css), so it
+      // is NOT stripped here -- stripping it showed the shapes' sharp edges through the glass for a frame.
+      var toAbout = false;
+      try { toAbout = !!(e.activation && /\/about\.html$/.test(new URL(e.activation.entry.url).pathname)); } catch (err) {}
+      if (!toAbout) document.documentElement.classList.add("vt-no-blur");
     });
     window.addEventListener("pagereveal", function (e) {
       if (e.viewTransition) {
@@ -53,6 +62,9 @@
       }
     });
   </script>
+  <!-- Hold the first render until the parser has reached the end of the page; otherwise Chrome can reveal the
+       page mid-parse and drop the view transition (see the same hint on about.html). Chrome-only; ignored elsewhere. -->
+  <link rel="expect" href="#page-parsed" blocking="render" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raina Ni - Work</title>
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png?v=4" />
@@ -74,6 +86,144 @@
       ]
     }
   </script>
+  <style>
+    /* ---- Work 4.0 experiment (Figma 1147-8448). Scoped to this page only. ---- */
+    html, body { overflow: hidden; height: 100%; overscroll-behavior: none; }
+    .page-canvas--work { padding: 0; height: 100vh; min-height: 0; overflow: hidden; }
+    .page-canvas--work .page-nav { z-index: 5; }
+    .w4 { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+    .w4__canvas {
+      position: absolute; top: 50%; left: 50%; width: 1440px; height: 900px;
+      transform: translate(-50%, -50%) scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px))));
+    }
+    .w4__shape { position: absolute; display: block; }
+    .w4__shape--e9 { left: 1218px; top: 220px; width: 204px; height: 204px; border-radius: 50%;
+      background: linear-gradient(198deg, #ffd7d7 8.32%, #ffe2e2 91.68%); box-shadow: 0 2.503px 12.515px rgba(255, 215, 215, 0.5); }
+    .w4__shape--e10 { left: 195px; top: -39px; width: 286.8px; height: 286.8px; border-radius: 50%;
+      background: linear-gradient(250deg, #fff0d7 8.45%, #ffd1b8 91.55%); box-shadow: 0 2.4px 12px rgba(255, 209, 184, 0.5); }
+    /* Figma: 258.12 circle rotated 126.354deg, bbox left 904 / top 720 / 361 square -> circle centered (1084.5, 900.5);
+       gradient angle 250deg + 126.354deg rotation = 16.35deg unrotated. */
+    .w4__shape--e11 { left: 955.4px; top: 771.4px; width: 258.12px; height: 258.12px; border-radius: 50%;
+      background: linear-gradient(16.35deg, #fff0d7 8.45%, #ffd1b8 91.55%); box-shadow: 0 2.16px 10.8px rgba(255, 209, 184, 0.5); }
+    /* Figma: 257.486 square, radius 6.18, rotate(-13.177deg); bbox left -25 / top 513 / 309 -> center (129.5, 667.5). */
+    .w4__shape--r6 { left: 0.76px; top: 538.76px; width: 257.486px; height: 257.486px; border-radius: 6.18px;
+      transform: rotate(-13.177deg); background: linear-gradient(270deg, #ffd7d7 0%, #ffb6b6 100%); box-shadow: 0 1.985px 9.924px rgba(255, 182, 182, 0.5); }
+
+    .w4-tab {
+      position: absolute; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start;
+      width: 600px; height: 500px; padding: 40px; gap: 24px; border-radius: 40px;
+      color: #5f5f5f; text-decoration: none; overflow: hidden;
+    }
+    /* Figma peek tab is a 0.9-scaled copy of the full 600x500 card (540x450, 36px padding/radius). */
+    .w4-tab { transform-origin: top left; }
+    .w4-tab::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 16%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 62%, rgba(255,255,255,.06) 84%, rgba(255,255,255,.2) 100%); }
+    /* rim: corner angles for a 600x500 (and 540x450) box: TR = atan(300/250) = 50.19deg = 13.94%, BL = 63.94% */
+    .w4-tab::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+      background: conic-gradient(from 0deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.9) 12.84%, rgba(255,255,255,0) 13.94%, rgba(255,255,255,.9) 15.04%,
+        rgba(255,255,255,.9) 62.84%, rgba(255,255,255,0) 63.94%, rgba(255,255,255,.9) 65.04%, rgba(255,255,255,.9) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+    /* Glass lives on its own layer, not on .w4-tab: an element with backdrop-filter becomes a backdrop root, which
+       would stop children's backdrop-filters (e.g. the phone rectangle) from seeing the page behind the tab. */
+    .w4-tab__glass { position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px) saturate(130%); -webkit-backdrop-filter: blur(8px) saturate(130%);
+      box-shadow: inset 4px 4px 16px rgba(0, 0, 0, 0.05), inset -4px -4px 16px rgba(255, 255, 255, 0.4); }
+    .w4-tab > * { position: relative; z-index: 1; }
+    .w4-tab > .w4-tab__glass { position: absolute; z-index: 0; }
+    .w4-tab__cover { position: relative; flex: 1 0 0; align-self: stretch; min-height: 0; }
+    .w4-tab__cover img { position: absolute; display: block; max-width: none; }
+    /* Exports are the rotated bounding boxes @2x (rotation baked in); positions = Figma bbox left/top inside the 520-wide cover. */
+    /* Backing rectangle for the phone UI that gets overlaid later. Height assumed (vertically centered in the 298px cover). */
+    .w4-cover-muji-screen { position: absolute; z-index: 2; left: 115px; top: 40px; width: 290px; height: 218px; }
+    .w4-cover-muji-phone { position: absolute; inset: 0; box-sizing: border-box;
+      border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .w4-cover-muji-lottie { position: absolute; inset: 0; pointer-events: none; }
+    /* Subtle version of the home-bg shape float (translateY 0 -> -18..-26px, 2.8-4.2s ease-in-out, infinite):
+       each piece bobs on its own loop with slightly different duration/distance, so they drift in and out of step. */
+    @keyframes w4-float-1 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    @keyframes w4-float-screen { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes w4-float-2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-11px); } }
+    .w4-cover-muji-1 { animation: w4-float-1 3.6s ease-in-out infinite; }
+    .w4-cover-muji-screen { animation: w4-float-screen 4.2s ease-in-out 0.5s infinite; }
+    .w4-cover-muji-2 { animation: w4-float-2 3.9s ease-in-out 1s infinite; }
+    /* Damai: same bob. The tilted screen floats via the standalone `translate` property so its rotate(10deg) transform is
+       left alone; the animation JSON lives inside the screen element, so frame + animation always move together. */
+    @keyframes w4-float-damai-screen { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+    .w4-cover-damai-1 { animation: w4-float-1 3.8s ease-in-out 0.2s infinite; }
+    .w4-cover-damai-2 { animation: w4-float-2 3.5s ease-in-out 0.6s infinite; }
+    .w4-cover-damai-3 { animation: w4-float-1 4.1s ease-in-out 1s infinite; }
+    .w4-cover-damai-screen { animation: w4-float-damai-screen 4.3s ease-in-out 0.4s infinite; }
+    /* Damai cover assets: Figma left/top inside the 520-wide cover; asset 3 is the rotated bbox @2x (rotation baked in). */
+    /* Damai screen: 120x220 rotated 10deg. Figma left/top (212, 30) is the rotated bounding box (156.4 x 237.5), so the
+       unrotated box is centered on the bbox center (290.2, 148.75) -> left 230.2 / top 38.75. The stripe is a normal
+       flex child, so the frame's align-items:center centers it horizontally. */
+    .w4-cover-damai-screen, .w4-cover-wapoo-screen { position: absolute; z-index: 2; left: 230.2px; top: 38.75px; width: 120px; height: 220px; box-sizing: border-box;
+      display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 8px 16px; transform: rotate(10deg);
+      border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .w4-cover-damai-screen__stripe, .w4-cover-wapoo-screen__stripe { width: 24px; height: 4px; flex-shrink: 0;
+      border-radius: 99px; background: rgba(255, 255, 255, 0.4); }
+    /* 120x220 animation laid exactly over the whole frame (border-box), rotating with it. */
+    .w4-cover-damai-lottie, .w4-cover-wapoo-lottie { position: absolute; left: -1px; top: -1px; width: 120px; height: 220px; pointer-events: none; }
+    /* Wapoo cover: same screen frame as Damai, rotated -15deg. Figma left/top (190, 27) is the rotated bounding box
+       (172.85 x 243.57), so the unrotated 120x220 frame is centered on (276.43, 148.78) -> left 216.43 / top 38.78.
+       Assets are 2x exports of the unrotated layers at their Figma left/top. */
+    .w4-cover-wapoo-screen { left: 216.43px; top: 38.78px; transform: rotate(-15deg); animation: w4-float-damai-screen 4.2s ease-in-out 0.5s infinite; }
+    .w4-cover-wapoo-1 { left: 89px; top: 37px; width: 86px; animation: w4-float-1 3.7s ease-in-out 0.3s infinite; }
+    .w4-cover-wapoo-2 { left: 113px; top: 162px; width: 90px; animation: w4-float-2 3.4s ease-in-out 0.7s infinite; }
+    .w4-cover-wapoo-3 { left: 299px; top: 50px; width: 138px; animation: w4-float-2 3.1s ease-in-out 1.4s infinite; }
+    .w4-cover-damai-1 { left: 128px; top: 36px; width: 84px; }
+    .w4-cover-damai-2 { left: 83px; top: 141px; width: 116px; }
+    .w4-cover-damai-3 { left: 284px; top: 79px; width: 167.5px; }
+    .w4-cover-muji-1 { left: 9px; top: 121px; width: 142.5px; }
+    .w4-cover-muji-2 { left: 384px; top: 0; width: 127px; }
+    .w4-tab__text { display: flex; flex-direction: column; align-self: stretch; gap: 12px; }
+    .w4-tab__text h2 { margin: 0; height: 24px; display: flex; flex-direction: column; justify-content: center; white-space: nowrap; font: 300 30px/normal "Figtree", sans-serif; color: #5f5f5f; }
+    .w4-tab__text p { margin: 0; font: 300 18px/normal "Figtree", sans-serif; color: #5f5f5f; }
+    /* Shared-shape morph with the home page (names match html.vt-bg-morph in style.css), and the tab strip is the
+       "work-tab" that slides in from the right while the home tab slides out. */
+    .w4__shape--r6 { view-transition-name: bg-rect; }
+    .w4__shape--e9 { view-transition-name: bg-e9; }
+    .w4__shape--e10 { view-transition-name: bg-e10; }
+    .w4__shape--e11 { view-transition-name: bg-e11; }
+    .w4__tabs { position: absolute; inset: 0; }
+    /* Each tab is its own transition group so they can arrive one after another instead of as one stiff block. */
+    .w4-tab--muji { view-transition-name: work-tab-1; }
+    .w4-tab--damai { view-transition-name: work-tab-2; }
+    .w4-tab--wapoo { view-transition-name: work-tab-3; }
+    /* Home -> Work: slide in from the right, left card first, each a beat after the last (and a touch slower). */
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-1) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-right; }
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-right; }
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-3) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right; }
+    /* About -> Work 4.0: the About tab leaves to the right (existing rule in style.css); the cards arrive from the
+       left, right-most first so a card behind never catches the one in front. The About tab is already on its way
+       out and the cards trail it (simulated at 1100/1440/1920px wide, both carousel positions: no overlaps). */
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-3) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-left; }
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-left; }
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-1) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-left; }
+    /* Home -> Work 4.0: the home tab's glass fades out gradually instead of snapping flat.
+       Blur can't live in the snapshot (and the snapshot layer is isolated, so a blur on it can't see the shapes behind),
+       so the blur sits on the transition GROUP, which can: the group slides left with the card (via the standalone
+       `translate` property, so the UA's own positioning animation is left alone), keeps its rounded corners, and the
+       blur eases from the card's real value to nothing over the slide. */
+    /* (the vt-glass-fade / vt-group-slide-left keyframes live in style.css now) */
+    html[data-transition="home-to-work"]::view-transition-group(home-tab) {
+      border-radius: 40px;
+      animation-name: -ua-view-transition-group-anim-home-tab, vt-group-slide-left, vt-glass-fade;
+      animation-duration: 800ms, 800ms, 800ms;
+      animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+      animation-fill-mode: both, both, both;
+    }
+    html[data-transition="home-to-work"]::view-transition-old(home-tab) { animation: none; }
+    /* Backdrop blurs can't live inside a captured snapshot: strip them for the transition, ease them back after. */
+    html.vt-no-blur .w4-tab__glass, html.vt-no-blur .w4-cover-muji-phone, html.vt-no-blur .w4-cover-damai-screen, html.vt-no-blur .w4-cover-wapoo-screen {
+      backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+    html.vt-blur-settling .w4-tab__glass, html.vt-blur-settling .w4-cover-muji-phone, html.vt-blur-settling .w4-cover-damai-screen, html.vt-blur-settling .w4-cover-wapoo-screen {
+      transition: backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease; }
+    @media (prefers-reduced-motion: reduce) { .w4-cover-muji-1, .w4-cover-muji-2, .w4-cover-muji-screen, .w4-cover-damai-1, .w4-cover-damai-2, .w4-cover-damai-3, .w4-cover-damai-screen, .w4-cover-wapoo-1, .w4-cover-wapoo-2, .w4-cover-wapoo-3, .w4-cover-wapoo-screen { animation: none; } }
+  </style>
 </head>
 <body>
   <div class="page-bg-gradient"></div>
@@ -144,132 +294,164 @@
       </a>
     </nav>
 
-    <div class="glass-card glass-card--work">
-      <div class="glass-card__top">
-        <div class="traffic-lights">
-          <span class="traffic-light traffic-light--red"></span>
-          <span class="traffic-light traffic-light--white"></span>
-          <span class="traffic-light traffic-light--green"></span>
+    <!-- Work 4.0 (Figma node 1147-8448): fixed 1440x900 stage, no page scroll. -->
+    <div class="w4">
+      <div class="w4__canvas">
+        <span class="w4__shape w4__shape--e9"></span>
+        <span class="w4__shape w4__shape--e10"></span>
+        <span class="w4__shape w4__shape--e11"></span>
+        <span class="w4__shape w4__shape--r6"></span>
+
+        <div class="w4__tabs">
+        <a class="w4-tab w4-tab--muji" href="muji.html" data-case-color="#8B0013" style="left:100px;top:200px;">
+          <span class="w4-tab__glass"></span>
+          <div class="traffic-lights">
+            <span class="traffic-light traffic-light--red"></span>
+            <span class="traffic-light traffic-light--white"></span>
+            <span class="traffic-light traffic-light--green"></span>
+          </div>
+          <div class="w4-tab__cover">
+            <div class="w4-cover-muji-screen">
+              <div class="w4-cover-muji-phone"></div>
+              <div class="w4-cover-muji-lottie" id="w4-muji-lottie"></div>
+            </div>
+            <img class="w4-cover-muji-1" src="../assets/images/work/gallery/muji-asset1.png" alt="" />
+            <img class="w4-cover-muji-2" src="../assets/images/work/gallery/muji-asset2.png" alt="" />
+          </div>
+          <div class="w4-tab__text">
+            <h2>MUJI USA</h2>
+            <p>E-commerce site reimagined as a lifestyle brand destination</p>
+          </div>
+        </a>
+
+        <a class="w4-tab w4-tab--damai" href="damai.html" data-case-color="#6665FE" style="left:736px;top:200px;">
+          <span class="w4-tab__glass"></span>
+          <div class="traffic-lights">
+            <span class="traffic-light traffic-light--red"></span>
+            <span class="traffic-light traffic-light--white"></span>
+            <span class="traffic-light traffic-light--green"></span>
+          </div>
+          <div class="w4-tab__cover">
+            <div class="w4-cover-damai-screen">
+              <span class="w4-cover-damai-screen__stripe"></span>
+              <div class="w4-cover-damai-lottie" id="w4-damai-lottie"></div>
+            </div>
+            <img class="w4-cover-damai-1" src="../assets/images/work/gallery/damai-asset1.png" alt="" />
+            <img class="w4-cover-damai-2" src="../assets/images/work/gallery/damai-asset2.png" alt="" />
+            <img class="w4-cover-damai-3" src="../assets/images/work/gallery/damai-asset3.png" alt="" />
+          </div>
+          <div class="w4-tab__text">
+            <h2>Damai Entertainment (Alibaba Group)</h2>
+            <p>B2B mobile app for real-time event ticketing data</p>
+          </div>
+        </a>
+
+        <a class="w4-tab w4-tab--wapoo" href="wapoo.html" data-case-color="#45DBE9" style="left:1371px;top:225px;">
+          <span class="w4-tab__glass"></span>
+          <div class="traffic-lights">
+            <span class="traffic-light traffic-light--red"></span>
+            <span class="traffic-light traffic-light--white"></span>
+            <span class="traffic-light traffic-light--green"></span>
+          </div>
+          <div class="w4-tab__cover">
+            <div class="w4-cover-wapoo-screen">
+              <span class="w4-cover-wapoo-screen__stripe"></span>
+              <div class="w4-cover-wapoo-lottie" id="w4-wapoo-lottie"></div>
+            </div>
+            <img class="w4-cover-wapoo-1" src="../assets/images/work/gallery/wapoo-asset1.png" alt="" />
+            <img class="w4-cover-wapoo-2" src="../assets/images/work/gallery/wapoo-asset2.png" alt="" />
+            <img class="w4-cover-wapoo-3" src="../assets/images/work/gallery/wapoo-asset3.png" alt="" />
+          </div>
+          <div class="w4-tab__text">
+            <h2>Wapoo AI</h2>
+            <p>AI-powered short-form video social app for Gen-Alpha</p>
+          </div>
+        </a>
         </div>
-        <div class="divider"></div>
-      </div>
-
-      <!-- Row 1: MUJI + Damai -->
-      <div class="work-row">
-        <a class="work-project" href="muji.html" data-case-color="#8B0013">
-          <div class="work-project__media">
-            <div class="work-project__media-imgwrap">
-              <img class="work-project__media-img--top work-project__media-img--shadow" src="../assets/images/work/muji/muji-hero.jpg" alt="MUJI USA" width="400" height="251" />
-            </div>
-          </div>
-          <div class="work-project__text">
-            <h2 class="work-project__title">MUJI USA</h2>
-            <p class="work-project__desc">E-commerce site reimagined as a lifestyle brand destination</p>
-          </div>
-        </a>
-
-        <a class="work-project" href="damai.html" data-case-color="#6665FE">
-          <div class="work-project__media work-project__media--cluster work-project__media--damai">
-            <img class="img-slot-a" src="../assets/images/work/damai/damai-3-final.png" alt="Damai Entertainment" />
-            <img class="img-slot-b" src="../assets/images/work/damai/damai-1-final.png" alt="Damai Entertainment" />
-            <img class="img-slot-c" src="../assets/images/work/damai/damai-2-final.png" alt="Damai Entertainment" />
-          </div>
-          <div class="work-project__text">
-            <h2 class="work-project__title">Damai Entertainment (Alibaba Group)</h2>
-            <p class="work-project__desc">B2B mobile app for real-time event ticketing data</p>
-          </div>
-        </a>
-      </div>
-
-      <!-- Row 2: Wapoo + Nodus -->
-      <div class="work-row">
-        <a class="work-project" href="wapoo.html" data-case-color="#45DBE9">
-          <div class="work-project__media work-project__media--cluster work-project__media--wapoo">
-            <img class="img-slot-a" src="../assets/images/work/wapoo/wapoo-2-final.jpg" alt="Wapoo AI" />
-            <img class="img-slot-b" src="../assets/images/work/wapoo/wapoo-1-final.jpg" alt="Wapoo AI" />
-            <img class="img-slot-c" src="../assets/images/work/wapoo/wapoo-3-final.jpg" alt="Wapoo AI" />
-          </div>
-          <div class="work-project__text">
-            <h2 class="work-project__title">Wapoo AI</h2>
-            <p class="work-project__desc">AI-powered short-form video social app for Gen-Alpha</p>
-          </div>
-        </a>
-
-        <a class="work-project work-project--no-hover-rise" role="link" aria-disabled="true">
-          <div class="work-project__media">
-            <div class="work-project__media-imgwrap">
-              <img class="work-project__media-img--top work-project__media-img--shadow" src="../assets/images/work/nodus/nodus-dashboard.png" alt="Nodus" width="400" height="251" />
-            </div>
-            <div class="work-project__coming-soon">
-              <span>Coming soon...</span>
-            </div>
-          </div>
-          <div class="work-project__text">
-            <h2 class="work-project__title">Nodus</h2>
-            <p class="work-project__desc">Innovative flashcards platform to ease active recital for students</p>
-          </div>
-        </a>
-      </div>
-
-      <!-- Row 3: Gorest AI + invisible spacer -->
-      <div class="work-row">
-        <a class="work-project work-project--no-hover-rise" role="link" aria-disabled="true">
-          <div class="work-project__media">
-            <div class="work-project__media-imgwrap">
-              <img class="work-project__media-img--top work-project__media-img--shadow" src="../assets/images/work/gorest/gorest-3dworld.png" alt="Gorest AI" width="400" height="251" />
-            </div>
-            <div class="work-project__coming-soon">
-              <span>Coming soon...</span>
-            </div>
-          </div>
-          <div class="work-project__text">
-            <h2 class="work-project__title">Gorest AI</h2>
-            <p class="work-project__desc">AI 3D game engine for the next generation of game creators</p>
-          </div>
-        </a>
-        <div class="work-project work-project--spacer" aria-hidden="true"></div>
       </div>
     </div>
-    <footer class="site-footer">
-      <div class="site-footer__left">
-        <a class="site-footer__hi" href="mailto:raina.nyy@gmail.com">
-          <span>Say hi to me at</span>
-          <span class="site-footer__hi-email">
-            <em>raina.nyy@gmail.com</em>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-        </a>
-        <button class="site-footer__top" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-          <span>Back to top</span>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M15.8333 10L9.99994 4.16669L4.16661 10M9.99994 4.16669V15.8334" stroke="#5F5F5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      <div class="site-footer__cols">
-        <div class="site-footer__col">
-          <p class="site-footer__head">Pages</p>
-          <a href="work.html">Work</a>
-          <a href="about.html">About</a>
-          <a href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume</a>
-        </div>
-        <div class="site-footer__col">
-          <p class="site-footer__head">Projects</p>
-          <a href="muji.html" data-case-color="#8B0013">MUJI USA</a>
-          <a href="damai.html" data-case-color="#6665FE">Damai</a>
-          <a href="wapoo.html" data-case-color="#45DBE9">Wapoo AI</a>
-        </div>
-        <div class="site-footer__col">
-          <p class="site-footer__head">Contact</p>
-          <a href="mailto:raina.nyy@gmail.com">Email</a>
-          <a href="https://www.linkedin.com/in/rainani" target="_blank" rel="noopener">LinkedIn</a>
-        </div>
-      </div>
-    </footer>
   </div>
 
-  <script src="../js/main.js?v=32"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <script>
+    // no-store: while iterating on the animations, always pull the latest file (a cached copy of an old JSON made new exports look unchanged).
+    function loadW4Lottie(id, path) {
+      fetch(path, { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          lottie.loadAnimation({
+            container: document.getElementById(id),
+            renderer: "svg",
+            loop: true,
+            autoplay: true,
+            animationData: data
+          });
+        });
+    }
+    loadW4Lottie("w4-muji-lottie", "../assets/lottie/muji-animation.json");
+    loadW4Lottie("w4-damai-lottie", "../assets/lottie/damai-animation.json");
+    loadW4Lottie("w4-wapoo-lottie", "../assets/lottie/wapoo-animation.json");
+  </script>
+
+  <script>
+    // Horizontal carousel: the three tabs sit on a strip; scrolling / swiping / arrow keys slides it one card
+    // (636px = 600 card + 36 gap). State 0 = MUJI + Damai big, Wapoo peeking right; state 1 = MUJI peeking left,
+    // Damai + Wapoo big (positions from Figma "Work 4.0" / "Work 4.0 (2)"). Each tab's left/top/scale is
+    // interpolated between its two states by p (0..1), then snaps to the nearest state when input stops.
+    (function () {
+      var S = {
+        muji:  [{ x: 100, y: 200, s: 1 }, { x: -476, y: 225, s: 0.9 }],
+        damai: [{ x: 736, y: 200, s: 1 }, { x: 100, y: 200, s: 1 }],
+        wapoo: [{ x: 1371, y: 225, s: 0.9 }, { x: 736, y: 200, s: 1 }]
+      };
+      var tabs = {};
+      Object.keys(S).forEach(function (k) { tabs[k] = document.querySelector(".w4-tab--" + k); });
+      var p = 0, snapTimer = null, raf = null;
+      function lerp(a, b, t) { return a + (b - a) * t; }
+      function render() {
+        Object.keys(S).forEach(function (k) {
+          var a = S[k][0], b = S[k][1], el = tabs[k];
+          el.style.left = lerp(a.x, b.x, p) + "px";
+          el.style.top = lerp(a.y, b.y, p) + "px";
+          el.style.transform = "scale(" + lerp(a.s, b.s, p) + ")";
+        });
+      }
+      function snapTo(target) {
+        cancelAnimationFrame(raf);
+        var from = p, t0 = performance.now(), dur = 450;
+        (function step(now) {
+          var t = Math.min((now - t0) / dur, 1), e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          p = lerp(from, target, e); render();
+          if (t < 1) raf = requestAnimationFrame(step);
+        })(t0);
+      }
+      function nudge(dp) {
+        cancelAnimationFrame(raf);
+        p = Math.min(1, Math.max(0, p + dp)); render();
+        clearTimeout(snapTimer);
+        snapTimer = setTimeout(function () { snapTo(p > 0.5 ? 1 : 0); }, 140);
+      }
+      var PX = 636;
+      window.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        var d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        nudge(d / PX);
+      }, { passive: false });
+      window.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") snapTo(1);
+        if (e.key === "ArrowLeft") snapTo(0);
+      });
+      var tx = null;
+      window.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
+      window.addEventListener("touchmove", function (e) {
+        if (tx === null) return;
+        var x = e.touches[0].clientX; nudge((tx - x) / PX); tx = x;
+      }, { passive: true });
+      window.addEventListener("touchend", function () { tx = null; });
+      render();
+    })();
+  </script>
+  <script src="../js/main.js?v=33"></script>
+  <span id="page-parsed" hidden></span>
 </body>
 </html>
