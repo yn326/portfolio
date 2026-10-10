@@ -23,7 +23,12 @@
       var prev = fromUrl ? keyFor(fromUrl) : null;
       if (cur && prev && cur !== prev) {
         var pair = prev + "-to-" + cur;
-        if (supported[pair]) document.documentElement.setAttribute("data-transition", pair);
+        if (supported[pair]) {
+          document.documentElement.setAttribute("data-transition", pair);
+          // The tabs only carry their transition names while a transition runs (see the vt-tab-names rules): a
+          // named element is a backdrop root, which stops the fake screens' backdrop blur from seeing the cover assets.
+          document.documentElement.classList.add("vt-tab-names");
+        }
       }
     })();
 
@@ -37,6 +42,7 @@
     // the incoming page's.
     window.addEventListener("pageswap", function (e) {
       if (!e.viewTransition) return;
+      document.documentElement.classList.add("vt-tab-names");
       // Heading to About: the exiting cards' blur rides on their transition groups (see style.css), so it
       // is NOT stripped here -- stripping it showed the shapes' sharp edges through the glass for a frame.
       var toAbout = false;
@@ -44,10 +50,12 @@
       if (!toAbout) document.documentElement.classList.add("vt-no-blur");
     });
     window.addEventListener("pagereveal", function (e) {
+      if (!e.viewTransition) document.documentElement.classList.remove("vt-tab-names");
       if (e.viewTransition) {
         document.documentElement.classList.add("vt-no-blur");
         e.viewTransition.finished.finally(function () {
           var root = document.documentElement;
+          root.classList.remove("vt-tab-names");
           // .vt-blur-settling carries the transition that eases the blur back
           // in -- it has to be added *before* vt-no-blur is removed (the
           // actual value change), or the change happens with no transition
@@ -60,6 +68,16 @@
           }, 300);
         });
       }
+    });
+    // Safety net: never leave the tab names on once the page has settled (or after a back-forward-cache restore).
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        var r = document.documentElement;
+        if (!r.classList.contains("vt-no-blur")) r.classList.remove("vt-tab-names");
+      }, 4000);
+    });
+    window.addEventListener("pageshow", function (e) {
+      if (e.persisted) document.documentElement.classList.remove("vt-tab-names", "vt-no-blur");
     });
   </script>
   <!-- Hold the first render until the parser has reached the end of the page; otherwise Chrome can reveal the
@@ -130,7 +148,7 @@
     .w4-cover-muji-screen { position: absolute; z-index: 2; left: 115px; top: 40px; width: 290px; height: 218px; }
     .w4-cover-muji-phone { position: absolute; inset: 0; box-sizing: border-box;
       border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .w4-cover-muji-lottie { position: absolute; inset: 0; pointer-events: none; }
     /* Subtle version of the home-bg shape float (translateY 0 -> -18..-26px, 2.8-4.2s ease-in-out, infinite):
        each piece bobs on its own loop with slightly different duration/distance, so they drift in and out of step. */
@@ -154,7 +172,7 @@
     .w4-cover-damai-screen, .w4-cover-wapoo-screen { position: absolute; z-index: 2; left: 230.2px; top: 38.75px; width: 120px; height: 220px; box-sizing: border-box;
       display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 8px 16px; transform: rotate(10deg);
       border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .w4-cover-damai-screen__stripe, .w4-cover-wapoo-screen__stripe { width: 24px; height: 4px; flex-shrink: 0;
       border-radius: 99px; background: rgba(255, 255, 255, 0.4); }
     /* 120x220 animation laid exactly over the whole frame (border-box), rotating with it. */
@@ -182,9 +200,9 @@
     .w4__shape--e11 { view-transition-name: bg-e11; }
     .w4__tabs { position: absolute; inset: 0; }
     /* Each tab is its own transition group so they can arrive one after another instead of as one stiff block. */
-    .w4-tab--muji { view-transition-name: work-tab-1; }
-    .w4-tab--damai { view-transition-name: work-tab-2; }
-    .w4-tab--wapoo { view-transition-name: work-tab-3; }
+    html.vt-tab-names .w4-tab--muji { view-transition-name: work-tab-1; }
+    html.vt-tab-names .w4-tab--damai { view-transition-name: work-tab-2; }
+    html.vt-tab-names .w4-tab--wapoo { view-transition-name: work-tab-3; }
     /* Home -> Work: slide in from the right, left card first, each a beat after the last (and a touch slower). */
     html[data-transition="home-to-work"]::view-transition-new(work-tab-1) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-right; }
     html[data-transition="home-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-right; }
