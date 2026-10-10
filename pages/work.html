@@ -23,7 +23,12 @@
       var prev = fromUrl ? keyFor(fromUrl) : null;
       if (cur && prev && cur !== prev) {
         var pair = prev + "-to-" + cur;
-        if (supported[pair]) document.documentElement.setAttribute("data-transition", pair);
+        if (supported[pair]) {
+          document.documentElement.setAttribute("data-transition", pair);
+          // The tabs only carry their transition names while a transition runs (see the vt-tab-names rules): a
+          // named element is a backdrop root, which stops the fake screens' backdrop blur from seeing the cover assets.
+          document.documentElement.classList.add("vt-tab-names");
+        }
       }
     })();
 
@@ -37,6 +42,7 @@
     // the incoming page's.
     window.addEventListener("pageswap", function (e) {
       if (!e.viewTransition) return;
+      document.documentElement.classList.add("vt-tab-names");
       // Heading to About or Home: the exiting cards' blur rides on their transition groups (see style.css), so it
       // is NOT stripped here -- stripping it showed the shapes' sharp edges through the glass for a frame.
       var toAbout = false;
@@ -44,10 +50,12 @@
       if (!toAbout) document.documentElement.classList.add("vt-no-blur");
     });
     window.addEventListener("pagereveal", function (e) {
+      if (!e.viewTransition) document.documentElement.classList.remove("vt-tab-names");
       if (e.viewTransition) {
         document.documentElement.classList.add("vt-no-blur");
         e.viewTransition.finished.finally(function () {
           var root = document.documentElement;
+          root.classList.remove("vt-tab-names");
           // .vt-blur-settling carries the transition that eases the blur back
           // in -- it has to be added *before* vt-no-blur is removed (the
           // actual value change), or the change happens with no transition
@@ -61,6 +69,16 @@
         });
       }
     });
+    // Safety net: never leave the tab names on once the page has settled (or after a back-forward-cache restore).
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        var r = document.documentElement;
+        if (!r.classList.contains("vt-no-blur")) r.classList.remove("vt-tab-names");
+      }, 4000);
+    });
+    window.addEventListener("pageshow", function (e) {
+      if (e.persisted) document.documentElement.classList.remove("vt-tab-names", "vt-no-blur");
+    });
   </script>
   <!-- Hold the first render until the parser has reached the end of the page; otherwise Chrome can reveal the
        page mid-parse and drop the view transition (see the same hint on about.html). Chrome-only; ignored elsewhere. -->
@@ -73,7 +91,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=124" />
+  <link rel="stylesheet" href="../css/style.css?v=123" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -182,28 +200,19 @@
     .w4__shape--e11 { view-transition-name: bg-e11; }
     .w4__tabs { position: absolute; inset: 0; }
     /* Each tab is its own transition group so they can arrive one after another instead of as one stiff block. */
-    .w4-tab--muji { view-transition-name: work-tab-1; }
-    .w4-tab--muji .w4-tab__glass { view-transition-name: work-glass-1; }
-    .w4-tab--damai { view-transition-name: work-tab-2; }
-    .w4-tab--damai .w4-tab__glass { view-transition-name: work-glass-2; }
-    .w4-tab--wapoo { view-transition-name: work-tab-3; }
-    .w4-tab--wapoo .w4-tab__glass { view-transition-name: work-glass-3; }
+    html.vt-tab-names .w4-tab--muji { view-transition-name: work-tab-1; }
+    html.vt-tab-names .w4-tab--damai { view-transition-name: work-tab-2; }
+    html.vt-tab-names .w4-tab--wapoo { view-transition-name: work-tab-3; }
     /* Home -> Work: slide in from the right, left card first, each a beat after the last (and a touch slower). */
     html[data-transition="home-to-work"]::view-transition-new(work-tab-1) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-right; }
-    html[data-transition="home-to-work"]::view-transition-new(work-glass-1) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-right; }
     html[data-transition="home-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-right; }
-    html[data-transition="home-to-work"]::view-transition-new(work-glass-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-right; }
     html[data-transition="home-to-work"]::view-transition-new(work-tab-3) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right; }
-    html[data-transition="home-to-work"]::view-transition-new(work-glass-3) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right; }
     /* About -> Work 4.0: the About tab leaves to the right (existing rule in style.css); the cards arrive from the
        left, right-most first so a card behind never catches the one in front. The About tab is already on its way
        out and the cards trail it (simulated at 1100/1440/1920px wide, both carousel positions: no overlaps). */
     html[data-transition="about-to-work"]::view-transition-new(work-tab-3) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-left; }
-    html[data-transition="about-to-work"]::view-transition-new(work-glass-3) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-left; }
     html[data-transition="about-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-left; }
-    html[data-transition="about-to-work"]::view-transition-new(work-glass-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-left; }
     html[data-transition="about-to-work"]::view-transition-new(work-tab-1) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-left; }
-    html[data-transition="about-to-work"]::view-transition-new(work-glass-1) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-left; }
     /* Home -> Work 4.0: the home tab's glass fades out gradually instead of snapping flat.
        Blur can't live in the snapshot (and the snapshot layer is isolated, so a blur on it can't see the shapes behind),
        so the blur sits on the transition GROUP, which can: the group slides left with the card (via the standalone
