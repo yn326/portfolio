@@ -203,6 +203,34 @@
     return true;
   }
 
+  // Back/forward sweep (no Lottie possible there): a pink band travels top -> bottom. Its bottom edge covers
+  // the screen from the top while its top edge follows, uncovering the page behind. Two nested clips so each
+  // edge has its own timing.
+  var SWEEP_MS = 650;
+  var SWEEP_LAG = 250;
+  function playSweep(color) {
+    var outer = document.createElement("div");
+    outer.setAttribute("aria-hidden", "true");
+    outer.setAttribute("data-case-overlay", "");
+    outer.style.cssText = "position:fixed;inset:0;z-index:" + Z + ";pointer-events:none;";
+    var inner = document.createElement("div");
+    inner.style.cssText = "position:absolute;inset:0;background:" + color + ";clip-path:inset(0 0 100% 0);";
+    outer.appendChild(inner);
+    document.body.appendChild(outer);
+    inner.animate(
+      [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }],
+      { duration: SWEEP_MS, easing: EASING, fill: "both" }
+    );
+    outer
+      .animate(
+        [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }],
+        { duration: SWEEP_MS, delay: SWEEP_LAG, easing: EASING, fill: "both" }
+      )
+      .finished.then(function () {
+        outer.remove();
+      });
+  }
+
   // Resolves once the page is ready to be looked at: fonts loaded and the images
   // visible on first screen decoded, then two animation frames so layout and the
   // first paint are done. Never waits longer than MAX_WAIT_MS.
@@ -242,7 +270,14 @@
   } catch (e) {}
   if (incoming && Date.now() - incoming.t > 10000) incoming = null;
 
-  if (incoming && !reduceMotion) {
+  if (incoming && incoming.mode === "sweep" && !reduceMotion) {
+    // Browser back/forward: the page shows normally and the pink band sweeps over it.
+    window.addEventListener("pagereveal", function (e) {
+      if (e.viewTransition) e.viewTransition.skipTransition();
+    });
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { playSweep(incoming.color); });
+    else playSweep(incoming.color);
+  } else if (incoming && !reduceMotion) {
     // Cover the page from the very first paint so nothing flashes before the
     // overlay exists (the overlay itself needs <body>, which isn't parsed yet).
     var style = document.createElement("style");
@@ -315,8 +350,7 @@
       return;
     }
     // Browser back/forward button or swipe gesture into or out of a case study: there's no click and the
-    // old page can't be held back to play the cover, so the new page simply opens already covered in pink
-    // and lowers it (same as after a click).
+    // old page can't be held back to play the Lottie cover, so the new page plays the pink sweep instead.
     var dest = e.activation && e.activation.entry && e.activation.entry.url;
     if (!dest) return;
     var path = new URL(dest).pathname;
@@ -326,7 +360,7 @@
     try {
       sessionStorage.setItem(
         KEY,
-        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme || "#FFC3C3", t: Date.now() })
+        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme || "#FFC3C3", mode: "sweep", t: Date.now() })
       );
     } catch (err) {}
     if (e.viewTransition) e.viewTransition.skipTransition();
@@ -345,6 +379,7 @@
       sessionStorage.removeItem(KEY);
     } catch (err) {}
     if (!inc || Date.now() - inc.t > 10000 || reduceMotion) return;
+    if (inc.mode === "sweep") { playSweep(inc.color); return; }
     var ov = makeOverlay(inc.color);
     ov.setAttribute("data-case-overlay", "");
     document.body.appendChild(ov);
