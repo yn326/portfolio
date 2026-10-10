@@ -4,7 +4,10 @@
     {
       "name": "portfolio-static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "5500"],
+      "runtimeArgs": [
+        ".claude/dev-server.py",
+        "5500"
+      ],
       "port": 5500
     }
   ]
