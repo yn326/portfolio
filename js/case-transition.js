@@ -143,7 +143,7 @@
   // circle. The case page then opens covered in the same
   // color (LOTTIE_COLOR) so the handoff is seamless. If lottie-web or the JSON isn't loaded yet the circle is used instead.
   var LOTTIE_SPEED = 2; // 1 = the animation's own 2.5s; it is a click response, so it plays faster
-  var LOTTIE_COLOR = "#FFD5D5"; // the Lottie's own pink; set to null to use each case study's theme color instead
+  var LOTTIE_COLOR = "#FFC3C3"; // pink for every case study; set to null to use each case study's theme color instead
   var LOTTIE_COVER_FRAME = 140; // first frame where the screen is solid
   var lottieJson = null;
   function loadLottieAssets() {
