@@ -203,11 +203,10 @@
     return true;
   }
 
-  // Back/forward sweep (no Lottie possible there): a pink band travels top -> bottom. Its bottom edge covers
-  // the screen from the top while its top edge follows, uncovering the page behind. Two nested clips so each
-  // edge has its own timing.
-  var SWEEP_MS = 650;
-  var SWEEP_LAG = 250;
+  // Back/forward sweep (no Lottie possible there), in two steps: the pink's bottom edge travels from the top of
+  // the screen to the bottom until the whole screen is pink; once that is done AND the page has finished
+  // loading, the top edge travels down to uncover the page.
+  var SWEEP_MS = 600;
   function playSweep(color) {
     var outer = document.createElement("div");
     outer.setAttribute("aria-hidden", "true");
@@ -217,18 +216,22 @@
     inner.style.cssText = "position:absolute;inset:0;background:" + color + ";clip-path:inset(0 0 100% 0);";
     outer.appendChild(inner);
     document.body.appendChild(outer);
-    inner.animate(
+    var cover = inner.animate(
       [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }],
-      { duration: SWEEP_MS, easing: EASING, fill: "both" }
+      { duration: SWEEP_MS, easing: EASING, fill: "forwards" }
     );
-    outer
-      .animate(
-        [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }],
-        { duration: SWEEP_MS, delay: SWEEP_LAG, easing: EASING, fill: "both" }
-      )
-      .finished.then(function () {
-        outer.remove();
-      });
+    Promise.all([cover.finished, waitUntilReady()]).then(function () {
+      setTimeout(function () {
+        outer
+          .animate(
+            [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }],
+            { duration: LOWER_MS, easing: EASING, fill: "forwards" }
+          )
+          .finished.then(function () {
+            outer.remove();
+          });
+      }, PAUSE_MS);
+    });
   }
 
   // Resolves once the page is ready to be looked at: fonts loaded and the images
