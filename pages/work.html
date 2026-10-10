@@ -91,7 +91,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=126" />
+  <link rel="stylesheet" href="../css/style.css?v=128" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -145,10 +145,10 @@
     .w4-tab__cover img { position: absolute; display: block; max-width: none; }
     /* Exports are the rotated bounding boxes @2x (rotation baked in); positions = Figma bbox left/top inside the 520-wide cover. */
     /* Backing rectangle for the phone UI that gets overlaid later. Height assumed (vertically centered in the 298px cover). */
-    .w4-cover-muji-screen { position: absolute; z-index: 2; left: 115px; top: 40px; width: 290px; height: 218px; }
+    .w4-cover-muji-screen { position: absolute; z-index: 2; left: 115px; top: 40px; width: 290px; height: 218px;
+      border-radius: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .w4-cover-muji-phone { position: absolute; inset: 0; box-sizing: border-box;
-      border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+      border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.05); }
     .w4-cover-muji-lottie { position: absolute; inset: 0; pointer-events: none; }
     /* Subtle version of the home-bg shape float (translateY 0 -> -18..-26px, 2.8-4.2s ease-in-out, infinite):
        each piece bobs on its own loop with slightly different duration/distance, so they drift in and out of step. */
@@ -200,19 +200,19 @@
     .w4__shape--e11 { view-transition-name: bg-e11; }
     .w4__tabs { position: absolute; inset: 0; }
     /* Each tab is its own transition group so they can arrive one after another instead of as one stiff block. */
+    /* The fake screens are named too: a named tab stops its descendants' backdrop blur from seeing the cover assets,
+       but a named element's own backdrop blur keeps working, so each screen is its own transition layer (same slide
+       as its card, see style.css) and keeps blurring the assets behind it for the whole transition. */
+    html.vt-tab-names .w4-tab--muji .w4-cover-muji-screen { view-transition-name: work-screen-1; }
+    html.vt-tab-names .w4-tab--damai .w4-cover-damai-screen { view-transition-name: work-screen-2; }
+    html.vt-tab-names .w4-tab--wapoo .w4-cover-wapoo-screen { view-transition-name: work-screen-3; }
     html.vt-tab-names .w4-tab--muji { view-transition-name: work-tab-1; }
     html.vt-tab-names .w4-tab--damai { view-transition-name: work-tab-2; }
     html.vt-tab-names .w4-tab--wapoo { view-transition-name: work-tab-3; }
     /* Home -> Work: slide in from the right, left card first, each a beat after the last (and a touch slower). */
-    html[data-transition="home-to-work"]::view-transition-new(work-tab-1) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-right; }
-    html[data-transition="home-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-right; }
-    html[data-transition="home-to-work"]::view-transition-new(work-tab-3) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right; }
     /* About -> Work 4.0: the About tab leaves to the right (existing rule in style.css); the cards arrive from the
        left, right-most first so a card behind never catches the one in front. The About tab is already on its way
        out and the cards trail it (simulated at 1100/1440/1920px wide, both carousel positions: no overlaps). */
-    html[data-transition="about-to-work"]::view-transition-new(work-tab-3) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-left; }
-    html[data-transition="about-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-left; }
-    html[data-transition="about-to-work"]::view-transition-new(work-tab-1) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-left; }
     /* Home -> Work 4.0: the home tab's glass fades out gradually instead of snapping flat.
        Blur can't live in the snapshot (and the snapshot layer is isolated, so a blur on it can't see the shapes behind),
        so the blur sits on the transition GROUP, which can: the group slides left with the card (via the standalone
@@ -226,11 +226,47 @@
       animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
       animation-fill-mode: both, both, both;
     }
+    /* Arrival: each card and its fake screen slide in as GROUPS with one fixed distance (viewport + 600px, the card's
+       box width), so a card and its screen stay locked together. (Per-image slides can't: the screens are rotated and
+       narrower, so a % based distance differs per element.) Same stagger as before; the nearest card lands first. */
+    @keyframes vt-group-slide-in-right-600 { from { translate: calc(100vw + 600px) 0; } to { translate: 0 0; } }
+    @keyframes vt-group-slide-in-left-600 { from { translate: calc(-100vw - 600px) 0; } to { translate: 0 0; } }
+    html[data-transition="home-to-work"]::view-transition-group(work-tab-1), html[data-transition="home-to-work"]::view-transition-group(work-screen-1),
+    html[data-transition="home-to-work"]::view-transition-group(work-tab-2), html[data-transition="home-to-work"]::view-transition-group(work-screen-2),
+    html[data-transition="home-to-work"]::view-transition-group(work-tab-3), html[data-transition="home-to-work"]::view-transition-group(work-screen-3),
+    html[data-transition="about-to-work"]::view-transition-group(work-tab-1), html[data-transition="about-to-work"]::view-transition-group(work-screen-1),
+    html[data-transition="about-to-work"]::view-transition-group(work-tab-2), html[data-transition="about-to-work"]::view-transition-group(work-screen-2),
+    html[data-transition="about-to-work"]::view-transition-group(work-tab-3), html[data-transition="about-to-work"]::view-transition-group(work-screen-3) {
+      animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1); animation-fill-mode: both, both; }
+    html[data-transition="home-to-work"]::view-transition-group(work-tab-1), html[data-transition="home-to-work"]::view-transition-group(work-screen-1) {
+      animation-name: -ua-view-transition-group-anim-work-tab-1, vt-group-slide-in-right-600; animation-duration: 800ms, 800ms; animation-delay: 0ms, 0ms; }
+    html[data-transition="home-to-work"]::view-transition-group(work-tab-2), html[data-transition="home-to-work"]::view-transition-group(work-screen-2) {
+      animation-name: -ua-view-transition-group-anim-work-tab-2, vt-group-slide-in-right-600; animation-duration: 850ms, 850ms; animation-delay: 0ms, 90ms; }
+    html[data-transition="home-to-work"]::view-transition-group(work-tab-3), html[data-transition="home-to-work"]::view-transition-group(work-screen-3) {
+      animation-name: -ua-view-transition-group-anim-work-tab-3, vt-group-slide-in-right-600; animation-duration: 900ms, 900ms; animation-delay: 0ms, 180ms; }
+    html[data-transition="about-to-work"]::view-transition-group(work-tab-3), html[data-transition="about-to-work"]::view-transition-group(work-screen-3) {
+      animation-name: -ua-view-transition-group-anim-work-tab-3, vt-group-slide-in-left-600; animation-duration: 800ms, 800ms; animation-delay: 0ms, 0ms; }
+    html[data-transition="about-to-work"]::view-transition-group(work-tab-2), html[data-transition="about-to-work"]::view-transition-group(work-screen-2) {
+      animation-name: -ua-view-transition-group-anim-work-tab-2, vt-group-slide-in-left-600; animation-duration: 850ms, 850ms; animation-delay: 0ms, 90ms; }
+    html[data-transition="about-to-work"]::view-transition-group(work-tab-1), html[data-transition="about-to-work"]::view-transition-group(work-screen-1) {
+      animation-name: -ua-view-transition-group-anim-work-tab-1, vt-group-slide-in-left-600; animation-duration: 900ms, 900ms; animation-delay: 0ms, 180ms; }
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-1) { animation: none; }
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-2) { animation: none; }
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-3) { animation: none; }
+    html[data-transition="home-to-work"]::view-transition-new(work-screen-1) { animation: none; }
+    html[data-transition="home-to-work"]::view-transition-new(work-screen-2) { animation: none; }
+    html[data-transition="home-to-work"]::view-transition-new(work-screen-3) { animation: none; }
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-1) { animation: none; }
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-2) { animation: none; }
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-3) { animation: none; }
+    html[data-transition="about-to-work"]::view-transition-new(work-screen-1) { animation: none; }
+    html[data-transition="about-to-work"]::view-transition-new(work-screen-2) { animation: none; }
+    html[data-transition="about-to-work"]::view-transition-new(work-screen-3) { animation: none; }
     html[data-transition="home-to-work"]::view-transition-old(home-tab) { animation: none; }
     /* Backdrop blurs can't live inside a captured snapshot: strip them for the transition, ease them back after. */
-    html.vt-no-blur .w4-tab__glass, html.vt-no-blur .w4-cover-muji-phone, html.vt-no-blur .w4-cover-damai-screen, html.vt-no-blur .w4-cover-wapoo-screen {
+    html.vt-no-blur .w4-tab__glass, html.vt-no-blur .w4-cover-muji-screen, html.vt-no-blur .w4-cover-damai-screen, html.vt-no-blur .w4-cover-wapoo-screen {
       backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-    html.vt-blur-settling .w4-tab__glass, html.vt-blur-settling .w4-cover-muji-phone, html.vt-blur-settling .w4-cover-damai-screen, html.vt-blur-settling .w4-cover-wapoo-screen {
+    html.vt-blur-settling .w4-tab__glass, html.vt-blur-settling .w4-cover-muji-screen, html.vt-blur-settling .w4-cover-damai-screen, html.vt-blur-settling .w4-cover-wapoo-screen {
       transition: backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease; }
     @media (prefers-reduced-motion: reduce) { .w4-cover-muji-1, .w4-cover-muji-2, .w4-cover-muji-screen, .w4-cover-damai-1, .w4-cover-damai-2, .w4-cover-damai-3, .w4-cover-damai-screen, .w4-cover-wapoo-1, .w4-cover-wapoo-2, .w4-cover-wapoo-3, .w4-cover-wapoo-screen { animation: none; } }
   </style>

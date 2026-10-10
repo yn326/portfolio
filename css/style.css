@@ -231,6 +231,34 @@ html[data-transition="work-to-home"]::view-transition-group(work-tab-1) {
 html[data-transition="work-to-home"]::view-transition-old(work-tab-1),
 html[data-transition="work-to-home"]::view-transition-old(work-tab-2),
 html[data-transition="work-to-home"]::view-transition-old(work-tab-3) { animation: none; }
+/* The fake screens (work-screen-N) are their own layers while named: same slide and stagger as their card, with their
+   own blur easing out. */
+html[data-transition="work-to-home"]::view-transition-group(work-screen-1),
+html[data-transition="work-to-home"]::view-transition-group(work-screen-2),
+html[data-transition="work-to-home"]::view-transition-group(work-screen-3) {
+  border-radius: 12px;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+html[data-transition="work-to-home"]::view-transition-group(work-screen-3) {
+  border-radius: 12px;
+  animation-name: -ua-view-transition-group-anim-work-screen-3, vt-group-slide-out-right-600, vt-glass10-fade-out;
+  animation-duration: 800ms, 800ms, 800ms;
+  animation-delay: 0ms, 0ms, 0ms;
+}
+html[data-transition="work-to-home"]::view-transition-group(work-screen-2) {
+  animation-name: -ua-view-transition-group-anim-work-screen-2, vt-group-slide-out-right-600, vt-glass10-fade-out;
+  animation-duration: 850ms, 850ms, 850ms;
+  animation-delay: 0ms, 90ms, 90ms;
+}
+html[data-transition="work-to-home"]::view-transition-group(work-screen-1) {
+  animation-name: -ua-view-transition-group-anim-work-screen-1, vt-group-slide-out-right-600, vt-glass10-fade-out;
+  animation-duration: 900ms, 900ms, 900ms;
+  animation-delay: 0ms, 180ms, 180ms;
+}
+html[data-transition="work-to-home"]::view-transition-old(work-screen-1),
+html[data-transition="work-to-home"]::view-transition-old(work-screen-2),
+html[data-transition="work-to-home"]::view-transition-old(work-screen-3) { animation: none; }
 /* ---- Work 4.0 -> About (the about page gets html.from-work-v2) ----
    Mirror image of the way back to Home: the cards slide out to the LEFT, left-most first
    (so a card behind never catches the one in front), and the About tab, which arrives from
@@ -239,6 +267,9 @@ html[data-transition="work-to-home"]::view-transition-old(work-tab-3) { animatio
    (which, unlike the snapshot, can see the shapes behind) and eases out as it slides;
    the shapes themselves have matching names on both pages, so they stay exactly put. */
 @keyframes vt-group-slide-out-left { from { translate: 0 0; } to { translate: calc(-100vw - 100%) 0; } }
+@keyframes vt-group-slide-out-right-600 { from { translate: 0 0; } to { translate: calc(100vw + 600px) 0; } }
+@keyframes vt-group-slide-out-left-600 { from { translate: 0 0; } to { translate: calc(-100vw - 600px) 0; } }
+@keyframes vt-glass10-fade-out { from { backdrop-filter: blur(10px); } to { backdrop-filter: blur(0px); } }
 @keyframes vt-glass8-fade-out { from { backdrop-filter: blur(8px) saturate(130%); } to { backdrop-filter: blur(0px) saturate(100%); } }
 html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-1),
 html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-2),
@@ -267,6 +298,35 @@ html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-t
 html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-tab-1),
 html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-tab-2),
 html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-tab-3) { animation: none; }
+/* The fake screens (work-screen-N) are their own layers while named: same slide and stagger as their card, with their
+   own blur easing out. */
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-screen-1),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-screen-2),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-screen-3) {
+  border-radius: 12px;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-screen-1) {
+  animation-name: -ua-view-transition-group-anim-work-screen-1, vt-group-slide-out-left-600, vt-glass10-fade-out;
+  animation-duration: 800ms, 800ms, 800ms;
+  animation-delay: 0ms, 0ms, 0ms;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-screen-2) {
+  animation-name: -ua-view-transition-group-anim-work-screen-2, vt-group-slide-out-left-600, vt-glass10-fade-out;
+  animation-duration: 850ms, 850ms, 850ms;
+  animation-delay: 0ms, 90ms, 90ms;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-screen-3) {
+  /* the right-most card is the 0.9-scaled peek: 540x450, so its radius scales too */
+  border-radius: 12px;
+  animation-name: -ua-view-transition-group-anim-work-screen-3, vt-group-slide-out-left-600, vt-glass10-fade-out;
+  animation-duration: 900ms, 900ms, 900ms;
+  animation-delay: 0ms, 180ms, 180ms;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-screen-1),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-screen-2),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-screen-3) { animation: none; }
 html.from-work-v2[data-transition="work-to-about"]::view-transition-new(about-tab),
 html.from-work-v2[data-transition="work-to-about"]::view-transition-new(about-footer) {
   animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right;
