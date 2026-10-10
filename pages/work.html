@@ -189,7 +189,18 @@
     .w4-cover-damai-3 { left: 284px; top: 79px; width: 167.5px; }
     .w4-cover-muji-1 { left: 9px; top: 121px; width: 142.5px; }
     .w4-cover-muji-2 { left: 384px; top: 0; width: 127px; }
-    .w4-tab__text { display: flex; flex-direction: column; align-self: stretch; gap: 12px; }
+    /* Figma "Frame 20": caption column (flex 1) + 46px arrow chip, 12px apart, vertically centred. */
+    .w4-tab__foot { display: flex; align-items: center; gap: 12px; align-self: stretch; }
+    .w4-tab__arrow { flex: none; width: 46px; height: 46px; border-radius: 99px; background: rgba(95, 95, 95, 0.05);
+      display: flex; align-items: center; justify-content: center; }
+    .w4-tab__arrow svg { display: block; }
+    .w4-tab__text { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; gap: 12px; }
+    /* Figma "Frame 879": scroll indicator, 104 x 4 at (668, 780). The bar widths trade 8px between the two cards that
+       change places, so the strip stays 104px wide. Driven by the carousel's progress (see the script below). */
+    .w4-dots { position: absolute; left: 668px; top: 780px; width: 104px; height: 4px; display: flex; align-items: center; gap: 8px; z-index: 3; }
+    .w4-dot { position: relative; flex: none; height: 4px; padding: 0; border: 0; border-radius: 99px; background: #ae8383; cursor: pointer; }
+    .w4-dot::after { content: ""; position: absolute; inset: -16px -4px; }
+    .w4-dot:focus-visible { outline: 2px solid #ae8383; outline-offset: 4px; }
     .w4-tab__text h2 { margin: 0; height: 24px; display: flex; flex-direction: column; justify-content: center; white-space: nowrap; font: 300 30px/normal "Figtree", sans-serif; color: #5f5f5f; }
     .w4-tab__text p { margin: 0; font: 300 18px/normal "Figtree", sans-serif; color: #5f5f5f; }
     /* Shared-shape morph with the home page (names match html.vt-bg-morph in style.css), and the tab strip is the
@@ -364,9 +375,12 @@
             <img class="w4-cover-muji-1" src="../assets/images/work/gallery/muji-asset1.png" alt="" />
             <img class="w4-cover-muji-2" src="../assets/images/work/gallery/muji-asset2.png" alt="" />
           </div>
-          <div class="w4-tab__text">
-            <h2>MUJI USA</h2>
-            <p>E-commerce site reimagined as a lifestyle brand destination</p>
+          <div class="w4-tab__foot">
+            <div class="w4-tab__text">
+              <h2>MUJI USA</h2>
+              <p>E-commerce site reimagined as a lifestyle brand</p>
+            </div>
+            <span class="w4-tab__arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 4.16667L15.8333 10L10 15.8333M15.8333 10H4.16667" stroke="#5F5F5F" stroke-opacity="0.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </div>
         </a>
 
@@ -386,9 +400,12 @@
             <img class="w4-cover-damai-2" src="../assets/images/work/gallery/damai-asset2.png" alt="" />
             <img class="w4-cover-damai-3" src="../assets/images/work/gallery/damai-asset3.png" alt="" />
           </div>
-          <div class="w4-tab__text">
-            <h2>Damai Entertainment (Alibaba Group)</h2>
-            <p>B2B mobile app for real-time event ticketing data</p>
+          <div class="w4-tab__foot">
+            <div class="w4-tab__text">
+              <h2>Damai Entertainment (Alibaba)</h2>
+              <p>B2B mobile app for real-time event ticketing data</p>
+            </div>
+            <span class="w4-tab__arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 4.16667L15.8333 10L10 15.8333M15.8333 10H4.16667" stroke="#5F5F5F" stroke-opacity="0.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </div>
         </a>
 
@@ -408,11 +425,19 @@
             <img class="w4-cover-wapoo-2" src="../assets/images/work/gallery/wapoo-asset2.png" alt="" />
             <img class="w4-cover-wapoo-3" src="../assets/images/work/gallery/wapoo-asset3.png" alt="" />
           </div>
-          <div class="w4-tab__text">
-            <h2>Wapoo AI</h2>
-            <p>AI-powered short-form video social app for Gen-Alpha</p>
+          <div class="w4-tab__foot">
+            <div class="w4-tab__text">
+              <h2>Wapoo AI</h2>
+              <p>AI-powered short-form video social app for Gen-Alpha</p>
+            </div>
+            <span class="w4-tab__arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 4.16667L15.8333 10L10 15.8333M15.8333 10H4.16667" stroke="#5F5F5F" stroke-opacity="0.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </div>
         </a>
+        </div>
+        <div class="w4-dots" role="group" aria-label="Case studies">
+          <button type="button" class="w4-dot" data-go="0" aria-label="Show MUJI USA"></button>
+          <button type="button" class="w4-dot" data-go="mid" aria-label="Show Damai Entertainment"></button>
+          <button type="button" class="w4-dot" data-go="1" aria-label="Show Wapoo AI"></button>
         </div>
       </div>
     </div>
@@ -461,6 +486,15 @@
           el.style.top = lerp(a.y, b.y, p) + "px";
           el.style.transform = "scale(" + lerp(a.s, b.s, p) + ")";
         });
+        renderDots();
+      }
+      // Indicator: the cards in view (big) are the long solid bars, the peeking one is short and half-faded.
+      var dots = Array.prototype.slice.call(document.querySelectorAll(".w4-dot"));
+      function renderDots() {
+        if (dots.length !== 3) return;
+        dots[0].style.width = lerp(32, 24, p) + "px"; dots[0].style.opacity = lerp(1, 0.5, p);
+        dots[1].style.width = "32px"; dots[1].style.opacity = 1;
+        dots[2].style.width = lerp(24, 32, p) + "px"; dots[2].style.opacity = lerp(0.5, 1, p);
       }
       function snapTo(target) {
         cancelAnimationFrame(raf);
@@ -494,6 +528,13 @@
         var x = e.touches[0].clientX; nudge((tx - x) / PX); tx = x;
       }, { passive: true });
       window.addEventListener("touchend", function () { tx = null; });
+      dots.forEach(function (d) {
+        d.addEventListener("click", function () {
+          var go = d.getAttribute("data-go");
+          if (go === "0") snapTo(0);
+          else if (go === "1") snapTo(1);
+        });
+      });
       render();
     })();
   </script>
