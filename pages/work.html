@@ -73,7 +73,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=124" />
+  <link rel="stylesheet" href="../css/style.css?v=125" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -183,6 +183,11 @@
     .w4__tabs { position: absolute; inset: 0; }
     /* Each tab is its own transition group so they can arrive one after another instead of as one stiff block. */
     .w4-tab--muji { view-transition-name: work-tab-1; }
+    /* Transition stacking: the glass layers are separate groups now, and tree order would paint a card's glass group
+       (a descendant of the card) ABOVE the card's own group, so its live backdrop blur would smear the card's content
+       and, as three cards span the screen, the whole page. Glass sits above the shapes but below the card contents. */
+    ::view-transition-group(work-glass-1), ::view-transition-group(work-glass-2), ::view-transition-group(work-glass-3) { z-index: 1; }
+    ::view-transition-group(work-tab-1), ::view-transition-group(work-tab-2), ::view-transition-group(work-tab-3) { z-index: 2; }
     .w4-tab--muji .w4-tab__glass { view-transition-name: work-glass-1; }
     .w4-tab--damai { view-transition-name: work-tab-2; }
     .w4-tab--damai .w4-tab__glass { view-transition-name: work-glass-2; }
