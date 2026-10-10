@@ -234,7 +234,10 @@ function initHomeBgEntrance() {
 function initHomeBgExit() {
   const canvas = document.querySelector(".home-bg__canvas");
   const shapes = document.querySelectorAll(".home-bg__shape");
-  const links = document.querySelectorAll('.hero-nav__item[href$="work.html"], .hero-nav__item[href$="about.html"]');
+  // Only the old Work page still uses the fall-out. Home -> About and Home -> Work 4.0 (work-v2.html) morph the
+  // shapes into the next page's matching shapes instead (view-transition names, see style.css), so they're not
+  // listed here. To bring the fall-out back for About, add '.hero-nav__item[href$="about.html"]' to this list.
+  const links = document.querySelectorAll('.hero-nav__item[href$="work.html"]');
   if (!canvas || !shapes.length || !links.length) return;
   const CLEAR_MARGIN = 80;
   const FALLBACK_MS = 1500;

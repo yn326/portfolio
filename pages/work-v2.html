@@ -6,7 +6,7 @@
   <script src="../js/case-transition.js?v=8"></script>
   <script>
     (function () {
-      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
+      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "work-v2.html": "work", "about.html": "about" };
       var supported = { "home-to-work": 1, "work-to-home": 1, "about-to-home": 1, "home-to-about": 1, "work-to-about": 1, "about-to-work": 1 };
       function keyFor(url) {
         try {
@@ -17,7 +17,11 @@
         }
       }
       var cur = keyFor(location.href);
-      var prev = document.referrer ? keyFor(document.referrer) : null;
+      var fromUrl = document.referrer;
+      try {
+        if (window.navigation && navigation.activation && navigation.activation.from) fromUrl = navigation.activation.from.url;
+      } catch (e) {}
+      var prev = fromUrl ? keyFor(fromUrl) : null;
       if (cur && prev && cur !== prev) {
         var pair = prev + "-to-" + cur;
         if (supported[pair]) document.documentElement.setAttribute("data-transition", pair);
@@ -33,7 +37,12 @@
     // source -- pageswap covers this (outgoing) page's capture, pagereveal covers
     // the incoming page's.
     window.addEventListener("pageswap", function (e) {
-      if (e.viewTransition) document.documentElement.classList.add("vt-no-blur");
+      if (!e.viewTransition) return;
+      // Heading to About: the exiting cards' blur rides on their transition groups (see style.css), so it
+      // is NOT stripped here -- stripping it showed the shapes' sharp edges through the glass for a frame.
+      var toAbout = false;
+      try { toAbout = !!(e.activation && /\/about\.html$/.test(new URL(e.activation.entry.url).pathname)); } catch (err) {}
+      if (!toAbout) document.documentElement.classList.add("vt-no-blur");
     });
     window.addEventListener("pagereveal", function (e) {
       if (e.viewTransition) {
@@ -54,6 +63,9 @@
       }
     });
   </script>
+  <!-- Hold the first render until the parser has reached the end of the page; otherwise Chrome can reveal the
+       page mid-parse and drop the view transition (see the same hint on about.html). Chrome-only; ignored elsewhere. -->
+  <link rel="expect" href="#page-parsed" blocking="render" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raina Ni - Work (v2 experiment)</title>
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png?v=4" />
@@ -62,7 +74,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=113" />
+  <link rel="stylesheet" href="../css/style.css?v=122" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -77,7 +89,7 @@
   </script>
   <style>
     /* ---- Work 4.0 experiment (Figma 1147-8448). Scoped to this page only. ---- */
-    html, body { overflow: hidden; height: 100%; }
+    html, body { overflow: hidden; height: 100%; overscroll-behavior: none; }
     .page-canvas--work { padding: 0; height: 100vh; min-height: 0; overflow: hidden; }
     .page-canvas--work .page-nav { z-index: 5; }
     .w4 { position: absolute; inset: 0; overflow: hidden; container-type: size; }
@@ -103,7 +115,8 @@
       width: 600px; height: 500px; padding: 40px; gap: 24px; border-radius: 40px;
       color: #5f5f5f; text-decoration: none; overflow: hidden;
     }
-    .w4-tab--wapoo { width: 540px; height: 450px; padding: 36px; gap: 36px; border-radius: 36px; }
+    /* Figma peek tab is a 0.9-scaled copy of the full 600x500 card (540x450, 36px padding/radius). */
+    .w4-tab { transform-origin: top left; }
     .w4-tab::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
       background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 16%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 62%, rgba(255,255,255,.06) 84%, rgba(255,255,255,.2) 100%); }
     /* rim: corner angles for a 600x500 (and 540x450) box: TR = atan(300/250) = 50.19deg = 13.94%, BL = 63.94% */
@@ -143,19 +156,25 @@
     .w4-cover-damai-2 { animation: w4-float-2 3.5s ease-in-out 0.6s infinite; }
     .w4-cover-damai-3 { animation: w4-float-1 4.1s ease-in-out 1s infinite; }
     .w4-cover-damai-screen { animation: w4-float-damai-screen 4.3s ease-in-out 0.4s infinite; }
-    @media (prefers-reduced-motion: reduce) { .w4-cover-muji-1, .w4-cover-muji-2, .w4-cover-muji-screen, .w4-cover-damai-1, .w4-cover-damai-2, .w4-cover-damai-3, .w4-cover-damai-screen { animation: none; } }
     /* Damai cover assets: Figma left/top inside the 520-wide cover; asset 3 is the rotated bbox @2x (rotation baked in). */
     /* Damai screen: 120x220 rotated 10deg. Figma left/top (212, 30) is the rotated bounding box (156.4 x 237.5), so the
        unrotated box is centered on the bbox center (290.2, 148.75) -> left 230.2 / top 38.75. The stripe is a normal
        flex child, so the frame's align-items:center centers it horizontally. */
-    .w4-cover-damai-screen { position: absolute; z-index: 2; left: 230.2px; top: 38.75px; width: 120px; height: 220px; box-sizing: border-box;
+    .w4-cover-damai-screen, .w4-cover-wapoo-screen { position: absolute; z-index: 2; left: 230.2px; top: 38.75px; width: 120px; height: 220px; box-sizing: border-box;
       display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 8px 16px; transform: rotate(10deg);
       border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.05);
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-    .w4-cover-damai-screen__stripe { width: 24px; height: 4px; flex-shrink: 0;
+    .w4-cover-damai-screen__stripe, .w4-cover-wapoo-screen__stripe { width: 24px; height: 4px; flex-shrink: 0;
       border-radius: 99px; background: rgba(255, 255, 255, 0.4); }
     /* 120x220 animation laid exactly over the whole frame (border-box), rotating with it. */
-    .w4-cover-damai-lottie { position: absolute; left: -1px; top: -1px; width: 120px; height: 220px; pointer-events: none; }
+    .w4-cover-damai-lottie, .w4-cover-wapoo-lottie { position: absolute; left: -1px; top: -1px; width: 120px; height: 220px; pointer-events: none; }
+    /* Wapoo cover: same screen frame as Damai, rotated -15deg. Figma left/top (190, 27) is the rotated bounding box
+       (172.85 x 243.57), so the unrotated 120x220 frame is centered on (276.43, 148.78) -> left 216.43 / top 38.78.
+       Assets are 2x exports of the unrotated layers at their Figma left/top. */
+    .w4-cover-wapoo-screen { left: 216.43px; top: 38.78px; transform: rotate(-15deg); animation: w4-float-damai-screen 4.2s ease-in-out 0.5s infinite; }
+    .w4-cover-wapoo-1 { left: 89px; top: 37px; width: 86px; animation: w4-float-1 3.7s ease-in-out 0.3s infinite; }
+    .w4-cover-wapoo-2 { left: 113px; top: 162px; width: 90px; animation: w4-float-2 3.4s ease-in-out 0.7s infinite; }
+    .w4-cover-wapoo-3 { left: 299px; top: 50px; width: 138px; animation: w4-float-2 3.1s ease-in-out 1.4s infinite; }
     .w4-cover-damai-1 { left: 128px; top: 36px; width: 84px; }
     .w4-cover-damai-2 { left: 83px; top: 141px; width: 116px; }
     .w4-cover-damai-3 { left: 284px; top: 79px; width: 167.5px; }
@@ -164,9 +183,47 @@
     .w4-tab__text { display: flex; flex-direction: column; align-self: stretch; gap: 12px; }
     .w4-tab__text h2 { margin: 0; height: 24px; display: flex; flex-direction: column; justify-content: center; white-space: nowrap; font: 300 30px/normal "Figtree", sans-serif; color: #5f5f5f; }
     .w4-tab__text p { margin: 0; font: 300 18px/normal "Figtree", sans-serif; color: #5f5f5f; }
-    .w4-tab--wapoo .w4-tab__text { gap: 10.8px; }
-    .w4-tab--wapoo .w4-tab__text h2 { font-size: 27px; }
-    .w4-tab--wapoo .w4-tab__text p { font-size: 16.2px; }
+    /* Shared-shape morph with the home page (names match html.vt-bg-morph in style.css), and the tab strip is the
+       "work-tab" that slides in from the right while the home tab slides out. */
+    .w4__shape--r6 { view-transition-name: bg-rect; }
+    .w4__shape--e9 { view-transition-name: bg-e9; }
+    .w4__shape--e10 { view-transition-name: bg-e10; }
+    .w4__shape--e11 { view-transition-name: bg-e11; }
+    .w4__tabs { position: absolute; inset: 0; }
+    /* Each tab is its own transition group so they can arrive one after another instead of as one stiff block. */
+    .w4-tab--muji { view-transition-name: work-tab-1; }
+    .w4-tab--damai { view-transition-name: work-tab-2; }
+    .w4-tab--wapoo { view-transition-name: work-tab-3; }
+    /* Home -> Work: slide in from the right, left card first, each a beat after the last (and a touch slower). */
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-1) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-right; }
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-right; }
+    html[data-transition="home-to-work"]::view-transition-new(work-tab-3) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right; }
+    /* About -> Work 4.0: the About tab leaves to the right (existing rule in style.css); the cards arrive from the
+       left, right-most first so a card behind never catches the one in front. The About tab is already on its way
+       out and the cards trail it (simulated at 1100/1440/1920px wide, both carousel positions: no overlaps). */
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-3) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-in-from-left; }
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-in-from-left; }
+    html[data-transition="about-to-work"]::view-transition-new(work-tab-1) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-left; }
+    /* Home -> Work 4.0: the home tab's glass fades out gradually instead of snapping flat.
+       Blur can't live in the snapshot (and the snapshot layer is isolated, so a blur on it can't see the shapes behind),
+       so the blur sits on the transition GROUP, which can: the group slides left with the card (via the standalone
+       `translate` property, so the UA's own positioning animation is left alone), keeps its rounded corners, and the
+       blur eases from the card's real value to nothing over the slide. */
+    /* (the vt-glass-fade / vt-group-slide-left keyframes live in style.css now) */
+    html[data-transition="home-to-work"]::view-transition-group(home-tab) {
+      border-radius: 40px;
+      animation-name: -ua-view-transition-group-anim-home-tab, vt-group-slide-left, vt-glass-fade;
+      animation-duration: 800ms, 800ms, 800ms;
+      animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+      animation-fill-mode: both, both, both;
+    }
+    html[data-transition="home-to-work"]::view-transition-old(home-tab) { animation: none; }
+    /* Backdrop blurs can't live inside a captured snapshot: strip them for the transition, ease them back after. */
+    html.vt-no-blur .w4-tab__glass, html.vt-no-blur .w4-cover-muji-phone, html.vt-no-blur .w4-cover-damai-screen, html.vt-no-blur .w4-cover-wapoo-screen {
+      backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+    html.vt-blur-settling .w4-tab__glass, html.vt-blur-settling .w4-cover-muji-phone, html.vt-blur-settling .w4-cover-damai-screen, html.vt-blur-settling .w4-cover-wapoo-screen {
+      transition: backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease; }
+    @media (prefers-reduced-motion: reduce) { .w4-cover-muji-1, .w4-cover-muji-2, .w4-cover-muji-screen, .w4-cover-damai-1, .w4-cover-damai-2, .w4-cover-damai-3, .w4-cover-damai-screen, .w4-cover-wapoo-1, .w4-cover-wapoo-2, .w4-cover-wapoo-3, .w4-cover-wapoo-screen { animation: none; } }
   </style>
 </head>
 <body>
@@ -209,7 +266,7 @@
           <path d="M42.7975 12.816C41.9215 12.816 41.1475 12.618 40.4755 12.222C39.8035 11.814 39.2755 11.256 38.8915 10.548C38.5195 9.84 38.3335 9.024 38.3335 8.1C38.3335 7.176 38.5195 6.36 38.8915 5.652C39.2755 4.944 39.7975 4.392 40.4575 3.996C41.1295 3.588 41.8975 3.384 42.7615 3.384C43.6015 3.384 44.3275 3.594 44.9395 4.014C45.5515 4.422 46.0255 4.998 46.3615 5.742C46.6975 6.486 46.8655 7.362 46.8655 8.37H39.7915C39.8515 9.354 40.1635 10.122 40.7275 10.674C41.2915 11.226 42.0055 11.502 42.8695 11.502C43.5055 11.502 44.0395 11.352 44.4715 11.052C44.9155 10.752 45.2575 10.356 45.4975 9.864L46.7395 10.494C46.5115 10.962 46.2055 11.37 45.8215 11.718C45.4495 12.066 45.0055 12.336 44.4895 12.528C43.9855 12.72 43.4215 12.816 42.7975 12.816ZM39.8995 7.164H45.3175C45.2815 6.648 45.1435 6.204 44.9035 5.832C44.6755 5.46 44.3755 5.172 44.0035 4.968C43.6315 4.764 43.2115 4.662 42.7435 4.662C42.2875 4.662 41.8495 4.764 41.4295 4.968C41.0095 5.16 40.6615 5.448 40.3855 5.832C40.1095 6.204 39.9475 6.648 39.8995 7.164Z" fill="#AE8383" fill-opacity="0.5"/>
         </svg>
       </a>
-      <a href="work.html" class="is-active" aria-label="Work">
+      <a href="work-v2.html" class="is-active" aria-label="Work">
         <svg width="42" height="13" viewBox="0 0 42 13" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3.852 12.6L0 0H1.53L4.68 10.278L7.722 0H9.234L12.222 10.242L15.408 0H16.938L13.032 12.6H11.394L8.478 2.466L5.472 12.6H3.852Z" fill="#AE8383"/>
           <path d="M21.617 12.816C20.741 12.816 19.961 12.618 19.277 12.222C18.605 11.814 18.077 11.256 17.693 10.548C17.309 9.84 17.117 9.024 17.117 8.1C17.117 7.176 17.303 6.36 17.675 5.652C18.059 4.944 18.587 4.392 19.259 3.996C19.943 3.588 20.717 3.384 21.581 3.384C22.469 3.384 23.249 3.588 23.921 3.996C24.605 4.392 25.133 4.944 25.505 5.652C25.889 6.36 26.081 7.176 26.081 8.1C26.081 9.024 25.889 9.84 25.505 10.548C25.133 11.256 24.611 11.814 23.939 12.222C23.267 12.618 22.493 12.816 21.617 12.816ZM21.617 11.484C22.217 11.484 22.739 11.34 23.183 11.052C23.627 10.764 23.975 10.368 24.227 9.864C24.491 9.36 24.623 8.772 24.623 8.1C24.623 7.428 24.491 6.84 24.227 6.336C23.975 5.832 23.621 5.436 23.165 5.148C22.709 4.86 22.181 4.716 21.581 4.716C20.993 4.716 20.471 4.86 20.015 5.148C19.571 5.436 19.217 5.832 18.953 6.336C18.701 6.84 18.575 7.428 18.575 8.1C18.575 8.76 18.701 9.348 18.953 9.864C19.217 10.368 19.577 10.764 20.033 11.052C20.501 11.34 21.029 11.484 21.617 11.484Z" fill="#AE8383"/>
@@ -246,6 +303,7 @@
         <span class="w4__shape w4__shape--e11"></span>
         <span class="w4__shape w4__shape--r6"></span>
 
+        <div class="w4__tabs">
         <a class="w4-tab w4-tab--muji" href="muji.html" data-case-color="#8B0013" style="left:100px;top:200px;">
           <span class="w4-tab__glass"></span>
           <div class="traffic-lights">
@@ -296,12 +354,21 @@
             <span class="traffic-light traffic-light--white"></span>
             <span class="traffic-light traffic-light--green"></span>
           </div>
-          <div class="w4-tab__cover"></div>
+          <div class="w4-tab__cover">
+            <div class="w4-cover-wapoo-screen">
+              <span class="w4-cover-wapoo-screen__stripe"></span>
+              <div class="w4-cover-wapoo-lottie" id="w4-wapoo-lottie"></div>
+            </div>
+            <img class="w4-cover-wapoo-1" src="../assets/images/work/gallery/wapoo-asset1.png" alt="" />
+            <img class="w4-cover-wapoo-2" src="../assets/images/work/gallery/wapoo-asset2.png" alt="" />
+            <img class="w4-cover-wapoo-3" src="../assets/images/work/gallery/wapoo-asset3.png" alt="" />
+          </div>
           <div class="w4-tab__text">
             <h2>Wapoo AI</h2>
             <p>AI-powered short-form video social app for Gen-Alpha</p>
           </div>
         </a>
+        </div>
       </div>
     </div>
   </div>
@@ -324,7 +391,68 @@
     }
     loadW4Lottie("w4-muji-lottie", "../assets/lottie/muji-animation.json");
     loadW4Lottie("w4-damai-lottie", "../assets/lottie/damai-animation.json");
+    loadW4Lottie("w4-wapoo-lottie", "../assets/lottie/wapoo-animation.json");
   </script>
-  <script src="../js/main.js?v=31"></script>
+
+  <script>
+    // Horizontal carousel: the three tabs sit on a strip; scrolling / swiping / arrow keys slides it one card
+    // (636px = 600 card + 36 gap). State 0 = MUJI + Damai big, Wapoo peeking right; state 1 = MUJI peeking left,
+    // Damai + Wapoo big (positions from Figma "Work 4.0" / "Work 4.0 (2)"). Each tab's left/top/scale is
+    // interpolated between its two states by p (0..1), then snaps to the nearest state when input stops.
+    (function () {
+      var S = {
+        muji:  [{ x: 100, y: 200, s: 1 }, { x: -476, y: 225, s: 0.9 }],
+        damai: [{ x: 736, y: 200, s: 1 }, { x: 100, y: 200, s: 1 }],
+        wapoo: [{ x: 1371, y: 225, s: 0.9 }, { x: 736, y: 200, s: 1 }]
+      };
+      var tabs = {};
+      Object.keys(S).forEach(function (k) { tabs[k] = document.querySelector(".w4-tab--" + k); });
+      var p = 0, snapTimer = null, raf = null;
+      function lerp(a, b, t) { return a + (b - a) * t; }
+      function render() {
+        Object.keys(S).forEach(function (k) {
+          var a = S[k][0], b = S[k][1], el = tabs[k];
+          el.style.left = lerp(a.x, b.x, p) + "px";
+          el.style.top = lerp(a.y, b.y, p) + "px";
+          el.style.transform = "scale(" + lerp(a.s, b.s, p) + ")";
+        });
+      }
+      function snapTo(target) {
+        cancelAnimationFrame(raf);
+        var from = p, t0 = performance.now(), dur = 450;
+        (function step(now) {
+          var t = Math.min((now - t0) / dur, 1), e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          p = lerp(from, target, e); render();
+          if (t < 1) raf = requestAnimationFrame(step);
+        })(t0);
+      }
+      function nudge(dp) {
+        cancelAnimationFrame(raf);
+        p = Math.min(1, Math.max(0, p + dp)); render();
+        clearTimeout(snapTimer);
+        snapTimer = setTimeout(function () { snapTo(p > 0.5 ? 1 : 0); }, 140);
+      }
+      var PX = 636;
+      window.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        var d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        nudge(d / PX);
+      }, { passive: false });
+      window.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") snapTo(1);
+        if (e.key === "ArrowLeft") snapTo(0);
+      });
+      var tx = null;
+      window.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
+      window.addEventListener("touchmove", function (e) {
+        if (tx === null) return;
+        var x = e.touches[0].clientX; nudge((tx - x) / PX); tx = x;
+      }, { passive: true });
+      window.addEventListener("touchend", function () { tx = null; });
+      render();
+    })();
+  </script>
+  <script src="../js/main.js?v=32"></script>
+  <span id="page-parsed" hidden></span>
 </body>
 </html>

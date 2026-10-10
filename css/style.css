@@ -147,6 +147,150 @@ html[data-transition="about-to-work"]::view-transition-new(work-footer) {
   animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in-from-left;
 }
 
+/* ---- Home <-> Work 4.0 (work-v2): background shapes morph instead of dropping ----
+   Each home shape that has a counterpart on the Work 4.0 page shares a
+   view-transition-name with it, so the browser animates the pair's position,
+   size and tilt from one page's box to the other's (and cross-fades the two
+   snapshots, which also covers the gradient/palette differences). The names
+   are only attached while html has .vt-bg-morph (set by the pageswap /
+   pagereveal handlers in index.html when the other page is work-v2), so the
+   existing Home <-> Work/About transitions are untouched.
+     home shape 1 (Rectangle 6)  -> work Rectangle 6
+     home shape 3 (Ellipse 9)    -> work Ellipse 9
+     home shape 4 (Ellipse 10)   -> work Ellipse 10
+     home shape 5 (Ellipse 8)    -> work Ellipse 11
+     home shape 2                -> no counterpart: fades out / in */
+html.vt-bg-morph .home-bg__shape-fill--1 { view-transition-name: bg-rect; }
+html.vt-bg-morph .home-bg__shape-fill--2 { view-transition-name: bg-spare; }
+html.vt-bg-morph .home-bg__shape-fill--3 { view-transition-name: bg-e9; }
+html.vt-bg-morph .home-bg__shape-fill--4 { view-transition-name: bg-e10; }
+html.vt-bg-morph .home-bg__shape-fill--5 { view-transition-name: bg-e11; }
+/* Duration/easing only (never the `animation` shorthand on a group -- see the note
+   at the top of this file): same 800ms curve as the glass tab slide, so the shapes
+   and the tab move simultaneously. */
+::view-transition-group(bg-rect),
+::view-transition-group(bg-e9),
+::view-transition-group(bg-e10),
+::view-transition-group(bg-e11),
+::view-transition-group(bg-spare),
+::view-transition-old(bg-rect),
+::view-transition-new(bg-rect),
+::view-transition-old(bg-e9),
+::view-transition-new(bg-e9),
+::view-transition-old(bg-e10),
+::view-transition-new(bg-e10),
+::view-transition-old(bg-e11),
+::view-transition-new(bg-e11) {
+  animation-duration: 800ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+/* The home shape with no Work counterpart doesn't fade: it travels off the bottom-right
+   of the screen on the same curve as everything else (and back in on the return trip). It
+   only has an old (or only a new) snapshot, so the motion goes on that pseudo, not the group. */
+@keyframes vt-spare-out { from { transform: translate(0, 0); } to { transform: translate(35vw, 110vh); } }
+@keyframes vt-spare-in { from { transform: translate(35vw, 110vh); } to { transform: translate(0, 0); } }
+::view-transition-old(bg-spare) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-spare-out; }
+::view-transition-new(bg-spare) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) both vt-spare-in; }
+/* ---- Return trip: Work 4.0 -> Home ----
+   Pseudo-element rules are read from the page being ARRIVED at, so everything the
+   outgoing Work 4.0 cards and the incoming home tab need has to live here, not on
+   work-v2.html. Cards slide out to the right, RIGHT-most first, each a beat after
+   the last (a card behind can never catch the one in front of it, since all of them
+   travel right). The left-most card therefore leaves last, so the home tab that
+   arrives from the left must not start before it does: it takes the left-most
+   card's exact delay and duration (180ms / 900ms), which keeps it trailing that
+   card at all times -- starting earlier made it run into the card; the home tab slides back in from the left with its glass blur easing
+   in on the transition group (mirror of the way out), while the shapes morph back
+   through the shared names above. */
+html[data-transition="work-to-home"]::view-transition-old(work-tab-3) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-out-right; }
+html[data-transition="work-to-home"]::view-transition-old(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-out-right; }
+html[data-transition="work-to-home"]::view-transition-old(work-tab-1) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-out-right; }
+/* ---- Work 4.0 -> About (the about page gets html.from-work-v2) ----
+   Mirror image of the way back to Home: the cards slide out to the LEFT, left-most first
+   (so a card behind never catches the one in front), and the About tab, which arrives from
+   the right, copies the right-most card's delay/duration (180ms / 900ms) so it trails that
+   card instead of running into it. Each card's glass blur rides on its transition group
+   (which, unlike the snapshot, can see the shapes behind) and eases out as it slides;
+   the shapes themselves have matching names on both pages, so they stay exactly put. */
+@keyframes vt-group-slide-out-left { from { translate: 0 0; } to { translate: calc(-100vw - 100%) 0; } }
+@keyframes vt-glass8-fade-out { from { backdrop-filter: blur(8px) saturate(130%); } to { backdrop-filter: blur(0px) saturate(100%); } }
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-1),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-2),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-3) {
+  border-radius: 40px;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-1) {
+  animation-name: -ua-view-transition-group-anim-work-tab-1, vt-group-slide-out-left, vt-glass8-fade-out;
+  animation-duration: 800ms, 800ms, 800ms;
+  animation-delay: 0ms, 0ms, 0ms;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-2) {
+  animation-name: -ua-view-transition-group-anim-work-tab-2, vt-group-slide-out-left, vt-glass8-fade-out;
+  animation-duration: 850ms, 850ms, 850ms;
+  animation-delay: 0ms, 90ms, 90ms;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-group(work-tab-3) {
+  /* the right-most card is the 0.9-scaled peek: 540x450, so its radius scales too */
+  border-radius: 36px;
+  animation-name: -ua-view-transition-group-anim-work-tab-3, vt-group-slide-out-left, vt-glass8-fade-out;
+  animation-duration: 900ms, 900ms, 900ms;
+  animation-delay: 0ms, 180ms, 180ms;
+}
+html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-tab-1),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-tab-2),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-tab-3) { animation: none; }
+html.from-work-v2[data-transition="work-to-about"]::view-transition-new(about-tab),
+html.from-work-v2[data-transition="work-to-about"]::view-transition-new(about-footer) {
+  animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right;
+}
+@keyframes vt-glass-fade-in { from { backdrop-filter: blur(0px) saturate(100%); } to { backdrop-filter: blur(20px) saturate(130%); } }
+@keyframes vt-group-slide-in-left { from { translate: calc(-100vw - 100%) 0; } to { translate: 0 0; } }
+html.home-bg-from-v2[data-transition="work-to-home"]::view-transition-group(home-tab) {
+  border-radius: 40px;
+  animation-name: -ua-view-transition-group-anim-home-tab, vt-group-slide-in-left, vt-glass-fade-in;
+  animation-duration: 800ms, 900ms, 900ms;
+  animation-delay: 0ms, 180ms, 180ms;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+/* About -> Home: About leaves as one piece (the existing 800ms slide-out right), so the home tab can follow it
+   with no delay -- both move on the same curve, which keeps a constant gap between them. */
+html.home-bg-from-v2[data-transition="about-to-home"]::view-transition-group(home-tab) {
+  border-radius: 40px;
+  animation-name: -ua-view-transition-group-anim-home-tab, vt-group-slide-in-left, vt-glass-fade-in;
+  animation-duration: 800ms, 800ms, 800ms;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+html.home-bg-from-v2[data-transition="work-to-home"]::view-transition-new(home-tab),
+html.home-bg-from-v2[data-transition="about-to-home"]::view-transition-new(home-tab) { animation: none; }
+/* ---- Home -> About: same treatment as Home -> Work 4.0 (the page being arrived at supplies the rules).
+   The card's glass blur rides on its transition group and fades while the group slides left; the
+   About tab / footer slide in from the right via the existing home-to-about rules. ---- */
+html[data-transition="home-to-about"]::view-transition-group(home-tab) {
+  border-radius: 40px;
+  animation-name: -ua-view-transition-group-anim-home-tab, vt-group-slide-left, vt-glass-fade;
+  animation-duration: 800ms, 800ms, 800ms;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+html[data-transition="home-to-about"]::view-transition-old(home-tab) { animation: none; }
+@keyframes vt-glass-fade { from { backdrop-filter: blur(20px) saturate(130%); } to { backdrop-filter: blur(0px) saturate(100%); } }
+@keyframes vt-group-slide-left { from { translate: 0 0; } to { translate: calc(-100vw - 100%) 0; } }
+/* Arriving on Home from Work 4.0 or About: the shapes must already be sitting where the
+   morph ends (the drop-in would leave them hidden/offscreen in the snapshot), so
+   skip the drop and go straight to the float loop. Specificity is deliberately
+   higher than .home-bg__shape--N.home-bg-ready. */
+html.home-bg-from-v2 .home-bg__shape:not(.is-exiting),
+html.home-bg-from-v2 .home-bg__shape.home-bg-ready:not(.is-exiting) { opacity: 1; transform: none; }
+html.home-bg-from-v2 .home-bg__shape--1.home-bg-ready:not(.is-exiting), html.home-bg-from-v2 .home-bg__shape--1:not(.is-exiting) { animation: home-bg-float-1 3.2s ease-in-out infinite; }
+html.home-bg-from-v2 .home-bg__shape--2.home-bg-ready:not(.is-exiting), html.home-bg-from-v2 .home-bg__shape--2:not(.is-exiting) { animation: home-bg-float-2 3.9s ease-in-out infinite; }
+html.home-bg-from-v2 .home-bg__shape--3.home-bg-ready:not(.is-exiting), html.home-bg-from-v2 .home-bg__shape--3:not(.is-exiting) { animation: home-bg-float-3 2.8s ease-in-out infinite; }
+html.home-bg-from-v2 .home-bg__shape--4.home-bg-ready:not(.is-exiting), html.home-bg-from-v2 .home-bg__shape--4:not(.is-exiting) { animation: home-bg-float-4 3.5s ease-in-out infinite; }
+html.home-bg-from-v2 .home-bg__shape--5.home-bg-ready:not(.is-exiting), html.home-bg-from-v2 .home-bg__shape--5:not(.is-exiting) { animation: home-bg-float-5 4.2s ease-in-out infinite; }
+
 /* Scoped to the transition only (the real .glass-card keeps its full glass
    effect everywhere else). backdrop-filter can't be baked into the static
    old/new snapshot images, so the UA carries it onto ::view-transition-group()
