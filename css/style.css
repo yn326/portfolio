@@ -329,7 +329,7 @@ html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-scr
 html.from-work-v2[data-transition="work-to-about"]::view-transition-old(work-screen-3) { animation: none; }
 html.from-work-v2[data-transition="work-to-about"]::view-transition-new(about-tab),
 html.from-work-v2[data-transition="work-to-about"]::view-transition-new(about-footer) {
-  animation: none; /* the tab and footer slide as groups now (see "Arriving on About") */
+  animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-in-from-right;
 }
 @keyframes vt-glass-fade-in { from { backdrop-filter: blur(0px) saturate(100%); } to { backdrop-filter: blur(20px) saturate(130%); } }
 @keyframes vt-group-slide-in-left { from { translate: calc(-100vw - 100%) 0; } to { translate: 0 0; } }
@@ -389,39 +389,6 @@ html[data-transition="about-to-work"]::view-transition-old(about-tab),
 html[data-transition="about-to-work"]::view-transition-old(about-footer) { animation: none; }
 @keyframes vt-glass-fade { from { backdrop-filter: blur(20px) saturate(130%); } to { backdrop-filter: blur(0px) saturate(100%); } }
 @keyframes vt-group-slide-left { from { translate: 0 0; } to { translate: calc(-100vw - 100%) 0; } }
-/* ---- Arriving on About (from Home or Work 4.0) ----
-   The tab and footer slide in as transition GROUPS with their glass blur easing IN on the group while they slide
-   (mirror of the way out), and the real elements keep their own blur untouched (see about.html: no vt-no-blur
-   on these routes), so when the transition ends the live blur is already there -- no pop, no re-ramp. */
-@keyframes vt-glass8-fade-in { from { backdrop-filter: blur(0px) saturate(100%); } to { backdrop-filter: blur(8px) saturate(130%); } }
-@keyframes vt-group-slide-in-right { from { translate: calc(100vw + 100%) 0; } to { translate: 0 0; } }
-html[data-transition="work-to-about"]::view-transition-group(about-tab),
-html[data-transition="work-to-about"]::view-transition-group(about-footer) {
-  border-radius: 40px;
-  animation-duration: 800ms, 800ms, 800ms;
-  animation-delay: 0ms, 0ms, 0ms;
-  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
-  animation-fill-mode: both, both, both;
-}
-html[data-transition="home-to-about"]::view-transition-group(about-tab),
-html[data-transition="home-to-about"]::view-transition-group(about-footer) {
-  border-radius: 40px;
-  animation-duration: 800ms, 800ms, 800ms;
-  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
-  animation-fill-mode: both, both, both;
-}
-html[data-transition="work-to-about"]::view-transition-group(about-tab),
-html[data-transition="home-to-about"]::view-transition-group(about-tab) {
-  animation-name: -ua-view-transition-group-anim-about-tab, vt-group-slide-in-right, vt-glass8-fade-in;
-}
-html[data-transition="work-to-about"]::view-transition-group(about-footer),
-html[data-transition="home-to-about"]::view-transition-group(about-footer) {
-  animation-name: -ua-view-transition-group-anim-about-footer, vt-group-slide-in-right, vt-glass8-fade-in;
-}
-html[data-transition="work-to-about"]::view-transition-new(about-tab),
-html[data-transition="work-to-about"]::view-transition-new(about-footer),
-html[data-transition="home-to-about"]::view-transition-new(about-tab),
-html[data-transition="home-to-about"]::view-transition-new(about-footer) { animation: none; }
 /* Arriving on Home from Work 4.0 or About: the shapes must already be sitting where the
    morph ends (the drop-in would leave them hidden/offscreen in the snapshot), so
    skip the drop and go straight to the float loop. Specificity is deliberately
