@@ -256,6 +256,46 @@
     });
   }
 
+  // Fallback when the browser doesn't run the view transition: there's no old page to cover, so the new page
+  // stays hidden behind a flat color matching the old page's background, and the same two-step pink sweep
+  // plays over that (bottom edge down until the screen is pink; then, once the page is ready, top edge down).
+  function fallbackSweep(color, under) {
+    var st = document.createElement("style");
+    st.textContent =
+      "html.case-enter{background:" + (under || "#fff") + "}html.case-enter body{visibility:hidden}";
+    document.head.appendChild(st);
+    root.classList.add("case-enter");
+    function start() {
+      var outer = document.createElement("div");
+      outer.setAttribute("aria-hidden", "true");
+      outer.setAttribute("data-case-overlay", "");
+      outer.style.cssText = "position:fixed;inset:0;z-index:" + Z + ";pointer-events:none;visibility:visible;";
+      var inner = document.createElement("div");
+      inner.style.cssText = "position:absolute;inset:0;background:" + color + ";clip-path:inset(0 0 100% 0);";
+      outer.appendChild(inner);
+      root.appendChild(outer);
+      var cover = inner.animate(
+        [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }],
+        { duration: SWEEP_MS, easing: EASING, fill: "forwards" }
+      );
+      Promise.all([cover.finished, waitUntilReady()]).then(function () {
+        root.classList.remove("case-enter");
+        st.remove();
+        setTimeout(function () {
+          outer
+            .animate(
+              [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }],
+              { duration: LOWER_MS, easing: EASING, fill: "forwards" }
+            )
+            .finished.then(function () { outer.remove(); });
+        }, PAUSE_MS);
+      });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+    else start();
+    setTimeout(function () { root.classList.remove("case-enter"); }, 6000);
+  }
+
   // Resolves once the page is ready to be looked at: fonts loaded and the images
   // visible on first screen decoded, then two animation frames so layout and the
   // first paint are done. Never waits longer than MAX_WAIT_MS.
@@ -368,7 +408,7 @@
         if (!vt) {
           root.classList.remove("case-sweep");
           sweepStyle.remove();
-          slabArrival();
+          fallbackSweep(incoming.color, incoming.under);
           return;
         }
         vt.ready.then(function () { runSweep(vt); }, function () {});
@@ -384,6 +424,13 @@
   }
 
   // ---- Outgoing page ----
+  function pageBg() {
+    try {
+      var c = getComputedStyle(document.body).backgroundColor;
+      if (!c || c === "transparent" || /rgba\(.*,\s*0\)$/.test(c)) c = getComputedStyle(root).backgroundColor;
+      return !c || /rgba\(.*,\s*0\)$/.test(c) || c === "transparent" ? "#fff" : c;
+    } catch (e) { return "#fff"; }
+  }
   var busy = false;
 
   var onCasePage = /\/(muji|damai|wapoo)\.html$/.test(location.pathname);
@@ -404,7 +451,7 @@
     try {
       sessionStorage.setItem(
         KEY,
-        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme || "#FFC3C3", mode: "sweep", t: Date.now() })
+        JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme || "#FFC3C3", mode: "sweep", under: pageBg(), t: Date.now() })
       );
     } catch (err) {}
     // Keep the browser's snapshot of this page (the pink sweeps over it); un-name its named elements first.
@@ -427,6 +474,7 @@
       sessionStorage.removeItem(KEY);
     } catch (err) {}
     if (!inc || Date.now() - inc.t > 10000 || reduceMotion) return;
+    if (inc.mode === "sweep") { fallbackSweep(inc.color, inc.under); return; }
     var ov = makeOverlay(inc.color);
     ov.setAttribute("data-case-overlay", "");
     document.body.appendChild(ov);
