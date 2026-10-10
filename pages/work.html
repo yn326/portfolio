@@ -43,10 +43,10 @@
     window.addEventListener("pageswap", function (e) {
       if (!e.viewTransition) return;
       document.documentElement.classList.add("vt-tab-names");
-      // Heading to About: the exiting cards' blur rides on their transition groups (see style.css), so it
+      // Heading to About or Home: the exiting cards' blur rides on their transition groups (see style.css), so it
       // is NOT stripped here -- stripping it showed the shapes' sharp edges through the glass for a frame.
       var toAbout = false;
-      try { toAbout = !!(e.activation && /\/about\.html$/.test(new URL(e.activation.entry.url).pathname)); } catch (err) {}
+      try { toAbout = !!(e.activation && /\/(about|index)\.html$|\/$/.test(new URL(e.activation.entry.url).pathname)); } catch (err) {}
       if (!toAbout) document.documentElement.classList.add("vt-no-blur");
     });
     window.addEventListener("pagereveal", function (e) {
@@ -91,7 +91,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=122" />
+  <link rel="stylesheet" href="../css/style.css?v=123" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own

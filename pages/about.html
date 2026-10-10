@@ -38,7 +38,12 @@
     // source -- pageswap covers this (outgoing) page's capture, pagereveal covers
     // the incoming page's.
     window.addEventListener("pageswap", function (e) {
-      if (e.viewTransition) document.documentElement.classList.add("vt-no-blur");
+      if (!e.viewTransition) return;
+      // Heading to Home or Work: the tab's and footer's blur rides on their transition groups and eases out
+      // while they slide (see style.css), so it is NOT stripped here -- stripping dropped it instantly.
+      var keep = false;
+      try { keep = !!(e.activation && /\/(index|work)\.html$|\/$/.test(new URL(e.activation.entry.url).pathname)); } catch (err) {}
+      if (!keep) document.documentElement.classList.add("vt-no-blur");
     });
     window.addEventListener("pagereveal", function (e) {
       if (e.viewTransition) {
@@ -71,7 +76,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&family=Homemade+Apple&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=170" />
+  <link rel="stylesheet" href="../css/style.css?v=171" />
   <style>
     /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }

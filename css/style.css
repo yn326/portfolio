@@ -202,9 +202,35 @@ html.vt-bg-morph .home-bg__shape-fill--5 { view-transition-name: bg-e11; }
    card at all times -- starting earlier made it run into the card; the home tab slides back in from the left with its glass blur easing
    in on the transition group (mirror of the way out), while the shapes morph back
    through the shared names above. */
-html[data-transition="work-to-home"]::view-transition-old(work-tab-3) { animation: 800ms cubic-bezier(0.65, 0, 0.35, 1) 0ms both vt-slide-out-right; }
-html[data-transition="work-to-home"]::view-transition-old(work-tab-2) { animation: 850ms cubic-bezier(0.65, 0, 0.35, 1) 90ms both vt-slide-out-right; }
-html[data-transition="work-to-home"]::view-transition-old(work-tab-1) { animation: 900ms cubic-bezier(0.65, 0, 0.35, 1) 180ms both vt-slide-out-right; }
+/* The cards' glass blur rides on their transition groups (like Work -> About below) and eases out as each
+   card slides, instead of being stripped the instant the transition starts. Same stagger as before. */
+@keyframes vt-group-slide-out-right { from { translate: 0 0; } to { translate: calc(100vw + 100%) 0; } }
+html[data-transition="work-to-home"]::view-transition-group(work-tab-1),
+html[data-transition="work-to-home"]::view-transition-group(work-tab-2),
+html[data-transition="work-to-home"]::view-transition-group(work-tab-3) {
+  border-radius: 40px;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+html[data-transition="work-to-home"]::view-transition-group(work-tab-3) {
+  border-radius: 36px; /* the right-most card is the 0.9-scaled peek */
+  animation-name: -ua-view-transition-group-anim-work-tab-3, vt-group-slide-out-right, vt-glass8-fade-out;
+  animation-duration: 800ms, 800ms, 800ms;
+  animation-delay: 0ms, 0ms, 0ms;
+}
+html[data-transition="work-to-home"]::view-transition-group(work-tab-2) {
+  animation-name: -ua-view-transition-group-anim-work-tab-2, vt-group-slide-out-right, vt-glass8-fade-out;
+  animation-duration: 850ms, 850ms, 850ms;
+  animation-delay: 0ms, 90ms, 90ms;
+}
+html[data-transition="work-to-home"]::view-transition-group(work-tab-1) {
+  animation-name: -ua-view-transition-group-anim-work-tab-1, vt-group-slide-out-right, vt-glass8-fade-out;
+  animation-duration: 900ms, 900ms, 900ms;
+  animation-delay: 0ms, 180ms, 180ms;
+}
+html[data-transition="work-to-home"]::view-transition-old(work-tab-1),
+html[data-transition="work-to-home"]::view-transition-old(work-tab-2),
+html[data-transition="work-to-home"]::view-transition-old(work-tab-3) { animation: none; }
 /* ---- Work 4.0 -> About (the about page gets html.from-work-v2) ----
    Mirror image of the way back to Home: the cards slide out to the LEFT, left-most first
    (so a card behind never catches the one in front), and the About tab, which arrives from
@@ -277,6 +303,30 @@ html[data-transition="home-to-about"]::view-transition-group(home-tab) {
   animation-fill-mode: both, both, both;
 }
 html[data-transition="home-to-about"]::view-transition-old(home-tab) { animation: none; }
+/* About -> Home / About -> Work: the About tab and footer leave to the right as one piece each; their glass
+   blur rides on the transition groups and eases out while they slide (mirror of Home -> About above)
+   instead of dropping the instant the transition starts. */
+html[data-transition="about-to-home"]::view-transition-group(about-tab),
+html[data-transition="about-to-home"]::view-transition-group(about-footer),
+html[data-transition="about-to-work"]::view-transition-group(about-tab),
+html[data-transition="about-to-work"]::view-transition-group(about-footer) {
+  border-radius: 40px;
+  animation-duration: 800ms, 800ms, 800ms;
+  animation-timing-function: linear, cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both, both;
+}
+html[data-transition="about-to-home"]::view-transition-group(about-tab),
+html[data-transition="about-to-work"]::view-transition-group(about-tab) {
+  animation-name: -ua-view-transition-group-anim-about-tab, vt-group-slide-out-right, vt-glass8-fade-out;
+}
+html[data-transition="about-to-home"]::view-transition-group(about-footer),
+html[data-transition="about-to-work"]::view-transition-group(about-footer) {
+  animation-name: -ua-view-transition-group-anim-about-footer, vt-group-slide-out-right, vt-glass8-fade-out;
+}
+html[data-transition="about-to-home"]::view-transition-old(about-tab),
+html[data-transition="about-to-home"]::view-transition-old(about-footer),
+html[data-transition="about-to-work"]::view-transition-old(about-tab),
+html[data-transition="about-to-work"]::view-transition-old(about-footer) { animation: none; }
 @keyframes vt-glass-fade { from { backdrop-filter: blur(20px) saturate(130%); } to { backdrop-filter: blur(0px) saturate(100%); } }
 @keyframes vt-group-slide-left { from { translate: 0 0; } to { translate: calc(-100vw - 100%) 0; } }
 /* Arriving on Home from Work 4.0 or About: the shapes must already be sitting where the
