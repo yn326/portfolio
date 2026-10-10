@@ -8,6 +8,47 @@
 //    point, revealing Work.
 // Work -> case additionally navigates while covered, then the new page opens a
 // growing hole in the same overlay from the same point.
+// ---- Cache warm-up ----
+// A cross-page transition is dropped by Chrome when the destination isn't ready almost immediately, which is
+// exactly what happens on a first visit with an empty cache (HTML, CSS, JS and the Lottie library all download
+// mid-click). So once this page has finished loading and the browser is idle, quietly fetch the other main pages
+// and the CSS/JS/images/Lottie files they reference into the HTTP cache. Plain fetch() only fills the cache; it
+// does not prerender (which is what used to make transitions time out).
+(function () {
+  var MAIN = ["index.html", "pages/work.html", "pages/about.html"];
+  var inPages = /\/pages\//.test(location.pathname);
+  var root = new URL(inPages ? "../" : "./", location.href);
+  var seen = {};
+  function warm(url, noCors) {
+    if (seen[url]) return;
+    seen[url] = 1;
+    try { fetch(url, noCors ? { mode: "no-cors" } : undefined).catch(function () {}); } catch (e) {}
+  }
+  function warmPage(url) {
+    seen[url] = 1;
+    fetch(url).then(function (r) { return r.ok ? r.text() : ""; }).then(function (html) {
+      var re = /(?:href|src)="([^"#]+\.(?:css|js|json|webp|png|jpg|jpeg|svg|woff2)(?:\?[^"]*)?)"/gi;
+      while ((m = re.exec(html))) {
+        if (/^(mailto|tel|data):/.test(m[1])) continue;
+        var u = new URL(m[1], url);
+        if (u.pathname === location.pathname) continue;
+        warm(u.href, u.origin !== location.origin);
+      }
+    }).catch(function () {});
+  }
+  function run() {
+    var c = navigator.connection;
+    if (c && (c.saveData || /2g/.test(c.effectiveType || ""))) return;
+    MAIN.forEach(function (p) {
+      var u = new URL(p, root).href;
+      if (new URL(u).pathname !== location.pathname) warmPage(u);
+    });
+  }
+  window.addEventListener("load", function () {
+    (window.requestIdleCallback || function (f) { setTimeout(f, 800); })(run, { timeout: 3000 });
+  });
+})();
+
 // ---- Transition diagnostics (off unless you turn them on) ----
 // In DevTools -> Console, run:  localStorage.vtdebug = "1"   (turn off with: localStorage.removeItem("vtdebug"))
 // then, with "Preserve log" ticked in the Console settings, click through the site. Each page logs one line
