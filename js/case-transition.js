@@ -92,6 +92,7 @@
   var OUT_MS = 450;
   var PAUSE_MS = 60;
   var IN_MS = 500;
+  var LOWER_MS = 700; // pink slab lowering to reveal a case study
   var EASING = "cubic-bezier(0.65, 0, 0.35, 1)";
   var Z = 2147483000;
   var THEMES = { muji: "#8B0013", damai: "#6665FE", wapoo: "#45DBE9" };
@@ -286,19 +287,16 @@
             });
           return;
         }
-        var start = null;
-        function frame(now) {
-          if (start === null) start = now;
-          var p = Math.min((now - start) / IN_MS, 1);
-          var r = ease(p) * R;
-          var mask =
-            "radial-gradient(circle at " + x + "px " + y + "px, transparent " + r + "px, #000 " + (r + 1) + "px)";
-          overlay.style.webkitMaskImage = mask;
-          overlay.style.maskImage = mask;
-          if (p < 1) requestAnimationFrame(frame);
-          else overlay.remove();
-        }
-        requestAnimationFrame(frame);
+        // Work/About -> case: the covering slab lowers itself (its top edge drops to the bottom of the
+        // screen, so it keeps getting flatter) and reveals the page from the top.
+        overlay
+          .animate(
+            [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }],
+            { duration: LOWER_MS, easing: EASING, fill: "forwards" }
+          )
+          .finished.then(function () {
+            overlay.remove();
+          });
       }
     };
 
