@@ -203,33 +203,55 @@
     return true;
   }
 
-  // Back/forward sweep (no Lottie possible there), in two steps: the pink's bottom edge travels from the top of
-  // the screen to the bottom until the whole screen is pink; once that is done AND the page has finished
-  // loading, the top edge travels down to uncover the page.
+  // ---- Back/forward sweep (the Lottie can't play there) ----
+  // The old page is already gone, so to cover IT we use the browser's own view transition: its snapshot of the
+  // old page stays on screen, and a pink layer (html::after, given its own transition name) is animated over
+  // it in two steps: the bottom edge travels from the top of the screen to the bottom until everything is
+  // pink; once that is done AND the new page has finished loading, the new page is swapped in underneath and
+  // the top edge travels down to uncover it. Named elements (work tabs, background shapes...) are un-named
+  // for the duration so they stay part of the plain page snapshots.
   var SWEEP_MS = 600;
-  function playSweep(color) {
-    var outer = document.createElement("div");
-    outer.setAttribute("aria-hidden", "true");
-    outer.setAttribute("data-case-overlay", "");
-    outer.style.cssText = "position:fixed;inset:0;z-index:" + Z + ";pointer-events:none;";
-    var inner = document.createElement("div");
-    inner.style.cssText = "position:absolute;inset:0;background:" + color + ";clip-path:inset(0 0 100% 0);";
-    outer.appendChild(inner);
-    document.body.appendChild(outer);
-    var cover = inner.animate(
-      [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }],
-      { duration: SWEEP_MS, easing: EASING, fill: "forwards" }
+  var NO_NAMES = "view-transition-name:none!important;";
+  function sweepCss(color) {
+    return (
+      "html.case-sweep-out *,html.case-sweep *{" + NO_NAMES + "}" +
+      "html.case-sweep::after{content:'';position:fixed;inset:0;z-index:" + Z + ";pointer-events:none;background:" + color +
+      ";view-transition-name:case-sweep}" +
+      "html.case-sweep::view-transition-group(*),html.case-sweep::view-transition-old(*),html.case-sweep::view-transition-new(*){animation:none!important}" +
+      "html.case-sweep::view-transition-new(root){opacity:0}" +
+      "html.case-sweep::view-transition-new(case-sweep){clip-path:inset(0 0 100% 0)}"
     );
+  }
+  function addSweepStyle(color) {
+    var st = document.createElement("style");
+    st.setAttribute("data-case-sweep", "");
+    st.textContent = sweepCss(color);
+    document.head.appendChild(st);
+    return st;
+  }
+  function pseudoAnim(pseudo, frames, opts) {
+    opts.pseudoElement = pseudo;
+    return root.animate(frames, opts);
+  }
+  function dbg(msg) {
+    try { if (localStorage.vtdebug === "1") console.log("[sweep] " + msg + " @" + Math.round(performance.now()) + "ms"); } catch (e) {}
+  }
+  function runSweep(vt) {
+    dbg("transition ready: cover starts");
+    var NEW_PINK = "::view-transition-new(case-sweep)";
+    var cover = pseudoAnim(NEW_PINK, [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }], {
+      duration: SWEEP_MS, easing: EASING, fill: "forwards",
+    });
+    // Keeps the transition alive while we wait for the page to finish loading.
+    var hold = pseudoAnim(NEW_PINK, [{ opacity: 1 }, { opacity: 1 }], { duration: 5000 });
+    cover.finished.then(function () { dbg("screen fully pink"); });
     Promise.all([cover.finished, waitUntilReady()]).then(function () {
+      dbg("page ready: top edge starts lowering");
       setTimeout(function () {
-        outer
-          .animate(
-            [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }],
-            { duration: LOWER_MS, easing: EASING, fill: "forwards" }
-          )
-          .finished.then(function () {
-            outer.remove();
-          });
+        pseudoAnim("::view-transition-new(root)", [{ opacity: 1 }, { opacity: 1 }], { duration: LOWER_MS, fill: "forwards" });
+        pseudoAnim(NEW_PINK, [{ clipPath: "inset(0 0 0 0)" }, { clipPath: "inset(100% 0 0 0)" }], {
+          duration: LOWER_MS, easing: EASING, fill: "forwards",
+        }).finished.then(function () { hold.cancel(); });
       }, PAUSE_MS);
     });
   }
@@ -273,14 +295,7 @@
   } catch (e) {}
   if (incoming && Date.now() - incoming.t > 10000) incoming = null;
 
-  if (incoming && incoming.mode === "sweep" && !reduceMotion) {
-    // Browser back/forward: the page shows normally and the pink band sweeps over it.
-    window.addEventListener("pagereveal", function (e) {
-      if (e.viewTransition) e.viewTransition.skipTransition();
-    });
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { playSweep(incoming.color); });
-    else playSweep(incoming.color);
-  } else if (incoming && !reduceMotion) {
+  function slabArrival() {
     // Cover the page from the very first paint so nothing flashes before the
     // overlay exists (the overlay itself needs <body>, which isn't parsed yet).
     var style = document.createElement("style");
@@ -342,6 +357,32 @@
     }, 4000);
   }
 
+  if (incoming && !reduceMotion) {
+    if (incoming.mode === "sweep") {
+      // Back/forward: pink sweep over the old page's snapshot (view transition); if the browser didn't start
+      // one, fall back to opening covered in pink and lowering it, like after a click.
+      var sweepStyle = addSweepStyle(incoming.color);
+      root.classList.add("case-sweep");
+      window.addEventListener("pagereveal", function (e) {
+        var vt = e.viewTransition;
+        if (!vt) {
+          root.classList.remove("case-sweep");
+          sweepStyle.remove();
+          slabArrival();
+          return;
+        }
+        vt.ready.then(function () { runSweep(vt); }, function () {});
+        vt.finished.then(cleanup, cleanup);
+        function cleanup() {
+          root.classList.remove("case-sweep");
+          sweepStyle.remove();
+        }
+      });
+    } else {
+      slabArrival();
+    }
+  }
+
   // ---- Outgoing page ----
   var busy = false;
 
@@ -366,7 +407,11 @@
         JSON.stringify({ x: window.innerWidth / 2, y: window.innerHeight / 2, color: LOTTIE_COLOR || ownTheme || "#FFC3C3", mode: "sweep", t: Date.now() })
       );
     } catch (err) {}
-    if (e.viewTransition) e.viewTransition.skipTransition();
+    // Keep the browser's snapshot of this page (the pink sweeps over it); un-name its named elements first.
+    if (e.viewTransition) {
+      addSweepStyle(LOTTIE_COLOR || ownTheme || "#FFC3C3");
+      root.classList.add("case-sweep-out");
+    }
   });
 
   // Coming back via bfcache would otherwise show the old page still covered.
@@ -382,7 +427,6 @@
       sessionStorage.removeItem(KEY);
     } catch (err) {}
     if (!inc || Date.now() - inc.t > 10000 || reduceMotion) return;
-    if (inc.mode === "sweep") { playSweep(inc.color); return; }
     var ov = makeOverlay(inc.color);
     ov.setAttribute("data-case-overlay", "");
     document.body.appendChild(ov);
