@@ -138,6 +138,72 @@
     return el;
   }
 
+  // ---- Lottie cover (assets/lottie/page-transition1.json) ----
+  // Leaving for a case study plays this animation (shapes fill the screen) instead of the plain growing
+  // circle. It is drawn in the case study's theme color so the case page, which opens covered in that same
+  // color, picks up seamlessly. If lottie-web or the JSON isn't loaded yet the circle is used instead.
+  var LOTTIE_SPEED = 2; // 1 = the animation's own 2.5s; it is a click response, so it plays faster
+  var LOTTIE_COVER_FRAME = 140; // first frame where the screen is solid
+  var lottieJson = null;
+  function loadLottieAssets() {
+    if (!document.querySelector('a[data-case-color]:not([data-case-color="exit"])')) return;
+    var base = /\/pages\//.test(location.pathname) ? "../" : "";
+    if (!window.lottie) {
+      var sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js";
+      sc.async = true;
+      document.head.appendChild(sc);
+    }
+    fetch(base + "assets/lottie/page-transition1.json")
+      .then(function (r) { return r.json(); })
+      .then(function (j) { lottieJson = JSON.stringify(j); })
+      .catch(function () {});
+  }
+  window.addEventListener("load", function () {
+    (window.requestIdleCallback || function (f) { setTimeout(f, 300); })(loadLottieAssets, { timeout: 2000 });
+  });
+  function hexToRgb01(hex) {
+    var n = parseInt(hex.replace("#", ""), 16);
+    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  }
+  function recolor(o, rgb) {
+    if (Array.isArray(o)) { o.forEach(function (v) { recolor(v, rgb); }); return; }
+    if (!o || typeof o !== "object") return;
+    if (o.ty === "fl" && o.c && Array.isArray(o.c.k) && typeof o.c.k[0] === "number") {
+      o.c.k = [rgb[0], rgb[1], rgb[2], o.c.k[3] === undefined ? 1 : o.c.k[3]];
+    }
+    for (var k in o) recolor(o[k], rgb);
+  }
+  // Returns true if the cover started; `done` is called once the screen is fully covered.
+  function playLottieCover(color, done) {
+    if (!window.lottie || !lottieJson || !/^#[0-9a-f]{6}$/i.test(color)) return false;
+    var data = JSON.parse(lottieJson);
+    recolor(data, hexToRgb01(color));
+    var box = document.createElement("div");
+    box.setAttribute("aria-hidden", "true");
+    box.setAttribute("data-case-overlay", "");
+    box.style.cssText = "position:fixed;inset:0;z-index:" + Z + ";pointer-events:none;";
+    document.body.appendChild(box);
+    var anim;
+    try {
+      anim = window.lottie.loadAnimation({
+        container: box,
+        renderer: "svg",
+        loop: false,
+        autoplay: false,
+        animationData: data,
+        rendererSettings: { preserveAspectRatio: "xMidYMid slice" },
+      });
+    } catch (e) { box.remove(); return false; }
+    anim.setSpeed(LOTTIE_SPEED);
+    var finished = false;
+    function finish() { if (finished) return; finished = true; done(); }
+    anim.addEventListener("enterFrame", function (ev) { if (ev.currentTime >= LOTTIE_COVER_FRAME) { anim.pause(); finish(); } });
+    anim.addEventListener("complete", finish);
+    anim.play();
+    return true;
+  }
+
   // Resolves once the page is ready to be looked at: fonts loaded and the images
   // visible on first screen decoded, then two animation frames so layout and the
   // first paint are done. Never waits longer than MAX_WAIT_MS.
@@ -323,7 +389,10 @@
       return;
     }
 
-    // Work -> case: circle of the theme color grows from the click point.
+    // Anywhere -> case: the Lottie shapes cover the screen (falls back to a growing circle).
+    if (playLottieCover(color, go)) return;
+
+    // Fallback: circle of the theme color grows from the click point.
     var overlay = makeOverlay(color);
     overlay.setAttribute("data-case-overlay", "");
     overlay.style.clipPath = "circle(0px at " + x + "px " + y + "px)";
