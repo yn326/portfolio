@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <script src="../js/case-transition.js?v=23"></script>
   <script>
+    // Works out which page-to-page transition this arrival is, from where we came from. Re-run at pagereveal because a
+    // page restored from the back/forward cache doesn't re-run this script: the browser's Back button would otherwise
+    // fall back to the default cross-fade here.
     (function () {
       var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
       var supported = { "home-to-work": 1, "work-to-home": 1, "about-to-home": 1, "home-to-about": 1, "work-to-about": 1, "about-to-work": 1 };
@@ -15,18 +18,25 @@
           return null;
         }
       }
-      var cur = keyFor(location.href);
-      // The Navigation API knows where we came from even on back/forward traversals; the referrer doesn't.
-      var fromUrl = document.referrer;
-      try {
-        if (window.navigation && navigation.activation && navigation.activation.from) fromUrl = navigation.activation.from.url;
-      } catch (e) {}
-      if (fromUrl && /\/work\.html/.test(fromUrl)) document.documentElement.classList.add("from-work-v2");
-      var prev = fromUrl ? keyFor(fromUrl) : null;
-      if (cur && prev && cur !== prev) {
-        var pair = prev + "-to-" + cur;
-        if (supported[pair]) document.documentElement.setAttribute("data-transition", pair);
+      function setRoute() {
+        var root = document.documentElement;
+        root.removeAttribute("data-transition");
+        root.classList.remove("from-work-v2");
+        var cur = keyFor(location.href);
+        // The Navigation API knows where we came from even on back/forward traversals; the referrer doesn't.
+        var fromUrl = document.referrer;
+        try {
+          if (window.navigation && navigation.activation && navigation.activation.from) fromUrl = navigation.activation.from.url;
+        } catch (e) {}
+        if (fromUrl && /\/work\.html/.test(fromUrl)) root.classList.add("from-work-v2");
+        var prev = fromUrl ? keyFor(fromUrl) : null;
+        if (cur && prev && cur !== prev) {
+          var pair = prev + "-to-" + cur;
+          if (supported[pair]) root.setAttribute("data-transition", pair);
+        }
       }
+      setRoute();
+      window.addEventListener("pagereveal", setRoute);
     })();
 
     // Strip backdrop-filter off the glass card for the duration of a cross-document
