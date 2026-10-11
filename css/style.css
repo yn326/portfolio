@@ -1500,23 +1500,43 @@ img.work-project__media-img--shadow {
     100% 100%;
 }
 
-/* ---- Case study page backgrounds ----
-   Each case study gets its OWN static blob background sampled from that
-   brand's palette (MUJI: dark red #8B0002 + tan #C98C72) instead of reusing
-   the shared home/work/about pink blob-bg animation. Exact size/position/
-   blur measured from Figma's "Background" frame (5 blurred circles, no
-   motion -- unlike the animated Lottie blob, this one is a static frame). */
-.case-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  background: #fff;
+/* ---- Case study page backgrounds (Figma "Background" frames in Case Studies) ----
+   Page gradient + the same four shapes as Home/Work/About, each with its own gradient and 50% drop shadow. The stage is the
+   1440x900 design canvas scaled to cover the viewport (same trick as the Work page). Per-case colours live in the
+   --cb-* variables below. */
+.case-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; container-type: size; background: var(--cb-bg, #fff); }
+.case-bg__stage { position: absolute; top: 50%; left: 50%; width: 1440px; height: 900px;
+  transform: translate(-50%, -50%) scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px)))); }
+.case-bg__shape { position: absolute; display: block; }
+.case-bg__shape--e9 { left: 1218px; top: 220px; width: 204px; height: 204px; border-radius: 50%;
+  background: linear-gradient(var(--cb-e9-a), var(--cb-e9-1), var(--cb-e9-2)); box-shadow: 0 2.503px 12.515px rgba(var(--cb-e9-s), 0.5); }
+.case-bg__shape--e10 { left: 195px; top: -39px; width: 286.8px; height: 286.8px; border-radius: 50%;
+  background: linear-gradient(var(--cb-e10-a), var(--cb-e10-1), var(--cb-e10-2)); box-shadow: 0 2.4px 12px rgba(var(--cb-e10-s), 0.5); }
+/* Figma: 258.12 circle, bbox left 904 / top 720; its rotation is folded into the gradient angle (circle). */
+.case-bg__shape--e11 { left: 955.4px; top: 771.4px; width: 258.12px; height: 258.12px; border-radius: 50%;
+  background: linear-gradient(var(--cb-e11-a), var(--cb-e11-1), var(--cb-e11-2)); box-shadow: 0 2.16px 10.8px rgba(var(--cb-e11-s), 0.5); }
+.case-bg__shape--r6 { left: 0.76px; top: 538.76px; width: 257.486px; height: 257.486px; border-radius: 6.18px; transform: rotate(-13.177deg);
+  background: linear-gradient(var(--cb-r6-a), var(--cb-r6-1), var(--cb-r6-2)); box-shadow: 0 1.985px 9.924px rgba(var(--cb-r6-s), 0.5); }
+.case-bg--muji { --cb-bg: linear-gradient(180deg, #FFEBE0 0%, #FFBBAD 100%);
+  --cb-e9-a: 198.29deg; --cb-e9-1: #F4AFA2; --cb-e9-2: #F6CAC2; --cb-e9-s: 244, 175, 162;
+  --cb-e10-a: 90deg; --cb-e10-1: #FFCCAD; --cb-e10-2: #FFDDC9; --cb-e10-s: 255, 204, 173;
+  --cb-e11-a: 216.35deg; --cb-e11-1: #FFCCAD; --cb-e11-2: #FFDDC9; --cb-e11-s: 255, 204, 173;
+  --cb-r6-a: 270deg; --cb-r6-1: #FAC4BA; --cb-r6-2: #FCA18F; --cb-r6-s: 252, 161, 143;
 }
-.case-bg__blob {
-  position: absolute;
-  border-radius: 50%;
+.case-bg--damai { --cb-bg: linear-gradient(0deg, #DCC7FF 0%, #FFD5CF 100%);
+  --cb-e9-a: 25.04deg; --cb-e9-1: #E3C0EE; --cb-e9-2: #EFD2F8; --cb-e9-s: 227, 192, 238;
+  --cb-e10-a: 250.42deg; --cb-e10-1: #FFCFC9; --cb-e10-2: #FFB5AC; --cb-e10-s: 255, 181, 172;
+  --cb-e11-a: 15deg; --cb-e11-1: #EACBF4; --cb-e11-2: #E2B1F2; --cb-e11-s: 255, 181, 172;
+  --cb-r6-a: 270deg; --cb-r6-1: #EACBF4; --cb-r6-2: #E2B1F2; --cb-r6-s: 226, 177, 242;
 }
+.case-bg--wapoo { --cb-bg: linear-gradient(180deg, #EDD9FD 0%, #B5E2FF 100%);
+  --cb-e9-a: 25.04deg; --cb-e9-1: #D5DAF3; --cb-e9-2: #C4CCF1; --cb-e9-s: 196, 204, 241;
+  --cb-e10-a: 250.42deg; --cb-e10-1: #E8D6F7; --cb-e10-2: #D8BFEB; --cb-e10-s: 213, 180, 238;
+  --cb-e11-a: 16.77deg; --cb-e11-1: #E8D6F7; --cb-e11-2: #D8BFEB; --cb-e11-s: 216, 191, 235;
+  --cb-r6-a: 270deg; --cb-r6-1: #C4DFF1; --cb-r6-2: #9ACEF1; --cb-r6-s: 154, 206, 241;
+}
+.page-canvas--case .page-nav { z-index: 10; }
+@media (max-width: 480px) { .page-canvas--case .page-nav { gap: 24px; } }
 
 /* Scrollspy (Figma: node 654:2165) -- fixed to the viewport (not the scrolling
    .page-canvas), vertically centered, 32px from the right edge. Each bar marks
@@ -1582,24 +1602,6 @@ img.work-project__media-img--shadow {
   background: var(--case-accent, #8b0013);
   width: 20px;
 }
-/* Text-based nav used on case study pages (Figma: Frame 26) -- distinct from
-   the icon-based .page-nav on Home/Work/About. */
-.case-nav {
-  position: absolute;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: inline-flex;
-  height: 22px;
-  align-items: center;
-  gap: 40px;
-  z-index: 10;
-}
-.case-nav a,
-.case-nav a svg {
-  display: block;
-}
-
 /* Glass card top bar for case studies (Figma: Frame 229 = Frame 228 back
    button + Frame 227 fake-URL pill) -- replaces the traffic-lights row used
    on Home/Work/About. */
