@@ -426,6 +426,13 @@
   // ---- Outgoing page ----
   function pageBg() {
     try {
+      // Case studies paint their gradient on the fixed .case-bg layer, not on <body>.
+      var cb = document.querySelector(".case-bg");
+      if (cb) {
+        var cs = getComputedStyle(cb);
+        if (cs.backgroundImage && cs.backgroundImage !== "none") return cs.backgroundImage;
+        if (cs.backgroundColor && !/rgba\(.*,\s*0\)$/.test(cs.backgroundColor)) return cs.backgroundColor;
+      }
       var c = getComputedStyle(document.body).backgroundColor;
       if (!c || c === "transparent" || /rgba\(.*,\s*0\)$/.test(c)) c = getComputedStyle(root).backgroundColor;
       return !c || /rgba\(.*,\s*0\)$/.test(c) || c === "transparent" ? "#fff" : c;
@@ -467,14 +474,20 @@
     busy = false;
     var stale = document.querySelectorAll("[data-case-overlay]");
     for (var i = 0; i < stale.length; i++) stale[i].remove();
+    // This page was frozen at the moment we left it, so the leaving-sweep markers are still on it: clear them.
+    root.classList.remove("case-sweep-out", "case-sweep");
+    var oldStyles = document.querySelectorAll("style[data-case-sweep]");
+    for (var j = 0; j < oldStyles.length; j++) oldStyles[j].remove();
     // Restored from the back/forward cache: scripts don't re-run, so play the arrival here.
-    var inc = null;
-    try {
-      inc = JSON.parse(sessionStorage.getItem(KEY));
-      sessionStorage.removeItem(KEY);
-    } catch (err) {}
-    if (!inc || Date.now() - inc.t > 10000 || reduceMotion) return;
-    if (inc.mode === "sweep") { fallbackSweep(inc.color, inc.under); return; }
+    var inc = takeRestore();
+    if (!inc || reduceMotion) return;
+    if (inc.mode === "sweep") {
+      // pagereveal (with the browser's view transition of the old page) usually follows within a few ms.
+      setTimeout(function () {
+        if (!restoreHandled) { restoreHandled = true; fallbackSweep(inc.color, inc.under); }
+      }, 60);
+      return;
+    }
     var ov = makeOverlay(inc.color);
     ov.setAttribute("data-case-overlay", "");
     document.body.appendChild(ov);
@@ -488,13 +501,37 @@
     });
   });
 
-  // A restored page would otherwise also run its own cross-fade/slide underneath the pink.
-  window.addEventListener("pagereveal", function (e) {
-    if (!e.viewTransition) return;
+  // Back/forward-cache restore bookkeeping: whichever of pageshow / pagereveal fires first reads the hand-off once.
+  var restoreInc = null, restoreHandled = false, restoreAt = 0;
+  function takeRestore() {
+    // pageshow and pagereveal are a few ms apart; anything older belongs to an earlier restore.
+    if (restoreInc && Date.now() - restoreAt < 1500) return restoreInc;
+    restoreInc = null;
+    var inc = null;
     try {
-      var peek = JSON.parse(sessionStorage.getItem(KEY));
-      if (peek && Date.now() - peek.t <= 10000 && !reduceMotion) e.viewTransition.skipTransition();
+      inc = JSON.parse(sessionStorage.getItem(KEY));
+      sessionStorage.removeItem(KEY);
     } catch (err) {}
+    if (!inc || Date.now() - inc.t > 10000) return null;
+    restoreInc = inc;
+    restoreAt = Date.now();
+    restoreHandled = false;
+    return inc;
+  }
+  window.addEventListener("pagereveal", function (e) {
+    if (!e.viewTransition || reduceMotion) return;
+    // Only a restored page needs this: a freshly loaded one consumed its hand-off at startup.
+    var inc = takeRestore();
+    if (!inc) return;
+    if (inc.mode !== "sweep" || restoreHandled) { e.viewTransition.skipTransition(); return; }
+    // The pink sweeps over the browser's snapshot of the page we just left (same as a fresh arrival).
+    restoreHandled = true;
+    var st = addSweepStyle(inc.color);
+    root.classList.add("case-sweep");
+    var vt = e.viewTransition;
+    vt.ready.then(function () { runSweep(vt); }, function () {});
+    var cleanup = function () { root.classList.remove("case-sweep"); st.remove(); restoreInc = null; };
+    vt.finished.then(cleanup, cleanup);
   });
 
   document.addEventListener("click", function (e) {
