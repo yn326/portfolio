@@ -424,7 +424,7 @@ html[data-transition="work-to-about"]::view-transition-new(about-tab),
 html[data-transition="work-to-about"]::view-transition-new(about-footer),
 html[data-transition="home-to-about"]::view-transition-new(about-tab),
 html[data-transition="home-to-about"]::view-transition-new(about-footer) { animation: none; }
-/* ---- About 2.0 (pages/about-v2.html): the page is a stack of glass tabs, each with its own transition name
+/* ---- About 2.0 (pages/about.html): the page is a stack of glass tabs, each with its own transition name
    (about-tab-1..7) and the shared class "about-card". They move together with exactly the timing the single old
    About tab had: leave to the right (to Home / Work), arrive from the right (from Home at 800ms; from Work 4.0 at
    900ms after the 180ms delay the Wapoo card needs to clear). Glass blur rides on the group, as on the old tab. ---- */
