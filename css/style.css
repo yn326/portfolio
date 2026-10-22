@@ -424,6 +424,37 @@ html[data-transition="work-to-about"]::view-transition-new(about-tab),
 html[data-transition="work-to-about"]::view-transition-new(about-footer),
 html[data-transition="home-to-about"]::view-transition-new(about-tab),
 html[data-transition="home-to-about"]::view-transition-new(about-footer) { animation: none; }
+/* ---- About 2.0 (pages/about-v2.html): the page is a stack of glass tabs, each with its own transition name
+   (about-tab-1..7) and the shared class "about-card". They move together with exactly the timing the single old
+   About tab had: leave to the right (to Home / Work), arrive from the right (from Home at 800ms; from Work 4.0 at
+   900ms after the 180ms delay the Wapoo card needs to clear). Glass blur rides on the group, as on the old tab. ---- */
+html[data-transition="about-to-home"]::view-transition-group(*.about-card),
+html[data-transition="about-to-work"]::view-transition-group(*.about-card) {
+  border-radius: 40px;
+  animation-name: vt-group-slide-out-right, vt-glass8-fade-out;
+  animation-duration: 800ms, 800ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both;
+}
+html[data-transition="about-to-home"]::view-transition-old(*.about-card),
+html[data-transition="about-to-work"]::view-transition-old(*.about-card),
+html[data-transition="home-to-about"]::view-transition-new(*.about-card),
+html[data-transition="work-to-about"]::view-transition-new(*.about-card) { animation: none; }
+html[data-transition="home-to-about"]::view-transition-group(*.about-card) {
+  border-radius: 40px;
+  animation-name: vt-group-slide-in-right, vt-glass8-fade-in;
+  animation-duration: 800ms, 800ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both;
+}
+html[data-transition="work-to-about"]::view-transition-group(*.about-card) {
+  border-radius: 40px;
+  animation-name: vt-group-slide-in-right, vt-glass8-fade-in;
+  animation-duration: 900ms, 900ms;
+  animation-delay: 180ms, 180ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1), cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: both, both;
+}
 /* Arriving on Home from Work 4.0 or About: the shapes must already be sitting where the
    morph ends (the drop-in would leave them hidden/offscreen in the snapshot), so
    skip the drop and go straight to the float loop. Specificity is deliberately
@@ -450,6 +481,7 @@ html.home-bg-from-v2 .home-bg__shape--5.home-bg-ready:not(.is-exiting), html.hom
 html.vt-no-blur .glass-card,
 html.vt-no-blur .glass-card--work,
 html.vt-no-blur .glass-card--about,
+html.vt-no-blur .a2-glass,
 html.vt-no-blur .site-footer {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -478,7 +510,8 @@ html.vt-no-blur .site-footer {
    directly to their own real rule's blur value. */
 html.vt-blur-settling .glass-card,
 html.vt-blur-settling .glass-card--work,
-html.vt-blur-settling .glass-card--about {
+html.vt-blur-settling .glass-card--about,
+html.vt-blur-settling .a2-glass {
   transition: backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease;
 }
 html.vt-blur-settling .glass-card {

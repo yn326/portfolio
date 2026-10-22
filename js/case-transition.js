@@ -11,7 +11,7 @@
 // and the CSS/JS/images/Lottie files they reference into the HTTP cache. Plain fetch() only fills the cache; it
 // does not prerender (which is what used to make transitions time out).
 (function () {
-  var MAIN = ["index.html", "pages/work.html", "pages/about.html"];
+  var MAIN = ["index.html", "pages/work.html", "pages/about.html", "pages/about-v2.html"];
   var inPages = /\/pages\//.test(location.pathname);
   var root = new URL(inPages ? "../" : "./", location.href);
   var seen = {};
@@ -345,9 +345,11 @@
     root.classList.add("case-enter");
 
     // The overlay replaces the default cross-fade / slide transition here.
+    // First reveal only: this page can later be restored from the back/forward cache, and a listener left behind
+    // here would skip the transition for that restore too.
     window.addEventListener("pagereveal", function (e) {
       if (e.viewTransition) e.viewTransition.skipTransition();
-    });
+    }, { once: true });
 
     var reveal = function () {
       var overlay = makeOverlay(incoming.color);
@@ -417,7 +419,7 @@
           root.classList.remove("case-sweep");
           sweepStyle.remove();
         }
-      });
+      }, { once: true });
     } else {
       slabArrival();
     }
@@ -453,7 +455,7 @@
     if (!dest) return;
     var path = new URL(dest).pathname;
     var toCase = /\/(muji|damai|wapoo)\.html$/.test(path);
-    var toMain = /\/(work|about|index)\.html$|\/$/.test(path);
+    var toMain = /\/(work|about(-v2)?|index)\.html$|\/$/.test(path);
     if (!(toCase || (onCasePage && toMain))) return;
     try {
       sessionStorage.setItem(

@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="js/case-transition.js?v=23"></script>
+  <script src="js/case-transition.js?v=25"></script>
   <script>
     (function () {
-      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about" };
+      var nameFor = { "": "home", "index.html": "home", "work.html": "work", "about.html": "about", "about-v2.html": "about" };
       var supported = { "home-to-work": 1, "work-to-home": 1, "about-to-home": 1, "home-to-about": 1, "work-to-about": 1, "about-to-work": 1 };
       function keyFor(url) {
         try {
@@ -23,7 +23,7 @@
       try {
         if (window.navigation && navigation.activation && navigation.activation.from) fromUrl = navigation.activation.from.url;
       } catch (e) {}
-      if (fromUrl && /\/(work|about)\.html/.test(fromUrl)) document.documentElement.classList.add("home-bg-from-v2");
+      if (fromUrl && /\/(work|about(-v2)?)\.html/.test(fromUrl)) document.documentElement.classList.add("home-bg-from-v2");
       var cur = keyFor(location.href);
       var prev = fromUrl ? keyFor(fromUrl) : null;
       if (cur && prev && cur !== prev) {
@@ -44,7 +44,7 @@
       if (!e.viewTransition) return;
       var toWorkV2 = false;
       try {
-        toWorkV2 = !!(e.activation && /\/(work|about)\.html$/.test(new URL(e.activation.entry.url).pathname));
+        toWorkV2 = !!(e.activation && /\/(work|about(-v2)?)\.html$/.test(new URL(e.activation.entry.url).pathname));
       } catch (err) {}
       if (toWorkV2) {
         // Leaving for Work 4.0: name the shapes so they morph into that page's shapes. The card's blur is
@@ -60,9 +60,9 @@
       try {
         var act = window.navigation && navigation.activation;
         var fromPath = act && act.from ? new URL(act.from.url).pathname : "";
-        if (/\/(work|about)\.html$/.test(fromPath)) {
+        if (/\/(work|about(-v2)?)\.html$/.test(fromPath)) {
           document.documentElement.classList.add("home-bg-from-v2");
-          document.documentElement.setAttribute("data-transition", /about\.html$/.test(fromPath) ? "about-to-home" : "work-to-home");
+          document.documentElement.setAttribute("data-transition", /about(-v2)?\.html$/.test(fromPath) ? "about-to-home" : "work-to-home");
         }
       } catch (err) {}
       if (e.viewTransition) {
@@ -248,7 +248,7 @@
               <path d="M34.1625 12.6V0H35.6025V7.668L39.4365 3.6H41.2545L37.9065 7.2L41.6145 12.6H39.8325L36.9525 8.244L35.6025 9.666V12.6H34.1625Z" fill="#5F5F5F"/>
             </svg>
           </a>
-          <a class="hero-nav__item" href="pages/about.html">
+          <a class="hero-nav__item" href="pages/about-v2.html">
             <span class="hero-nav__icon">
               <svg width="20.571" height="23.143" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11.5714 14.1428C15.1218 14.1428 18 11.2647 18 7.71428C18 4.16387 15.1218 1.28571 11.5714 1.28571C8.02102 1.28571 5.14285 4.16387 5.14285 7.71428C5.14285 11.2647 8.02102 14.1428 11.5714 14.1428ZM11.5714 14.1428C14.2994 14.1428 16.9156 15.2265 18.8445 17.1555C20.7735 19.0844 21.8571 21.7006 21.8571 24.4286M11.5714 14.1428C8.84348 14.1428 6.22727 15.2265 4.29832 17.1555C2.36938 19.0844 1.28571 21.7006 1.28571 24.4286" stroke="#AE8383" stroke-width="2.57143" stroke-linecap="round" stroke-linejoin="round"/>
