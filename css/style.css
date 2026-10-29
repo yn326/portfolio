@@ -1116,8 +1116,41 @@ button { font-family: inherit; cursor: pointer; }
   background: rgba(255, 218, 218, 0.5);
   transition: background 0.2s ease;
 }
-.hero-nav__item:hover .hero-nav__icon {
-  background: rgba(225, 176, 176, 0.5);
+/* Hover: a skewed #D7A4A4 bar sweeps across the circle (Codrops ButtonHoverStyles
+   "03" / mimas, with the bar entering instead of leaving) and the glyph turns white. */
+.hero-nav__icon,
+.hero-nav__item {
+  --sweep-ease: cubic-bezier(0.3, 1, 0.8, 1);
+}
+.hero-nav__icon {
+  overflow: hidden;
+}
+.hero-nav__icon::before,
+.hero-nav__item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -10%;
+  width: 120%;
+  background: #d7a4a4;
+  transform: translate3d(-130%, 0, 0) skew(30deg);
+  transition: transform 0.4s var(--sweep-ease);
+  pointer-events: none;
+}
+.hero-nav__item::before { display: none; }
+.hero-nav__item:hover .hero-nav__icon::before,
+.hero-nav__item:hover::before {
+  transform: translate3d(0, 0, 0); /* flat at the end so it covers the whole shape, corners included */
+}
+.hero-nav__icon svg {
+  position: relative;
+}
+.hero-nav__icon svg path {
+  transition: stroke 0.25s ease;
+}
+.hero-nav__item:hover .hero-nav__icon svg path {
+  stroke: #fff;
 }
 /* Glyph + label widths, as fractions of the 80px item width (Work / About / Resume). */
 .hero-nav__icon svg { display: block; height: auto; }
@@ -1127,6 +1160,12 @@ button { font-family: inherit; cursor: pointer; }
 .hero-nav__label {
   display: block;
   height: auto;
+}
+.hero-nav__label path {
+  transition: fill 0.25s ease;
+}
+.hero-nav__item:hover .hero-nav__label path {
+  fill: #ae8383;
 }
 .hero-nav__item:nth-child(1) .hero-nav__label { width: 0.525em; }  /* 42 */
 .hero-nav__item:nth-child(2) .hero-nav__label { width: 0.625em; }  /* 50 */
@@ -1155,7 +1194,14 @@ button { font-family: inherit; cursor: pointer; }
     background: rgba(255, 218, 218, 0.5);
     transition: background 0.2s ease;
   }
-  .hero-nav__item:hover { background: rgba(225, 176, 176, 0.5); }
+  .hero-nav__item {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-nav__item::before { display: block; }
+  .hero-nav__icon::before { display: none; }
+  .hero-nav__label { position: relative; }
+  .hero-nav__item:hover .hero-nav__label path { fill: #fff; }
   .hero-nav__icon,
   .hero-nav__item:hover .hero-nav__icon {
     flex: none;
@@ -1903,6 +1949,41 @@ img.work-project__media-img--shadow {
   font-size: 18px;
   font-weight: 400;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.25s ease;
+}
+/* Hover (same as the Resume button on About): a skewed bar enters from the left
+   (Codrops ButtonHoverStyles "03" / mimas), ends flat, and the text + arrow go gray.
+   The bar is the resting fill at 15% over the white card, opaque so it fully covers it. */
+.case-hero__cta::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: -10%;
+  width: 120%;
+  background: color-mix(in srgb, var(--case-accent, #8b0013) 15%, #fff);
+  transform: translate3d(-130%, 0, 0) skew(30deg);
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+  pointer-events: none;
+}
+.case-hero__cta:hover,
+.case-hero__cta:focus-visible {
+  color: #5f5f5f;
+}
+.case-hero__cta:hover::before,
+.case-hero__cta:focus-visible::before {
+  transform: translate3d(0, 0, 0);
+}
+.case-hero__cta svg path {
+  transition: stroke 0.25s ease;
+}
+.case-hero__cta:hover svg path,
+.case-hero__cta:focus-visible svg path {
+  stroke: #5f5f5f;
 }
 
 .case-section {
@@ -3951,7 +4032,7 @@ section.case-final.reveal-ready.is-revealed {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 4px 8px; /* row 4, column 8: 8px between "Say hi to me at" and the email */
   font-size: 24px;
   color: #5f5f5f;
 }
@@ -3960,10 +4041,38 @@ section.case-final.reveal-ready.is-revealed {
    that points at it always move as one unit (Figma: the two are now
    explicitly framed together, see node 920-5880). */
 .site-footer__hi-email {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   white-space: nowrap;
+}
+/* Email + arrow rest at 75% opacity. On hover a 100% copy (same gray, no colour change)
+   is revealed by a slanted edge sweeping in from the left, same motion as the homepage
+   buttons' fill (Codrops "03" / mimas: 0.4s, cubic-bezier(0.3, 1, 0.8, 1), edge skewed 30deg). */
+.site-footer__hi-email > em,
+.site-footer__hi-email > svg {
+  opacity: 0.75;
+}
+@property --footer-sweep {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: -30px;
+}
+.site-footer__hi-fill {
+  --footer-sweep: -30px;
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  clip-path: polygon(-30px 0, var(--footer-sweep) 0, calc(var(--footer-sweep) + 14px) 100%, -30px 100%);
+  transition: --footer-sweep 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+.site-footer__hi:hover .site-footer__hi-fill,
+.site-footer__hi:focus-visible .site-footer__hi-fill {
+  --footer-sweep: 100%;
 }
 .site-footer__hi svg {
   display: block;
@@ -3977,10 +4086,14 @@ section.case-final.reveal-ready.is-revealed {
   padding: 8px 16px;
   border: 0;
   border-radius: 99px;
-  background: rgba(95, 95, 95, 0.15);
+  background: rgba(174, 131, 131, 0.15);
   color: #5f5f5f;
   font: inherit;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+.site-footer__top:hover {
+  background: rgba(174, 131, 131, 0.3);
 }
 .site-footer__top svg {
   display: block;
@@ -4006,6 +4119,15 @@ section.case-final.reveal-ready.is-revealed {
 }
 .site-footer__col .site-footer__head {
   font-weight: 400;
+}
+/* Footer links rest at 75% opacity and go to 100% on hover (headings stay full). */
+.site-footer__col a {
+  opacity: 0.75;
+  transition: opacity 0.25s ease;
+}
+.site-footer__col a:hover,
+.site-footer__col a:focus-visible {
+  opacity: 1;
 }
 .site-footer::before {
   content: "";

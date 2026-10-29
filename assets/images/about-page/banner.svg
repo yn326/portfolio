@@ -1,15 +1,15 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1170" height="250" viewBox="0 0 1170 250" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1170" height="200" viewBox="0 0 1170 200" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="Subtract">
-<path d="M1130 0C1152.09 0 1170 17.9086 1170 40V210C1170 232.091 1152.09 250 1130 250H349.479C334.7 250 324 235.779 324 221C324 160.249 274.751 111 214 111C153.249 111 104 160.249 104 221C104 235.779 93.2999 250 78.5213 250H40C17.9086 250 0 232.091 0 210V40C3.54389e-06 17.9086 17.9086 1.06706e-06 40 0H1130Z" fill="url(#paint0_linear_1366_1536)" fill-opacity="0.2"/>
-<path d="M1130 0C1152.09 0 1170 17.9086 1170 40V210C1170 232.091 1152.09 250 1130 250H349.479C334.7 250 324 235.779 324 221C324 160.249 274.751 111 214 111C153.249 111 104 160.249 104 221C104 235.779 93.2999 250 78.5213 250H40C17.9086 250 0 232.091 0 210V40C3.54389e-06 17.9086 17.9086 1.06706e-06 40 0H1130Z" fill="url(#pattern0_1366_1536)" fill-opacity="0.2"/>
+<path d="M1130 0C1152.09 0 1170 17.9086 1170 40V160C1170 182.091 1152.09 200 1130 200H349.928C332.421 200 320 182.507 320 165C320 104.249 270.751 55 210 55C149.249 55 100 104.249 100 165C100 182.507 87.5788 200 70.0721 200H40C17.9086 200 3.22172e-07 182.091 0 160V40C0 17.9086 17.9086 1.06706e-06 40 0H1130Z" fill="url(#paint0_linear_1429_548)" fill-opacity="0.2"/>
+<path d="M1130 0C1152.09 0 1170 17.9086 1170 40V160C1170 182.091 1152.09 200 1130 200H349.928C332.421 200 320 182.507 320 165C320 104.249 270.751 55 210 55C149.249 55 100 104.249 100 165C100 182.507 87.5788 200 70.0721 200H40C17.9086 200 3.22172e-07 182.091 0 160V40C0 17.9086 17.9086 1.06706e-06 40 0H1130Z" fill="url(#pattern0_1429_548)" fill-opacity="0.2"/>
 </g>
 <defs>
-<linearGradient id="paint0_linear_1366_1536" x1="1170" y1="125" x2="0" y2="125" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint0_linear_1429_548" x1="1170" y1="100" x2="0" y2="100" gradientUnits="userSpaceOnUse">
 <stop stop-color="#FFD7D7"/>
 <stop offset="1" stop-color="#FFB6B6"/>
 </linearGradient>
-<pattern id="pattern0_1366_1536" patternUnits="userSpaceOnUse" patternTransform="matrix(30 0 0 30 582.5 122.5)" preserveAspectRatio="none" viewBox="0 0 30 30" width="1" height="1">
-<g id="pattern0_1366_1536_inner">
+<pattern id="pattern0_1429_548" patternUnits="userSpaceOnUse" patternTransform="matrix(30 0 0 30 582.5 97.5)" preserveAspectRatio="none" viewBox="0 0 30 30" width="1" height="1">
+<g id="pattern0_1429_548_inner">
 <circle id="Ellipse 16" cx="2.5" cy="2.5" r="2.5" fill="#5F5F5F" fill-opacity="0.5"/>
 </g>
 </pattern></defs>

@@ -110,7 +110,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=211" />
+  <link rel="stylesheet" href="../css/style.css?v=230" />
   <style>
     /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }
@@ -150,22 +150,27 @@
     .a2-glass[data-tab="6"] { view-transition-name: about-tab-6; view-transition-class: about-card; }
     .a2-glass[data-tab="7"] { view-transition-name: about-tab-7; view-transition-class: about-card; }
     .a2-glass > * { position: relative; z-index: 1; }
-    .a2-h { margin: 0; font-size: 30px; font-weight: 300; line-height: normal; }
+    .a2-h { margin: 0; font-size: 24px; font-weight: 300; line-height: normal; }
     .a2-t18 { font-size: 18px; font-weight: 300; line-height: normal; margin: 0; }
     .a2-reg { font-weight: 400; }
     .a2-tint { background: rgba(174,131,131,.15); }
     .a2-pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; border-radius: 99px;
       font-size: 18px; font-weight: 400; line-height: normal; color: #5f5f5f; text-decoration: none; white-space: nowrap; border: 0; font-family: inherit; }
     .a2-pill img { width: 20px; height: 20px; display: block; }
-    .a2-pill--solid { background: #ae8383; color: #fff; }
+    .a2-pill--solid { background: #d7a4a4; color: #fff; position: relative; overflow: hidden; isolation: isolate; transition: color .25s ease; }
+    /* Resume hover (Codrops ButtonHoverStyles "03" / mimas, same direction as the homepage buttons): a skewed bar enters from the left and ends flat. Its colour (#EACFCB) is Email / LinkedIn's hover fill (30% #AE8383) as it composites over the card, as an opaque bar so it fully covers the #D7A4A4 pill; text + icon go gray like theirs. */
+    .a2-pill--solid::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -10%; width: 120%; background: #eacfcb; transform: translate3d(-130%, 0, 0) skew(30deg); transition: transform .4s cubic-bezier(.3,1,.8,1); pointer-events: none; }
+    .a2-pill--solid:hover, .a2-pill--solid:focus-visible { color: #5f5f5f; }
+    .a2-pill--solid:hover::before, .a2-pill--solid:focus-visible::before { transform: translate3d(0, 0, 0); }
+    .a2-pill--solid:hover .a2-resume-ic path, .a2-pill--solid:focus-visible .a2-resume-ic path { stroke: #5f5f5f; }
 
     /* hero */
     .a2-hero { display: flex; flex-direction: column; gap: 40px; }
     .a2-hero__top { display: flex; flex-direction: column; gap: 24px; }
-    .a2-banner { position: relative; width: 100%; aspect-ratio: 1170 / 311; }
-    .a2-banner__shape { position: absolute; left: 0; top: 0; width: 100%; height: calc(250 / 311 * 100%); }
+    .a2-banner { position: relative; width: 100%; aspect-ratio: 1170 / 255; }
+    .a2-banner__shape { position: absolute; left: 0; top: 0; width: 100%; height: calc(200 / 255 * 100%); }
     .a2-banner__shape img { width: 100%; height: 100%; display: block; }
-    .a2-avatar { position: absolute; left: calc(124 / 1170 * 100%); top: calc(131 / 311 * 100%); width: calc(180 / 1170 * 100%); aspect-ratio: 1; }
+    .a2-avatar { position: absolute; left: calc(120 / 1170 * 100%); top: calc(75 / 255 * 100%); width: calc(180 / 1170 * 100%); aspect-ratio: 1; }
     .a2-avatar img { width: 100%; height: 100%; display: block; }
     .a2-id { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 0 40px; flex-wrap: wrap; }
     .a2-id__who { display: flex; flex-direction: column; gap: 8px; }
@@ -174,8 +179,16 @@
     .a2-id__name img { width: 24px; height: 24px; }
     .a2-id__loc { font-size: 16px; color: rgba(95,95,95,.75); margin: 0; }
     .a2-links { display: flex; gap: 16px; flex-wrap: wrap; }
-    .a2-links .a2-pill:not(.a2-pill--solid) { background: rgba(174,131,131,.15); }
+    .a2-links .a2-pill:not(.a2-pill--solid) { background: rgba(174,131,131,.15); transition: background .2s ease; }
+    .a2-links .a2-pill:not(.a2-pill--solid):hover { background: rgba(174,131,131,.3); }
     .a2-pill--solid img { filter: brightness(0) invert(1); }
+    .a2-resume-ic { width: 20px; height: 20px; display: block; flex: none; }
+    .a2-resume-ic path:not([class]) { transition: stroke .25s ease; }
+    /* Resume hover: two short "text" lines grow out inside the paper icon. */
+    .a2-resume-ic__l1, .a2-resume-ic__l2 { transform-box: fill-box; transform-origin: left center; transform: scaleX(0); transition: transform .3s cubic-bezier(.3,1,.8,1), stroke .25s ease; }
+    .a2-pill--solid:hover .a2-resume-ic__l1, .a2-pill--solid:focus-visible .a2-resume-ic__l1 { transform: scaleX(1); transition-delay: .05s; }
+    .a2-pill--solid:hover .a2-resume-ic__l2, .a2-pill--solid:focus-visible .a2-resume-ic__l2 { transform: scaleX(1); transition-delay: .2s; }
+    @media (prefers-reduced-motion: reduce) { .a2-resume-ic__l1, .a2-resume-ic__l2 { transition: none; } }
     .a2-stats { display: flex; gap: 16px; padding: 0 40px; }
     .a2-stat { flex: 1 0 0; min-width: 0; display: flex; justify-content: space-between; padding: 24px; border-radius: 24px; }
     .a2-stat b { display: block; font-weight: 300; font-size: 30px; margin-bottom: 8px; }
@@ -188,7 +201,8 @@
     @media (prefers-reduced-motion: reduce) { .a2-shuffle.is-spin img { animation: none; } }
     .a2-stat img { width: 24px; height: 24px; flex: none; }
     .a2-hero__foot { display: flex; justify-content: flex-end; padding: 0 40px; margin-top: -24px; }
-    .a2-shuffle { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; font: inherit; font-size: 18px; color: #5f5f5f; cursor: pointer; }
+    .a2-shuffle { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; font: inherit; font-size: 18px; color: #5f5f5f; cursor: pointer; transition: color .25s ease; }
+    .a2-shuffle:hover { color: #ae8383; }
     .a2-shuffle img { width: 20px; height: 20px; transition: transform .5s; }
     .a2-shuffle:hover img { transform: rotate(-180deg); }
 
@@ -199,14 +213,14 @@
     .a2-card p + p { margin-top: 0; }
 
     .a2-comm { display: flex; gap: 16px; }
-    .a2-comm__item { flex: 1 0 0; min-width: 0; display: flex; flex-direction: column; gap: 24px; padding: 32px 24px; border-radius: 24px; }
+    .a2-comm__item { flex: 1 0 0; min-width: 0; display: flex; flex-direction: column; gap: 24px; padding: 24px; border-radius: 24px; }
     .a2-comm__head { display: flex; align-items: center; gap: 16px; }
-    .a2-comm__logo { width: 60px; height: 60px; flex: none; object-fit: cover; }
-    .a2-comm__head p { margin: 0; font-size: 24px; font-weight: 400; line-height: normal; }
+    .a2-comm__logo { width: 50px; height: 50px; flex: none; object-fit: cover; }
+    .a2-comm__head p { margin: 0; font-size: 22px; font-weight: 300; line-height: normal; }
     .a2-comm__body { display: flex; flex-direction: column; gap: 16px; }
     .a2-comm__photo { width: 100%; aspect-ratio: 294 / 200; object-fit: cover; border-radius: 16px; display: block; }
     .a2-meta { display: flex; gap: 32px; flex-wrap: wrap; }
-    .a2-meta span { display: inline-flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 400; color: #ae8383; }
+    .a2-meta span { display: inline-flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 300; color: #ae8383; }
     .a2-meta img { width: 24px; height: 24px; }
 
     .a2-exp { display: flex; flex-direction: column; gap: 24px; }
@@ -215,7 +229,7 @@
     .a2-exp__logo { width: 80px; height: 80px; flex: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .a2-exp__logo img { display: block; object-fit: cover; }
     .a2-exp__who p { margin: 0; }
-    .a2-exp__who .co { font-size: 24px; font-weight: 300; line-height: normal; }
+    .a2-exp__who .co { font-size: 22px; font-weight: 300; line-height: normal; }
     .a2-exp__who .role { font-size: 18px; line-height: normal; margin-top: 8px; }
     .a2-exp .a2-pill { font-weight: 300; background: rgba(174,131,131,.15); flex: none; }
 
@@ -235,7 +249,7 @@
     @media (prefers-reduced-motion: reduce) { .a2-bar { animation: none; } }
     .a2-repeat__icon { position: absolute; left: 71px; top: 60px; width: 43.64px; height: 43.64px; }
     .a2-track { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 8px; }
-    .a2-track img { width: 36px; height: 36px; flex: none; }
+    .a2-track img { width: 36px; height: 36px; flex: none; filter: drop-shadow(0 0 5px rgba(174,131,131,.5)); } /* Figma drop shadow: x0 y0 blur 10 (= 5px std dev) #AE8383 50% */
     .a2-track p { margin: 0; font-size: 18px; line-height: normal; }
     .a2-track p + p { margin-top: 4px; }
 
@@ -247,23 +261,26 @@
     .a2-person__txt { display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1 0 0; align-items: flex-start; }
     .a2-person__txt p { margin: 0; font-size: 18px; line-height: normal; }
     .a2-person__txt p + p { margin-top: 4px; }
-    .a2-connect { font-size: 16px; font-weight: 400; padding: 8px 16px; background: rgba(174,131,131,.15); cursor: pointer; }
+    .a2-connect { font-size: 16px; font-weight: 400; padding: 8px 16px; background: rgba(174,131,131,.15); cursor: pointer; transition: background .2s ease; }
     .a2-connect img { width: 18px; height: 18px; }
 
+    .a2-connect:not(.is-pending):hover { background: rgba(174,131,131,.3); }
     .a2-connect.is-pending { color: rgba(95,95,95,.75); cursor: default; }
     /* Recommended Actions (Figma 1378:2790): rows rest like "Shoot me an Email"; hover = the "Connect on LinkedIn" look. */
     .a2-actions { display: flex; flex-direction: column; gap: 24px; }
     .a2-act { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #5f5f5f; text-decoration: none; font-size: 18px; font-weight: 300; line-height: normal; transition: color .25s ease; }
     .a2-act:hover, .a2-act:focus-visible { color: #ae8383; }
     .a2-act__who { display: flex; align-items: center; gap: 12px; min-width: 0; white-space: nowrap; }
-    .a2-act__tile { width: 50px; height: 50px; flex: none; }
+    .a2-act__tile { width: 50px; height: 50px; flex: none; border-radius: 8px; overflow: hidden; }
     .a2-act__tile rect { fill: rgba(174,131,131,.15); transition: fill .25s ease; }
     .a2-act__tile path { stroke: #5f5f5f; transition: stroke .25s ease; }
     .a2-act__arrow { width: 24px; height: 24px; flex: none; transform: rotate(45deg); transition: transform .3s ease; }
     .a2-act:hover .a2-act__arrow, .a2-act:focus-visible .a2-act__arrow { transform: none; }
     @media (prefers-reduced-motion: reduce) { .a2-act__arrow { transition: none; } }
     .a2-act__arrow path { stroke: #5f5f5f; transition: stroke .25s ease; }
-    .a2-act:hover .a2-act__tile rect, .a2-act:focus-visible .a2-act__tile rect { fill: #ae8383; }
+    /* Hover sweep as on the homepage buttons (Codrops "03" / mimas): a skewed bar slides across the tile. */
+    .a2-act__tile .a2-act__sweep { fill: #d7a4a4; transform-box: fill-box; transform-origin: center; transform: translateX(-130%) skewX(30deg); transition: transform .4s cubic-bezier(.3,1,.8,1); }
+    .a2-act:hover .a2-act__sweep, .a2-act:focus-visible .a2-act__sweep { transform: none; } /* flat at the end so it covers the whole tile, corners included */
     .a2-act:hover .a2-act__tile path, .a2-act:focus-visible .a2-act__tile path { stroke: #fff; }
     .a2-act:hover .a2-act__arrow path, .a2-act:focus-visible .a2-act__arrow path { stroke: #ae8383; }
     @media (max-width: 1000px) {
@@ -332,7 +349,7 @@
     <section class="a2-glass a2-hero" aria-label="Profile" data-tab="1">
       <div class="a2-hero__top">
         <div class="a2-banner">
-          <div class="a2-banner__shape"><img src="../assets/images/about-page/banner.svg" alt="" /></div>
+          <div class="a2-banner__shape"><img src="../assets/images/about-page/banner.svg?v=2" alt="" /></div>
           <div class="a2-avatar"><img src="../assets/images/about-page/avatar.png" alt="Raina" /></div>
         </div>
         <div class="a2-id">
@@ -344,7 +361,7 @@
           <div class="a2-links">
             <a class="a2-pill" href="mailto:yn326@cornell.edu">Email <img src="../assets/images/about-page/mail.svg" alt="" /></a>
             <a class="a2-pill" href="https://www.linkedin.com/in/rainani/" target="_blank" rel="noopener">LinkedIn <img src="../assets/images/about-page/user-plus-sm.svg" alt="" /></a>
-            <a class="a2-pill a2-pill--solid" href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume <img src="../assets/images/about-page/sticky-note.svg" alt="" /></a>
+            <a class="a2-pill a2-pill--solid" href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume <svg class="a2-resume-ic" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M12 17C12.2641 17.0006 12.5257 16.949 12.7697 16.848C13.0137 16.747 13.2353 16.5987 13.4217 16.4117L16.4117 13.4217C16.5987 13.2353 16.747 13.0137 16.848 12.7697C16.949 12.5257 17.0006 12.2641 17 12M12 17H3.66667C3.22464 17 2.80072 16.8244 2.48816 16.5118C2.1756 16.1993 2 15.7754 2 15.3333V3.66667C2 3.22464 2.1756 2.80072 2.48816 2.48816C2.80072 2.17559 3.22464 2 3.66667 2H15.3333C15.7754 2 16.1993 2.17559 16.5118 2.48816C16.8244 2.80072 17 3.22464 17 3.66667V12M12 17V12.8333C12 12.6123 12.0878 12.4004 12.2441 12.2441C12.4004 12.0878 12.6123 12 12.8333 12H17" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path class="a2-resume-ic__l1" d="M5.5 6.5H11.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path class="a2-resume-ic__l2" d="M5.5 9.75H9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></a>
           </div>
         </div>
       </div>
@@ -366,20 +383,20 @@
           <h2 class="a2-h">Communities</h2>
           <div class="a2-comm">
             <div class="a2-comm__item a2-tint">
-              <div class="a2-comm__head"><img class="a2-comm__logo" src="../assets/images/about/dcc-logo.png" alt="" /><p>Design Consulting at Cornell</p></div>
+              <div class="a2-comm__head"><img class="a2-comm__logo" src="../assets/images/about-page/dcc-logo.png?v=3" alt="" /><p>Design Consulting at Cornell</p></div>
               <div class="a2-comm__body">
                 <p class="a2-t18">I am currently a Project Manager at DCC leading our design project with Trip.com!</p>
                 <img class="a2-comm__photo" src="../assets/images/about-page/dcc-photo.jpg" alt="DCC team" />
               </div>
-              <div class="a2-meta"><span><img src="../assets/images/about-page/user-round.svg" alt="" />54</span><span><img src="../assets/images/about-page/clock.svg" alt="" />2 years</span><span><img src="../assets/images/about-page/briefcase.svg" alt="" />PM</span></div>
+              <div class="a2-meta"><span><img src="../assets/images/about-page/user-round.svg?v=2" alt="" />54</span><span><img src="../assets/images/about-page/clock.svg?v=2" alt="" />2 years</span><span><img src="../assets/images/about-page/briefcase.svg?v=2" alt="" />PM</span></div>
             </div>
             <div class="a2-comm__item a2-tint">
-              <div class="a2-comm__head"><img class="a2-comm__logo" src="../assets/images/about-page/cvec-logo.png" alt="" /><p>Cornell VC and Entrepreneurship</p></div>
+              <div class="a2-comm__head"><img class="a2-comm__logo" src="../assets/images/about-page/cvec-logo.png?v=2" alt="" /><p>Cornell VC and Entrepreneurship</p></div>
               <div class="a2-comm__body">
                 <p class="a2-t18">I joined CVEC as a designer to help Gorest launch their AI game engine!</p>
                 <img class="a2-comm__photo" src="../assets/images/about-page/cvec-photo.jpg" alt="CVEC event" />
               </div>
-              <div class="a2-meta"><span><img src="../assets/images/about-page/user-round.svg" alt="" />35</span><span><img src="../assets/images/about-page/clock.svg" alt="" />1 year</span><span><img src="../assets/images/about-page/briefcase.svg" alt="" />Designer</span></div>
+              <div class="a2-meta"><span><img src="../assets/images/about-page/user-round.svg?v=2" alt="" />35</span><span><img src="../assets/images/about-page/clock.svg?v=2" alt="" />1 year</span><span><img src="../assets/images/about-page/briefcase.svg?v=2" alt="" />Designer</span></div>
             </div>
           </div>
         </section>
@@ -387,9 +404,9 @@
         <section class="a2-glass a2-card a2-exp" style="gap:24px" data-tab="4">
           <h2 class="a2-h">Experiences</h2>
           <div class="a2-exp__row"><div class="a2-exp__who"><div class="a2-exp__logo a2-tint"><img src="../assets/images/about-page/trip.png" alt="" style="width:70px;height:70px;object-fit:contain" /></div><div><p class="co">Trip.com Group</p><p class="role">Lead Design Consultant (via DCC)</p></div></div><span class="a2-pill">Fall 2026</span></div>
-          <div class="a2-exp__row"><div class="a2-exp__who"><div class="a2-exp__logo a2-tint"><img src="../assets/images/about-page/damai.png" alt="" style="width:50px;height:45px;object-fit:contain" /></div><div><p class="co">Damai Entertainment (Alibaba Group)</p><p class="role">B2B Design Intern</p></div></div><span class="a2-pill">Summer 2026</span></div>
+          <div class="a2-exp__row"><div class="a2-exp__who"><div class="a2-exp__logo a2-tint"><img src="../assets/images/about-page/damai.png?v=2" alt="" style="width:50px;height:45px;object-fit:contain" /></div><div><p class="co">Damai Entertainment (Alibaba Group)</p><p class="role">B2B Design Intern</p></div></div><span class="a2-pill">Summer 2026</span></div>
           <div class="a2-exp__row"><div class="a2-exp__who"><div class="a2-exp__logo a2-tint"><img src="../assets/images/about-page/wapoo.jpg" alt="" style="width:50px;height:48px;border-radius:4px" /></div><div><p class="co">Wapoo AI</p><p class="role">Product Design Intern</p></div></div><span class="a2-pill">Summer 2026</span></div>
-          <div class="a2-exp__row"><div class="a2-exp__who"><div class="a2-exp__logo a2-tint"><img src="../assets/images/about-page/muji.png" alt="" style="width:50px;height:50px;border-radius:4px" /></div><div><p class="co">MUJI USA</p><p class="role">Product Design Consultant (via DCC)</p></div></div><span class="a2-pill">Spring 2026</span></div>
+          <div class="a2-exp__row"><div class="a2-exp__who"><div class="a2-exp__logo a2-tint"><img src="../assets/images/about-page/muji-square.png" alt="" style="width:50px;height:50px;border-radius:4px" /></div><div><p class="co">MUJI USA</p><p class="role">Product Design Consultant (via DCC)</p></div></div><span class="a2-pill">Spring 2026</span></div>
         </section>
       </div>
 
@@ -401,19 +418,19 @@
             <div class="a2-repeat__cover"></div>
             <svg class="a2-repeat__icon" viewBox="0 0 43.6364 43.6364" fill="none" aria-hidden="true"><defs><filter id="a2-ib" x="0" y="0" width="45.8182" height="45.8182" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="b"/><feBlend in="SourceGraphic" in2="b" result="shape"/><feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="h"/><feOffset dx="2.18182" dy="2.18182"/><feGaussianBlur stdDeviation="5.45455"/><feComposite in2="h" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/><feBlend in2="shape"/></filter><linearGradient id="a2-ig" x1="1.7804" y1="0" x2="41.856" y2="43.6364" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity=".8"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".6"/></linearGradient></defs><g filter="url(#a2-ib)"><rect width="43.6364" height="43.6364" rx="21.8182" fill="#fff"/><rect x=".545455" y=".545455" width="42.5455" height="42.5455" rx="21.2727" stroke="url(#a2-ig)" stroke-width="1.09091"/><g stroke="#AE8383" stroke-width="2.18182" stroke-linecap="round"><path class="a2-bar" style="--d:-0.00s;--lo:.45" d="M10.9091 19.6364V22.9091"/><path class="a2-bar" style="--d:-0.17s;--lo:.45" d="M15.2727 15.2727V27.2727"/><path class="a2-bar" style="--d:-0.34s;--lo:.45" d="M19.6364 12V31.6364"/><path class="a2-bar" style="--d:-0.51s;--lo:.45" d="M24 17.4545V25.0909"/><path class="a2-bar" style="--d:-0.68s;--lo:.45" d="M28.3636 14.1818V28.3636"/><path class="a2-bar" style="--d:-0.85s;--lo:.45" d="M32.7273 19.6364V22.9091"/></g></g></svg>
           </div>
-          <div class="a2-track a2-tint"><img src="../assets/images/about-page/play.svg" alt="" /><div><p class="a2-reg">NEON</p><p>A2O, A2O Lite</p></div></div>
+          <div class="a2-track a2-tint"><img src="../assets/images/about-page/play.svg?v=2" alt="" /><div><p class="a2-reg">NEON</p><p>A2O, A2O Lite</p></div></div>
         </section>
 
         <section class="a2-glass a2-know" data-tab="6">
           <div class="a2-know__head"><h2 class="a2-h">You May Know</h2><p class="a2-t18" style="margin-top:8px">From Raina’s network</p></div>
           <div class="a2-person"><div class="a2-avatar50 a2-tint"><img src="../assets/images/about-page/claude.png" alt="" style="width:30px;height:30px" /></div><div class="a2-person__txt"><div><p class="a2-reg">Claude</p><p>Raina’s unpaid assisstant</p></div><button class="a2-pill a2-connect" type="button" data-name="Claude"><img src="../assets/images/about-page/user-plus.svg" alt="" />Connect</button></div></div>
           <div class="a2-person"><div class="a2-avatar50 a2-tint">🧋</div><div class="a2-person__txt"><div><p class="a2-reg">Boba</p><p>Raina’s most consistent relationship</p></div><button class="a2-pill a2-connect" type="button" data-name="Boba"><img src="../assets/images/about-page/user-plus.svg" alt="" />Connect</button></div></div>
-          <div class="a2-person"><div class="a2-avatar50 a2-tint"><img src="../assets/images/about-page/midjourney.png" alt="" style="width:30px;height:25px;object-fit:cover" /></div><div class="a2-person__txt"><div><p class="a2-reg">Midjourney</p><p>Raina’s second favorite</p></div><button class="a2-pill a2-connect" type="button" data-name="Midjourney"><img src="../assets/images/about-page/user-plus.svg" alt="" />Connect</button></div></div>
+          <div class="a2-person"><div class="a2-avatar50 a2-tint"><img src="../assets/images/about-page/midjourney.png?v=2" alt="" style="width:30px;height:25px;object-fit:cover" /></div><div class="a2-person__txt"><div><p class="a2-reg">Midjourney</p><p>Raina’s second favorite</p></div><button class="a2-pill a2-connect" type="button" data-name="Midjourney"><img src="../assets/images/about-page/user-plus.svg" alt="" />Connect</button></div></div>
         </section>
         <section class="a2-glass a2-actions" data-tab="7">
           <h2 class="a2-h">Recommended Actions</h2>
-          <a class="a2-act" href="mailto:yn326@cornell.edu"><span class="a2-act__who"><svg class="a2-act__tile" viewBox="0 0 50 50" fill="none" aria-hidden="true"><rect width="50" height="50" rx="8"/><path d="M34 20.5L25.9081 25.6543C25.6335 25.8138 25.3216 25.8978 25.0041 25.8978C24.6865 25.8978 24.3746 25.8138 24.1 25.6543L16 20.5M17.8 17.8H32.2C33.1941 17.8 34 18.6059 34 19.6V30.4C34 31.3941 33.1941 32.2 32.2 32.2H17.8C16.8059 32.2 16 31.3941 16 30.4V19.6C16 18.6059 16.8059 17.8 17.8 17.8Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Shoot me an Email</span></span><svg class="a2-act__arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.0002 16.9999V6.9999H7.0002M17.0002 6.9999L7.0002 16.9999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-          <a class="a2-act" href="https://www.linkedin.com/in/rainani/" target="_blank" rel="noopener"><span class="a2-act__who"><svg class="a2-act__tile" viewBox="0 0 50 50" fill="none" aria-hidden="true"><rect width="50" height="50" rx="8"/><path d="M28.3234 32.4781V30.8163C28.3234 29.9348 27.9733 29.0895 27.35 28.4662C26.7267 27.8429 25.8813 27.4927 24.9998 27.4927H20.0144C19.133 27.4927 18.2876 27.8429 17.6643 28.4662C17.041 29.0895 16.6908 29.9348 16.6908 30.8163V32.4781M30.8161 21.6764V26.6618M33.3088 24.1691H28.3234M25.8307 20.8455C25.8307 22.6811 24.3427 24.1691 22.5071 24.1691C20.6716 24.1691 19.1835 22.6811 19.1835 20.8455C19.1835 19.0099 20.6716 17.5219 22.5071 17.5219C24.3427 17.5219 25.8307 19.0099 25.8307 20.8455Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Connect on LinkedIn</span></span><svg class="a2-act__arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.0002 16.9999V6.9999H7.0002M17.0002 6.9999L7.0002 16.9999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="a2-act" href="mailto:yn326@cornell.edu"><span class="a2-act__who"><svg class="a2-act__tile" viewBox="0 0 50 50" fill="none" aria-hidden="true"><rect width="50" height="50" rx="8"/><rect class="a2-act__sweep" x="-20" width="90" height="50"/><path d="M34 20.5L25.9081 25.6543C25.6335 25.8138 25.3216 25.8978 25.0041 25.8978C24.6865 25.8978 24.3746 25.8138 24.1 25.6543L16 20.5M17.8 17.8H32.2C33.1941 17.8 34 18.6059 34 19.6V30.4C34 31.3941 33.1941 32.2 32.2 32.2H17.8C16.8059 32.2 16 31.3941 16 30.4V19.6C16 18.6059 16.8059 17.8 17.8 17.8Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Shoot me an Email</span></span><svg class="a2-act__arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.0002 16.9999V6.9999H7.0002M17.0002 6.9999L7.0002 16.9999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="a2-act" href="https://www.linkedin.com/in/rainani/" target="_blank" rel="noopener"><span class="a2-act__who"><svg class="a2-act__tile" viewBox="0 0 50 50" fill="none" aria-hidden="true"><rect width="50" height="50" rx="8"/><rect class="a2-act__sweep" x="-20" width="90" height="50"/><path d="M28.3234 32.4781V30.8163C28.3234 29.9348 27.9733 29.0895 27.35 28.4662C26.7267 27.8429 25.8813 27.4927 24.9998 27.4927H20.0144C19.133 27.4927 18.2876 27.8429 17.6643 28.4662C17.041 29.0895 16.6908 29.9348 16.6908 30.8163V32.4781M30.8161 21.6764V26.6618M33.3088 24.1691H28.3234M25.8307 20.8455C25.8307 22.6811 24.3427 24.1691 22.5071 24.1691C20.6716 24.1691 19.1835 22.6811 19.1835 20.8455C19.1835 19.0099 20.6716 17.5219 22.5071 17.5219C24.3427 17.5219 25.8307 19.0099 25.8307 20.8455Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Connect on LinkedIn</span></span><svg class="a2-act__arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.0002 16.9999V6.9999H7.0002M17.0002 6.9999L7.0002 16.9999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
         </section>
 
       </div>
