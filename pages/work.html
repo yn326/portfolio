@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="../js/case-transition.js?v=26"></script>
+  <script>
+    /* Safari mis-evaluates the tan(atan2()) viewport-ratio trick the background shapes are scaled with (huge in a small
+       window, tiny when it grows), so the cover scale is computed here and the CSS only uses its own formula as a fallback. */
+    (function () {
+      var d = document.documentElement;
+      function s() { d.style.setProperty("--cover-scale", Math.max(d.clientWidth / 1440, d.clientHeight / 900)); }
+      s(); addEventListener("resize", s);
+    })();
+  </script>
+  <script src="../js/case-transition.js?v=27"></script>
   <script>
     // Works out which page-to-page transition this arrival is, from where we came from. Re-run at pagereveal because a
     // page restored from the back/forward cache doesn't re-run this script: the browser's Back button would otherwise
@@ -114,7 +123,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=132" />
+  <link rel="stylesheet" href="../css/style.css?v=205" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -127,7 +136,7 @@
     .w4 { position: absolute; inset: 0; overflow: hidden; container-type: size; }
     .w4__canvas {
       position: absolute; top: 50%; left: 50%; width: 1440px; height: 900px;
-      transform: translate(-50%, -50%) scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px))));
+      transform: translate(-50%, -50%) scale(var(--cover-scale, max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px)))));
     }
     .w4__shape { position: absolute; display: block; }
     .w4__shape--e9 { left: 1218px; top: 220px; width: 204px; height: 204px; border-radius: 50%;
@@ -148,7 +157,7 @@
       color: #5f5f5f; text-decoration: none; overflow: hidden;
     }
     /* Figma peek tab is a 0.9-scaled copy of the full 600x500 card (540x450, 36px padding/radius). */
-    .w4-tab { transform-origin: top left; }
+    .w4-tab { transform-origin: top left; will-change: transform; }
     .w4-tab::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
       background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 16%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 62%, rgba(255,255,255,.06) 84%, rgba(255,255,255,.2) 100%); }
     /* rim: corner angles for a 600x500 (and 540x450) box: TR = atan(300/250) = 50.19deg = 13.94%, BL = 63.94% */
@@ -257,6 +266,8 @@
     html.vt-tab-names .w4-tab--muji .w4-cover-muji-screen { view-transition-name: work-screen-1; }
     html.vt-tab-names .w4-tab--damai .w4-cover-damai-screen { view-transition-name: work-screen-2; }
     html.vt-tab-names .w4-tab--wapoo .w4-cover-wapoo-screen { view-transition-name: work-screen-3; }
+    /* The three-dash indicator isn't part of any slide: name it so it fades (see work-dots rules in style.css) instead of popping in/out with the page snapshot. */
+    html.vt-tab-names .w4-dots { view-transition-name: work-dots; }
     html.vt-tab-names .w4-tab--muji { view-transition-name: work-tab-1; }
     html.vt-tab-names .w4-tab--damai { view-transition-name: work-tab-2; }
     html.vt-tab-names .w4-tab--wapoo { view-transition-name: work-tab-3; }
@@ -522,9 +533,9 @@
       function render() {
         Object.keys(S).forEach(function (k) {
           var a = S[k][0], b = S[k][1], el = tabs[k];
-          el.style.left = lerp(a.x, b.x, p) + "px";
-          el.style.top = lerp(a.y, b.y, p) + "px";
-          el.style.transform = "scale(" + lerp(a.s, b.s, p) + ")";
+          // left/top stay at the first state (set in the markup); the slide is a compositor-friendly transform, so no
+          // layout or repaint of the blurred glass per frame (that made Safari stutter).
+          el.style.transform = "translate3d(" + (lerp(a.x, b.x, p) - a.x) + "px, " + (lerp(a.y, b.y, p) - a.y) + "px, 0) scale(" + lerp(a.s, b.s, p) + ")";
         });
         renderDots();
       }
@@ -578,7 +589,7 @@
       render();
     })();
   </script>
-  <script src="../js/main.js?v=33"></script>
+  <script src="../js/main.js?v=34"></script>
   <span id="page-parsed" hidden></span>
 </body>
 </html>

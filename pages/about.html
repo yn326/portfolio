@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="../js/case-transition.js?v=26"></script>
+  <script>
+    /* Safari mis-evaluates the tan(atan2()) viewport-ratio trick the background shapes are scaled with (huge in a small
+       window, tiny when it grows), so the cover scale is computed here and the CSS only uses its own formula as a fallback. */
+    (function () {
+      var d = document.documentElement;
+      function s() { d.style.setProperty("--cover-scale", Math.max(d.clientWidth / 1440, d.clientHeight / 900)); }
+      s(); addEventListener("resize", s);
+    })();
+  </script>
+  <script src="../js/case-transition.js?v=27"></script>
   <script>
     // Works out which page-to-page transition this arrival is, from where we came from. Re-run at pagereveal because a
     // page restored from the back/forward cache doesn't re-run this script: the browser's Back button would otherwise
@@ -101,12 +110,12 @@
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=180" />
+  <link rel="stylesheet" href="../css/style.css?v=205" />
   <style>
     /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }
     .w4-bg__canvas { position: absolute; top: 50%; left: 50%; width: 1440px; height: 900px;
-      transform: translate(-50%, -50%) scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px)))); }
+      transform: translate(-50%, -50%) scale(var(--cover-scale, max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px))))); }
     .w4__shape { position: absolute; display: block; }
     .w4__shape--e9 { left: 1218px; top: 220px; width: 204px; height: 204px; border-radius: 50%;
       background: linear-gradient(198deg, #ffd7d7 8.32%, #ffe2e2 91.68%); box-shadow: 0 2.503px 12.515px rgba(255, 215, 215, 0.5); view-transition-name: bg-e9; }

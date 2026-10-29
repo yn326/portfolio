@@ -85,9 +85,45 @@ function initScrollspy() {
 // make it earlier and actually made it later, since a smaller number is a
 // line closer to the top. 65% -- most of the way down the viewport --
 // actually triggers early.)
+// EXPERIMENT switch for the white case-study frames:
+//   "reveal" = a frame slides up and fades in once, as it first scrolls into view (no enlarging)
+//   "focus"  = the original behaviour: the frame the reader is on enlarges slightly (code below, untouched)
+const CASE_FRAME_EFFECT = "reveal";
+
+// Slide-up + fade-in. Frames already on screen at load are left alone; the rest start hidden (class added by
+// script, so with JS off everything stays visible) and get .is-revealed the first time their top passes 95% of the
+// viewport height. Styles: .case-section.reveal-ready in style.css.
+function initCaseFrameReveal(frames) {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!("IntersectionObserver" in window)) return;
+  const line = window.innerHeight * 0.95;
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        io.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -5% 0px", threshold: 0 }
+  );
+  frames.forEach((frame) => {
+    // Already above the line (or scrolled past, e.g. when reloaded part-way down): nothing to animate.
+    if (frame.getBoundingClientRect().top < line) return;
+    frame.classList.add("reveal-ready");
+    io.observe(frame);
+  });
+}
+
 function initCaseFrameFocus() {
-  const frames = document.querySelectorAll(".case-hero__card, .case-section.case-section--built");
+  // The hero card (heading box at the top) deliberately does not take part: it stays put and only the sections enlarge.
+  const frames = document.querySelectorAll(".case-section.case-section--built");
   if (!frames.length) return;
+  if (CASE_FRAME_EFFECT === "reveal") {
+    // The coloured "Final designs" sections (section.case-final) join in too; they never took part in the enlarge.
+    initCaseFrameReveal(document.querySelectorAll(".case-section.case-section--built, section.case-final"));
+    return;
+  }
 
   // Don't focus anything until the reader actually scrolls -- otherwise the
   // hero card pops in already-expanded on load, before they've done
@@ -99,8 +135,8 @@ function initCaseFrameFocus() {
   function update() {
     ticking = false;
     if (!hasScrolled) return;
-    const line = window.innerHeight * 0.65;
-    let current = frames[0];
+    const line = window.innerHeight * 0.5; // was 0.65: a smaller number = a line nearer the top = the frame enlarges later
+    let current = null; // none until the first section's top reaches the line
     for (const frame of frames) {
       if (frame.getBoundingClientRect().top <= line) current = frame;
     }
@@ -303,12 +339,86 @@ function initHomeBgExit() {
   });
 }
 
+// Eased scroll for in-page links, "View final designs" and "Back to top". Safari's own `scroll-behavior: smooth` has
+// no easing curve, so the page drives the scroll itself, reproducing Chrome's native smooth scroll (measured: a
+// duration of about sqrt(distance) frames at 60fps, and an ease close to cubic-bezier(.4, 0, .05, 1)) so every
+// browser feels the same. Any wheel / touch / key input hands control straight back to the reader.
+function cubicBezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const X = (s) => ((ax * s + bx) * s + cx) * s;
+  const Y = (s) => ((ay * s + by) * s + cy) * s;
+  return (t) => {
+    let lo = 0, hi = 1, s = t;
+    for (let i = 0; i < 24; i++) {
+      s = (lo + hi) / 2;
+      if (X(s) < t) lo = s; else hi = s;
+    }
+    return Y(s);
+  };
+}
+const scrollEase = cubicBezier(0.4, 0, 0.05, 1);
+let scrollAnim = null;
+function smoothScrollTo(targetY) {
+  const root = document.documentElement;
+  const max = Math.max(0, root.scrollHeight - window.innerHeight);
+  const to = Math.min(Math.max(0, targetY), max);
+  if (scrollAnim) scrollAnim.cancel();
+  const from = window.scrollY;
+  const dist = to - from;
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!dist || reduce) {
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, to);
+    root.style.scrollBehavior = "";
+    return;
+  }
+  const duration = Math.min(3333, Math.sqrt(Math.abs(dist)) * (1000 / 60));
+  const start = performance.now();
+  let raf = 0;
+  root.style.scrollBehavior = "auto"; // otherwise the CSS smooth scroll fights every frame we set
+  const stops = ["wheel", "touchstart", "keydown", "mousedown"];
+  function finish() {
+    cancelAnimationFrame(raf);
+    stops.forEach((t) => window.removeEventListener(t, finish));
+    root.style.scrollBehavior = "";
+    scrollAnim = null;
+  }
+  stops.forEach((t) => window.addEventListener(t, finish, { passive: true }));
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    window.scrollTo(0, from + dist * scrollEase(t));
+    if (t < 1) raf = requestAnimationFrame(step);
+    else finish();
+  }
+  scrollAnim = { cancel: finish };
+  raf = requestAnimationFrame(step);
+}
+window.smoothScrollTo = smoothScrollTo;
+
+function initSmoothAnchors() {
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const hash = link.getAttribute("href");
+    if (hash.length < 2) return;
+    let target = null;
+    try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch (err) {}
+    if (!target) return;
+    e.preventDefault();
+    const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+    smoothScrollTo(target.getBoundingClientRect().top + window.scrollY - margin);
+    try { history.replaceState(history.state, "", hash); } catch (err) {}
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initWorkRing();
   initPageNavFade();
   initNoteModal();
   initAboutPhotoHover();
   initScrollspy();
+  initSmoothAnchors();
   initCaseFrameFocus();
   initHomeBgEntrance();
   initHomeBgExit();

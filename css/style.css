@@ -22,6 +22,13 @@
   mix-blend-mode: normal;
 }
 
+/* Work page's three-dash indicator: fades out as Work is left, and fades in once the cards have mostly arrived,
+   instead of vanishing/appearing the instant the page snapshot swaps. */
+@keyframes vt-dots-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes vt-dots-in { from { opacity: 0; } to { opacity: 1; } }
+::view-transition-old(work-dots) { animation: 250ms ease both vt-dots-out; mix-blend-mode: normal; }
+::view-transition-new(work-dots) { animation: 450ms ease 450ms both vt-dots-in; mix-blend-mode: normal; }
+
 /* IMPORTANT: never put a custom `animation` on ::view-transition-group() --
    overriding it silently destroys the UA's own top/left positioning for
    that box (confirmed via computed-style inspection: top/left both reset
@@ -607,7 +614,7 @@ button { font-family: inherit; cursor: pointer; }
   width: 1440px;
   height: 900px;
   transform: translate(-50%, -50%)
-    scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px))));
+    scale(var(--cover-scale, max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px)))));
 }
 /* Each shape is split into two layers so a JS-driven exit (see initHomeBgExit
    in main.js) can read and continue from the float loop's current position
@@ -1539,7 +1546,7 @@ img.work-project__media-img--shadow {
    --cb-* variables below. */
 .case-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; container-type: size; background: var(--cb-bg, #fff); }
 .case-bg__stage { position: absolute; top: 50%; left: 50%; width: 1440px; height: 900px;
-  transform: translate(-50%, -50%) scale(max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px)))); }
+  transform: translate(-50%, -50%) scale(var(--cover-scale, max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px))))); }
 .case-bg__shape { position: absolute; display: block; }
 .case-bg__shape--e9 { left: 1218px; top: 220px; width: 204px; height: 204px; border-radius: 50%;
   background: linear-gradient(var(--cb-e9-a), var(--cb-e9-1), var(--cb-e9-2)); box-shadow: 0 2.503px 12.515px rgba(var(--cb-e9-s), 0.5); }
@@ -1824,12 +1831,6 @@ img.work-project__media-img--shadow {
   display: flex;
   flex-direction: column;
   gap: 40px;
-  /* initCaseFrameFocus() in main.js -- same treatment as .case-section--
-     built below, see the comment there. */
-  transition: transform 0.3s ease;
-}
-.case-hero__card.is-focused {
-  transform: scale(1.02);
 }
 .case-hero__titlerow {
   display: flex;
@@ -1931,6 +1932,19 @@ img.work-project__media-img--shadow {
 }
 .case-section.case-section--built.is-focused {
   transform: scale(1.02);
+}
+/* EXPERIMENT (CASE_FRAME_EFFECT = "reveal" in main.js): frames slide up and fade in as they first scroll into view.
+   The enlarge rule above is kept for the "focus" mode. */
+.case-section.case-section--built.reveal-ready,
+section.case-final.reveal-ready {
+  opacity: 0;
+  transform: translateY(56px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 0.8, 0.26, 1);
+}
+.case-section.case-section--built.reveal-ready.is-revealed,
+section.case-final.reveal-ready.is-revealed {
+  opacity: 1;
+  transform: none;
 }
 .case-section__group {
   display: flex;

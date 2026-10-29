@@ -333,6 +333,11 @@
     incoming = JSON.parse(sessionStorage.getItem(KEY));
     sessionStorage.removeItem(KEY);
   } catch (e) {}
+  // Refreshing a page must never replay an arrival animation.
+  try {
+    var navEntry = performance.getEntriesByType("navigation")[0];
+    if (navEntry && navEntry.type === "reload") incoming = null;
+  } catch (e) {}
   if (incoming && Date.now() - incoming.t > 10000) incoming = null;
 
   function slabArrival() {
@@ -453,6 +458,10 @@
     // old page can't be held back to play the Lottie cover, so the new page plays the pink sweep instead.
     var dest = e.activation && e.activation.entry && e.activation.entry.url;
     if (!dest) return;
+    // A refresh (or landing on the very same URL) is not a page change: no sweep.
+    try {
+      if (e.activation.navigationType === "reload" || new URL(dest).href === location.href) return;
+    } catch (err) {}
     var path = new URL(dest).pathname;
     var toCase = /\/(muji|damai|wapoo)\.html$/.test(path);
     var toMain = /\/(work|about|index)\.html$|\/$/.test(path);
