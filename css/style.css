@@ -1719,7 +1719,12 @@ img.work-project__media-img--shadow {
   align-items: center;
   justify-content: center;
   border-radius: 99px;
-  background: rgba(95, 95, 95, 0.1);
+  background: rgba(174, 131, 131, 0.15);
+  transition: background 0.2s ease;
+}
+.case-topbar__back:hover,
+.case-topbar__back:focus-visible {
+  background: rgba(174, 131, 131, 0.3);
 }
 .case-topbar__url {
   display: flex;
@@ -1727,7 +1732,7 @@ img.work-project__media-img--shadow {
   align-items: center;
   padding: 12px 16px;
   border-radius: 99px;
-  background: rgba(95, 95, 95, 0.1);
+  background: rgba(174, 131, 131, 0.15);
   margin: 0;
   font-family: "Figtree", sans-serif;
   font-size: 18px;
