@@ -24,8 +24,8 @@
 
 /* Work page's three-dash indicator: fades out as Work is left, and fades in once the cards have mostly arrived,
    instead of vanishing/appearing the instant the page snapshot swaps. */
-@keyframes vt-dots-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes vt-dots-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vt-dots-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }
+@keyframes vt-dots-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 ::view-transition-old(work-dots) { animation: 250ms ease both vt-dots-out; mix-blend-mode: normal; }
 ::view-transition-new(work-dots) { animation: 450ms ease 450ms both vt-dots-in; mix-blend-mode: normal; }
 
@@ -1592,8 +1592,12 @@ img.work-project__media-img--shadow {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 0;
   z-index: 40;
+  pointer-events: none;
+}
+.scrollspy.is-visible {
+  pointer-events: auto;
 }
 .scrollspy__item {
   display: flex;
@@ -1605,6 +1609,16 @@ img.work-project__media-img--shadow {
   border-radius: 12px;
   text-decoration: none;
   background: transparent;
+  /* Bars slide in top to bottom (--i) and back out bottom to top (--r),
+     both set in main.js. The delay comes from the state being entered. */
+  opacity: 0;
+  translate: 16px 0;
+  transition: opacity 0.3s ease calc(var(--r, 0) * 60ms), translate 0.3s ease calc(var(--r, 0) * 60ms);
+}
+.scrollspy.is-visible .scrollspy__item {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: calc(var(--i, 0) * 60ms);
 }
 .scrollspy__label {
   display: none;
@@ -1619,7 +1633,7 @@ img.work-project__media-img--shadow {
   width: 12px;
   height: 4px;
   border-radius: 99px;
-  background: rgba(95, 95, 95, 0.5);
+  background: rgba(95, 95, 95, 0.25);
   transition: width 0.2s ease, background-color 0.2s ease;
 }
 .scrollspy__item.is-current .scrollspy__bar {

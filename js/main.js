@@ -50,6 +50,10 @@ function initScrollspy() {
     .map((item) => ({ item, section: document.querySelector(item.getAttribute("href")) }))
     .filter((p) => p.section);
   if (!pairs.length) return;
+  pairs.forEach((p, i) => {
+    p.item.style.setProperty("--i", i);
+    p.item.style.setProperty("--r", pairs.length - 1 - i);
+  });
 
   let ticking = false;
   function update() {
@@ -62,6 +66,8 @@ function initScrollspy() {
     for (const pair of pairs) {
       pair.item.classList.toggle("is-current", pair === current);
     }
+    // Only show the nav once the reader reaches the first marked section.
+    nav.classList.toggle("is-visible", pairs[0].section.getBoundingClientRect().top <= line);
   }
   function onScroll() {
     if (ticking) return;
