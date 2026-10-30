@@ -3981,6 +3981,15 @@ section.case-final.reveal-ready.is-revealed {
 .page-nav a svg {
   display: block;
 }
+/* Resting links are 50% (fill-opacity attribute); hover lifts them to 75%. The current
+   page's link has no fill-opacity (full), so the attribute selector leaves it alone. */
+.page-nav a svg path[fill-opacity] {
+  transition: fill-opacity 0.2s ease;
+}
+.page-nav a:hover svg path[fill-opacity],
+.page-nav a:focus-visible svg path[fill-opacity] {
+  fill-opacity: 0.75;
+}
 
 /* Footer (Figma: Frame 28), 32px below the glass card's bottom edge. The card is
    absolutely positioned, so each page's top = card top (142px) + rendered card
