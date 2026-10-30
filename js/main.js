@@ -211,6 +211,85 @@ function initPageNavFade() {
   update();
 }
 
+// Case-study prototype videos (Damai Final designs): they autoplay muted and loop. Each gets a
+// floating bar at the bottom in the style of Safari's inline video controls (frosted dark pill,
+// play/pause + scrubber), inset from the video's rounded corners. Click the video to toggle too.
+// Shown on hover, keyboard focus, while paused and on touch screens. Reduced-motion visitors get
+// the videos paused to start with.
+function initCaseVideos() {
+  const boxes = document.querySelectorAll(".case-final-row__video");
+  if (!boxes.length) return;
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const PAUSE = '<svg class="vc__pause" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.4" height="12" rx="1.1"/><rect x="9.6" y="2" width="3.4" height="12" rx="1.1"/></svg>';
+  const PLAY = '<svg class="vc__play" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.9v10.2a.6.6 0 0 0 .92.5l8-5.1a.6.6 0 0 0 0-1l-8-5.1A.6.6 0 0 0 4 2.9z"/></svg>';
+  boxes.forEach((box) => {
+    const video = box.querySelector("video");
+    if (!video) return;
+    const bar = document.createElement("div");
+    bar.className = "vc";
+    bar.setAttribute("role", "group");
+    bar.setAttribute("aria-label", "Video controls");
+    bar.innerHTML =
+      '<button type="button" class="vc__btn">' + PAUSE + PLAY + "</button>" +
+      '<input class="vc__scrub" type="range" min="0" max="1000" step="1" value="0" aria-label="Seek">';
+    const btn = bar.querySelector(".vc__btn");
+    const scrub = bar.querySelector(".vc__scrub");
+    let raf = 0;
+    let dragging = false;
+    let resumeAfter = false;
+
+    function progress() {
+      const d = video.duration;
+      const frac = d && isFinite(d) ? video.currentTime / d : 0;
+      scrub.value = String(Math.round(frac * 1000));
+      scrub.style.setProperty("--p", (frac * 100).toFixed(2) + "%");
+      scrub.setAttribute("aria-valuetext", Math.round(video.currentTime) + " of " + Math.round(d || 0) + " seconds");
+    }
+    function tick() {
+      if (!dragging) progress();
+      raf = video.paused ? 0 : requestAnimationFrame(tick);
+    }
+    function sync() {
+      const paused = video.paused;
+      box.classList.toggle("is-paused", paused);
+      btn.setAttribute("aria-label", paused ? "Play video" : "Pause video");
+      if (!paused && !raf) raf = requestAnimationFrame(tick);
+      if (paused) progress();
+    }
+    function toggle() {
+      if (video.paused) video.play().catch(() => {});
+      else video.pause();
+    }
+
+    btn.addEventListener("click", (e) => { e.stopPropagation(); toggle(); });
+    bar.addEventListener("click", (e) => e.stopPropagation());
+    box.addEventListener("click", toggle);
+    scrub.addEventListener("pointerdown", () => {
+      dragging = true;
+      resumeAfter = !video.paused;
+      video.pause();
+    });
+    const endDrag = () => {
+      if (!dragging) return;
+      dragging = false;
+      if (resumeAfter) video.play().catch(() => {});
+    };
+    scrub.addEventListener("pointerup", endDrag);
+    scrub.addEventListener("pointercancel", endDrag);
+    scrub.addEventListener("input", () => {
+      const d = video.duration;
+      if (d && isFinite(d)) video.currentTime = (scrub.value / 1000) * d;
+      scrub.style.setProperty("--p", (scrub.value / 10).toFixed(2) + "%");
+    });
+    video.addEventListener("play", sync);
+    video.addEventListener("pause", sync);
+    video.addEventListener("loadedmetadata", progress);
+    if (reduce) video.pause();
+    box.appendChild(bar);
+    sync();
+  });
+}
+
 // EXPERIMENT switch for the top nav:
 //   true  = the nav is pinned to the viewport. It fades away as you scroll down, and
 //           slides back in with a progressive blur along the top edge as soon as you scroll up.
@@ -506,4 +585,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initCaseFrameFocus();
   initHomeBgEntrance();
   initHomeBgExit();
+  initCaseVideos();
 });

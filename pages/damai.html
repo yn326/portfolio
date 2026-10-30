@@ -34,7 +34,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=240" />
+  <link rel="stylesheet" href="../css/style.css?v=249" />
   <style>
     /* TEMPORARY: blur the content of these screenshots for now. The wrapper keeps the 1px stroke
        and rounded corners sharp; only the picture inside is blurred. To show the images again,
@@ -271,9 +271,7 @@
         <h2 class="case-section__title">I drew low-fidelity wireframes for 4 main interfaces of the redesigned app.</h2>
       </div>
 
-      <!-- Wireframes image hidden for now, restore tomorrow (remove the comment markers):
-      <span class="blur-cover blur-cover--wide"><img class="case-concept__screenshot" src="../assets/images/work/damai/concept-wireframes.png" alt="Low-fidelity wireframes for the redesigned Maikong app's 4 main interfaces" /></span>
-      -->
+      <img class="case-concept__screenshot" src="../assets/images/work/damai/concept-wireframes.png" alt="Low-fidelity wireframes for the redesigned Maikong app's 4 main interfaces" />
 
       <p class="case-section__body">I received feedback to keep the needs of different types of event organizers in mind. Thus, I conducted 5 additional interviews across organizers of concerts, theatre, and exhibitions to summarize the main differences in their needs and goals.</p>
 
@@ -639,18 +637,44 @@
       <p class="case-section__body">In this case, I added a toggle in the upper-left corner so users can switch between layouts on their own &mdash; accommodating both large and small-scale events, since the same organizer may manage both types.</p>
     </section>
 
-    <!-- Final designs section hidden for now, restore later (remove the comment markers):
-    <section class="case-final" id="final-designs">
-      <div class="case-final__heading-group">
-        <p class="case-final__eyebrow">Final designs</p>
-        <h2 class="case-final__title">Maikong Redesigned</h2>
+    <section class="case-final case-final--rows" id="final-designs">
+      <div class="case-final-row">
+        <div class="case-final-row__text">
+          <div class="case-final__heading-group">
+            <p class="case-final__eyebrow">Final designs</p>
+            <h2 class="case-final__title">Looking up data</h2>
+          </div>
+          <p class="case-final-row__desc">Lets all users quickly gauge trends and numbers from ticketing data.</p>
+        </div>
+        <div class="case-final-row__video">
+          <video src="../assets/videos/damai-project.mp4" autoplay loop muted playsinline></video>
+        </div>
       </div>
-
-      <div class="case-final__video">
-        <video src="../assets/videos/damai-prototype.mp4" autoplay loop muted playsinline></video>
+      <div class="case-final-row case-final-row--reverse">
+        <div class="case-final-row__text">
+          <div class="case-final__heading-group">
+            <p class="case-final__eyebrow">Final designs</p>
+            <h2 class="case-final__title">Adding to favorites</h2>
+          </div>
+          <p class="case-final-row__desc">Lets Damai staff quickly access projects they are responsible for.</p>
+        </div>
+        <div class="case-final-row__video">
+          <video src="../assets/videos/damai-favorite.mp4" autoplay loop muted playsinline></video>
+        </div>
+      </div>
+      <div class="case-final-row">
+        <div class="case-final-row__text">
+          <div class="case-final__heading-group">
+            <p class="case-final__eyebrow">Final designs</p>
+            <h2 class="case-final__title">Searching for projects</h2>
+          </div>
+          <p class="case-final-row__desc">Allows Damai staff and event organizers to find specific projects.</p>
+        </div>
+        <div class="case-final-row__video">
+          <video src="../assets/videos/damai-search.mp4" autoplay loop muted playsinline></video>
+        </div>
       </div>
     </section>
-    -->
     </div>
     <footer class="site-footer">
       <div class="site-footer__left">
@@ -698,6 +722,6 @@
     </footer>
   </div>
 
-  <script src="../js/main.js?v=42"></script>
+  <script src="../js/main.js?v=45"></script>
 </body>
 </html>
