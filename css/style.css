@@ -1688,6 +1688,7 @@ img.work-project__media-img--shadow {
 }
 .scrollspy__item:hover {
   background: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Figma drop shadow: x0 y0 blur 10, #000 10% */
 }
 .scrollspy__item:hover .scrollspy__label {
   display: block;
