@@ -123,7 +123,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=238" />
+  <link rel="stylesheet" href="../css/style.css?v=240" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -225,10 +225,6 @@
     /* Fixed at 58px (Figma): the 64px hover chip overflows its row evenly instead of making the row taller. */
     .w4-tab__foot { display: flex; align-items: center; gap: 12px; align-self: stretch; height: 58px; flex: none; }
     .w4-tab--muji { --chip-hover: linear-gradient(to right, rgba(251, 171, 123, 0.7), rgba(249, 137, 115, 0.7)); }
-    /* Damai case study temporarily unlinked: the card stays on the strip but is not clickable (no href, no hover arrow).
-       To relink: restore href="damai.html" data-case-color="#6665FE" on the tab and drop w4-tab--off. */
-    .w4-tab--off { pointer-events: none; cursor: default; }
-    .w4-tab--off .w4-tab__arrow { display: none; }
     .w4-tab--damai { --chip-hover: linear-gradient(to left, rgba(181, 154, 227, 0.7), rgba(253, 147, 134, 0.7)); }
     .w4-tab--wapoo { --chip-hover: linear-gradient(to right, rgba(200, 149, 241, 0.7), rgba(166, 216, 249, 0.7)); }
     .w4-tab__arrow { position: relative; flex: none; width: 46px; height: 46px; border-radius: 99px; background: rgba(95, 95, 95, 0.05);
@@ -439,7 +435,7 @@
           </div>
         </a>
 
-        <a class="w4-tab w4-tab--damai w4-tab--off" aria-disabled="true" style="left:736px;top:200px;">
+        <a class="w4-tab w4-tab--damai" href="damai.html" data-case-color="#6665FE" style="left:736px;top:200px;">
           <span class="w4-tab__glass"></span>
           <div class="traffic-lights">
             <span class="traffic-light traffic-light--red"></span>

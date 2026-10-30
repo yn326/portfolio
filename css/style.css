@@ -3939,11 +3939,14 @@ section.case-final.reveal-ready.is-revealed {
   height: 1px;
   pointer-events: none;
 }
-/* Invisible spacer 80px past the footer's bottom edge (footer top + 192px + 80px). */
+/* Invisible spacer 80px past the footer's bottom edge (footer top + 192px + 80px).
+   Damai: the Final designs section is commented out for now, so the card is shorter; the footer
+   sits 34px below the card (same as the other case studies). When that section is restored, use footer
+   top 7771.78px and spacer 8043.78px. */
 .page-canvas--damai::after {
   content: "";
   position: absolute;
-  top: 8041.78px;
+  top: 6724.78px;
   left: 0;
   width: 1px;
   height: 1px;
@@ -4087,7 +4090,7 @@ body .page-nav.is-reveal {
 .page-canvas--about .site-footer { view-transition-name: about-footer; }
 .page-canvas--wapoo .site-footer { top: 12281.97px; }
 .page-canvas--muji .site-footer { top: 13786.65px; }
-.page-canvas--damai .site-footer { top: 7769.78px; }
+.page-canvas--damai .site-footer { top: 6452.78px; } /* card bottom 6418.78 + 34; with Final designs restored: 7771.78px */
 .site-footer__left {
   display: flex;
   flex-direction: column;
@@ -4195,11 +4198,6 @@ body .page-nav.is-reveal {
 .site-footer__col a:hover,
 .site-footer__col a:focus-visible {
   opacity: 1;
-}
-/* A footer entry with no href (a case study that is temporarily unlinked) stays as plain text. */
-.site-footer__col a:not([href]) {
-  pointer-events: none;
-  cursor: default;
 }
 .site-footer::before {
   content: "";
