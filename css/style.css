@@ -4196,6 +4196,11 @@ body .page-nav.is-reveal {
 .site-footer__col a:focus-visible {
   opacity: 1;
 }
+/* A footer entry with no href (a case study that is temporarily unlinked) stays as plain text. */
+.site-footer__col a:not([href]) {
+  pointer-events: none;
+  cursor: default;
+}
 .site-footer::before {
   content: "";
   position: absolute;
