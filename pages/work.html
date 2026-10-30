@@ -123,7 +123,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=250" />
+  <link rel="stylesheet" href="../css/style.css?v=265" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -133,7 +133,18 @@
     html, body { overflow: hidden; height: 100%; overscroll-behavior: none; }
     .page-canvas--work { padding: 0; height: 100vh; min-height: 0; overflow: hidden; }
     .page-canvas--work .page-nav { z-index: 5; }
-    .w4 { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+    /* Background shapes: a fixed, cover-scaled 1440x900 layer behind everything (so it stays put while the card list scrolls). */
+    .w4 { position: fixed; inset: 0; overflow: hidden; container-type: size; z-index: 0; }
+    /* Cards: laid out by the layout script (see the end of the page). Two-up carousel on a viewport-sized stage; at <= 648px
+       (html.w4-list) the stage is in flow, as tall as the list, and the document scrolls natively. */
+    .w4-stage { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; overflow: hidden; z-index: 1; }
+    /* Only <html> scrolls. If <body> were a scroll container too (overflow-y: auto) it would swallow the wheel and the page
+       would not scroll with a mouse. */
+    html.w4-list { overflow-x: hidden; overflow-y: auto; height: auto; }
+    html.w4-list body { overflow: visible; height: auto; }
+    html.w4-list .page-canvas--work { height: auto; min-height: 100vh; overflow: visible; }
+    html.w4-list .w4-stage { position: relative; }
+    html.w4-list .w4-dots { display: none; }
     .w4__canvas {
       position: absolute; top: 50%; left: 50%; width: 1440px; height: 900px;
       transform: translate(-50%, -50%) scale(var(--cover-scale, max(tan(atan2(100cqw, 1440px)), tan(atan2(100cqh, 900px)))));
@@ -153,7 +164,7 @@
 
     .w4-tab {
       position: absolute; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start;
-      width: 600px; height: 500px; padding: 40px; gap: 24px; border-radius: 40px;
+      width: 600px; height: calc(500px + var(--extra, 0px)); padding: 40px; gap: 24px; border-radius: 40px;
       color: #5f5f5f; text-decoration: none; overflow: hidden;
     }
     /* Figma peek tab is a 0.9-scaled copy of the full 600x500 card (540x450, 36px padding/radius). */
@@ -174,6 +185,7 @@
     .w4-tab > * { position: relative; z-index: 1; }
     .w4-tab > .w4-tab__glass { position: absolute; z-index: 0; }
     .w4-tab__cover { position: relative; flex: 1 0 0; align-self: stretch; min-height: 0; }
+    /* --extra: how much taller the cards get when the description wraps onto more lines (set by the layout script); the cover keeps its size because the footer grows by the same amount. */
     .w4-tab__cover img { position: absolute; display: block; max-width: none; }
     /* Exports are the rotated bounding boxes @2x (rotation baked in); positions = Figma bbox left/top inside the 520-wide cover. */
     /* Backing rectangle for the phone UI that gets overlaid later. Height assumed (vertically centered in the 298px cover). */
@@ -221,13 +233,14 @@
     .w4-cover-damai-3 { left: 284px; top: 79px; width: 167.5px; }
     .w4-cover-muji-1 { left: 9px; top: 121px; width: 142.5px; }
     .w4-cover-muji-2 { left: 384px; top: 0; width: 127px; }
-    /* Figma "Frame 20": caption column (flex 1) + 46px arrow chip, 12px apart, vertically centred. */
+    /* Figma "Frame 20": caption column (flex 1) + 46px arrow chip, 24px apart (was 12), vertically centred. */
     /* Fixed at 58px (Figma): the 64px hover chip overflows its row evenly instead of making the row taller. */
-    .w4-tab__foot { display: flex; align-items: center; gap: 12px; align-self: stretch; height: 58px; flex: none; }
+    .w4-tab__foot { display: flex; align-items: center; gap: 24px; align-self: stretch; height: calc(58px + var(--extra, 0px)); flex: none; }
     .w4-tab--muji { --chip-hover: linear-gradient(to right, rgba(251, 171, 123, 0.7), rgba(249, 137, 115, 0.7)); }
     .w4-tab--damai { --chip-hover: linear-gradient(to left, rgba(181, 154, 227, 0.7), rgba(253, 147, 134, 0.7)); }
     .w4-tab--wapoo { --chip-hover: linear-gradient(to right, rgba(200, 149, 241, 0.7), rgba(166, 216, 249, 0.7)); }
-    .w4-tab__arrow { position: relative; flex: none; width: 46px; height: 46px; border-radius: 99px; background: rgba(95, 95, 95, 0.05);
+    /* --chip-k (set by the layout script) keeps the arrow chip from rendering smaller than 44px: 1 at full size, 44px / (46px x scale) once the cards scale below 44/46. */
+    .w4-tab__arrow { position: relative; flex: none; width: calc(46px * var(--chip-k, 1)); height: calc(46px * var(--chip-k, 1)); border-radius: 99px; background: rgba(174, 131, 131, 0.15);
       color: #5f5f5f; display: flex; align-items: center; justify-content: center;
       transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1), height 240ms cubic-bezier(0.22, 1, 0.36, 1); }
     /* Hover (Figma "Frame 884"): the chip grows 46 -> 64px and fills with its card's own gradient (cross-faded, since
@@ -235,23 +248,31 @@
        the Figma icon is the same arrow redrawn on a 24px diagonal with a 2.057px stroke). */
     .w4-tab__arrow::before { content: ""; position: absolute; inset: 0; border-radius: inherit; opacity: 0;
       background: var(--chip-hover); transition: opacity 240ms ease; }
-    .w4-tab__arrow svg { position: relative; display: block; overflow: visible;
+    .w4-tab__arrow svg { position: relative; display: block; overflow: visible; transform: scale(var(--chip-k, 1));
       transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1); }
     .w4-tab__arrow path { stroke: currentColor; stroke-opacity: 0.75; transition: stroke-opacity 240ms ease; }
-    .w4-tab:hover .w4-tab__arrow, .w4-tab:focus-visible .w4-tab__arrow { width: 64px; height: 64px; color: #fff; }
-    .w4-tab:hover .w4-tab__arrow::before, .w4-tab:focus-visible .w4-tab__arrow::before { opacity: 1; }
-    .w4-tab:hover .w4-tab__arrow svg, .w4-tab:focus-visible .w4-tab__arrow svg { transform: rotate(-45deg) scale(2.057); }
-    .w4-tab:hover .w4-tab__arrow path, .w4-tab:focus-visible .w4-tab__arrow path { stroke-opacity: 1; }
+    /* Hover / focus growth: not on touch screens (primary pointer coarse), where there is no hover to show. */
+    @media not all and (pointer: coarse) {
+      .w4-tab:hover .w4-tab__arrow, .w4-tab:focus-visible .w4-tab__arrow { width: calc(64px * var(--chip-k, 1)); height: calc(64px * var(--chip-k, 1)); color: #fff; }
+      .w4-tab:hover .w4-tab__arrow::before, .w4-tab:focus-visible .w4-tab__arrow::before { opacity: 1; }
+      .w4-tab:hover .w4-tab__arrow svg, .w4-tab:focus-visible .w4-tab__arrow svg { transform: rotate(-45deg) scale(calc(2.057 * var(--chip-k, 1))); }
+      .w4-tab:hover .w4-tab__arrow path, .w4-tab:focus-visible .w4-tab__arrow path { stroke-opacity: 1; }
+    }
     @media (prefers-reduced-motion: reduce) { .w4-tab__arrow, .w4-tab__arrow::before, .w4-tab__arrow svg, .w4-tab__arrow path { transition: none; } }
     .w4-tab__text { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; gap: 12px; }
     /* Figma "Frame 879": scroll indicator, 104 x 4 at (668, 780). The bar widths trade 8px between the two cards that
        change places, so the strip stays 104px wide. Driven by the carousel's progress (see the script below). */
-    .w4-dots { position: absolute; left: 668px; top: 780px; width: 104px; height: 4px; display: flex; align-items: center; gap: 8px; z-index: 3; }
+    .w4-dots { position: absolute; left: 668px; top: 780px; width: 104px; height: 4px; display: flex; align-items: center; gap: 8px; z-index: 3; transform-origin: 0 0; }
     .w4-dot { position: relative; flex: none; height: 4px; padding: 0; border: 0; border-radius: 99px; background: #ae8383; cursor: pointer; }
     .w4-dot::after { content: ""; position: absolute; inset: -16px -4px; }
     .w4-dot:focus-visible { outline: 2px solid #ae8383; outline-offset: 4px; }
-    .w4-tab__text h2 { margin: 0; height: 24px; display: flex; flex-direction: column; justify-content: center; white-space: nowrap; font: 300 30px/normal "Figtree", sans-serif; color: #5f5f5f; }
-    .w4-tab__text p { margin: 0; font: 300 18px/normal "Figtree", sans-serif; color: #5f5f5f; }
+    .w4-tab__text h2 { margin: 0; height: 24px; display: flex; flex-direction: column; justify-content: center; white-space: nowrap; font-family: "Figtree", sans-serif; font-weight: 300; line-height: normal; font-size: max(30px, calc(23.3333px / var(--ts, 1))); color: #5f5f5f; }
+    /* Once the cards are scaled below 7/9 (the point where the 14px description stops shrinking) the heading stops shrinking too, at
+       23.33px (= 30px x 7/9), and may wrap; the h2's fixed 24px height is only for the unfloored sizes. */
+    .w4-stage.is-floor .w4-tab__text h2 { height: auto; min-height: 24px; white-space: normal; }
+    /* The description never renders smaller than 14px: while the cards are scaled down (--ts is the scale), its design size grows to
+       14px / scale, so the on-screen size stays 14px and the text wraps onto more lines instead. */
+    .w4-tab__text p { margin: 0; font-family: "Figtree", sans-serif; font-weight: 300; line-height: normal; font-size: max(18px, calc(14px / var(--ts, 1))); color: #5f5f5f; }
     /* Shared-shape morph with the home page (names match html.vt-bg-morph in style.css), and the tab strip is the
        "work-tab" that slides in from the right while the home tab slides out. */
     .w4__shape--r6 { view-transition-name: bg-rect; }
@@ -409,7 +430,11 @@
         <span class="w4__shape w4__shape--e10"></span>
         <span class="w4__shape w4__shape--e11"></span>
         <span class="w4__shape w4__shape--r6"></span>
+      </div>
+    </div>
 
+    <!-- Cards + scroll indicator: positioned by the layout script below (two-up carousel above 648px, vertical list at 648px and below). -->
+    <div class="w4-stage">
         <div class="w4__tabs">
         <a class="w4-tab w4-tab--muji" href="muji.html" data-case-color="#8B0013" style="left:100px;top:200px;">
           <span class="w4-tab__glass"></span>
@@ -490,7 +515,6 @@
           <button type="button" class="w4-dot" data-go="mid" aria-label="Show Damai Entertainment"></button>
           <button type="button" class="w4-dot" data-go="1" aria-label="Show Wapoo AI"></button>
         </div>
-      </div>
     </div>
   </div>
 
@@ -530,14 +554,86 @@
       Object.keys(S).forEach(function (k) { tabs[k] = document.querySelector(".w4-tab--" + k); });
       var p = 0, snapTimer = null, raf = null;
       function lerp(a, b, t) { return a + (b - a) * t; }
+
+      // Responsive layout (design: 600x500 cards, 36px apart, two big cards = 1236px wide). The side margin is 24px,
+      // the same as the home page's glass tab.
+      //   >= 1440px   cards scale up with the screen, as before
+      //   1284-1439   cards stay full size, centered (>= 24px side margins)
+      //   649-1283    two-up carousel scaled down so the margins stay 24px: scale = (width - 48) / 1236
+      //   <= 648      carousel off: a vertical list, 36px between cards, first card at y = 200, scaling down with
+      //               24px side margins: scale = min(1, (width - 48) / 600); the page scrolls natively
+      var ORDER = ["muji", "damai", "wapoo"];
+      var stage = document.querySelector(".w4-stage"), strip = document.querySelector(".w4__tabs");
+      var dotsEl = document.querySelector(".w4-dots");
+      var mode = "row", ts = 1, listLeft = 24, cardH = 500;
+      // Background shapes: the 1440x900 canvas is centered and cropped as the window narrows, so shapes near its left/right
+      // edges (the pink circle and square) slide out of view first, while the two orange circles near the middle stay. To keep
+      // the pink ones partly in view like the orange ones, their distance from the center line is capped at SHAPE_K x the
+      // visible half-width (so they move toward the center in proportion as the window narrows); at full width they sit where
+      // the design puts them (600 and 590.5 from the center).
+      var SHAPE_K = 1.12;
+      var shapeE9 = document.querySelector(".w4__shape--e9"), shapeR6 = document.querySelector(".w4__shape--r6");
+      function placeShapes(vw, vh) {
+        var c = Math.max(vw / 1440, vh / 900), half = vw / (2 * c); // visible half-width, in canvas px
+        shapeE9.style.left = (720 + Math.min(600, SHAPE_K * half) - 102) + "px";      // 204px circle, design center x 1320
+        shapeR6.style.left = (720 - Math.min(590.5, SHAPE_K * half) - 128.743) + "px"; // 257.486px square, design center x 129.5
+      }
+      function layout() {
+        var de = document.documentElement;
+        // Pick the mode from the full window width, then measure: the list mode adds a page scrollbar (15px with classic
+        // scrollbars), so the usable width has to be read after the class is on, or the side margins come out uneven.
+        var list = window.innerWidth <= 648;
+        de.classList.toggle("w4-list", list);
+        mode = list ? "list" : "row";
+        var vw = de.clientWidth, vh = de.clientHeight;
+        var c = Math.max(vw / 1440, vh / 900);
+        placeShapes(vw, vh);
+        if (list) ts = Math.min(1, (vw - 48) / 600);
+        else ts = vw >= 1440 ? c : (vw >= 1284 ? 1 : (vw - 48) / 1236);
+        // Description text floor (see .w4-tab__text p): publish the scale, then grow every card by however much the
+        // wrapped text needs beyond the 58px footer (same extra for all three so they stay the same height).
+        stage.style.setProperty("--ts", ts);
+        stage.classList.toggle("is-floor", ts < 14 / 18);
+        stage.style.setProperty("--chip-k", Math.max(1, 44 / (46 * ts)));
+        var all = ORDER.map(function (k) { return tabs[k]; });
+        all.forEach(function (el) { el.style.setProperty("--extra", "0px"); });
+        var extra = 0;
+        all.forEach(function (el) {
+          var need = Math.max(el.querySelector(".w4-tab__text").offsetHeight, el.querySelector(".w4-tab__arrow").offsetHeight);
+          extra = Math.max(extra, need - 58);
+        });
+        extra = Math.max(0, Math.ceil(extra));
+        all.forEach(function (el) { el.style.setProperty("--extra", extra + "px"); });
+        cardH = 500 + extra;
+        if (list) {
+          listLeft = (vw - 600 * ts) / 2;
+          stage.style.height = (200 + 3 * cardH * ts + 2 * 36 + 80) + "px";
+          strip.style.transform = "none";
+        } else {
+          var x0 = vw / 2 - 618 * ts, y0 = (vh - 900 * ts) / 2 + 200 * ts;
+          stage.style.height = vh + "px";
+          strip.style.transformOrigin = "0 0";
+          strip.style.transform = "translate(" + (x0 - 100 * ts) + "px, " + (y0 - 200 * ts) + "px) scale(" + ts + ")";
+          dotsEl.style.left = (vw / 2 - 52 * ts) + "px";
+          // Indicator: its design spot (780) unless the cards got taller (wrapped text), but never closer than 36px
+          // (screen px) to the bottom of the cards.
+          dotsEl.style.top = Math.max((vh - 900 * ts) / 2 + 780 * ts, y0 + cardH * ts + 36) + "px";
+          dotsEl.style.transform = "scale(" + ts + ")";
+        }
+        render();
+      }
       function render() {
-        Object.keys(S).forEach(function (k) {
+        ORDER.forEach(function (k, i) {
           var a = S[k][0], b = S[k][1], el = tabs[k];
+          if (mode === "list") {
+            el.style.transform = "translate3d(" + (listLeft - a.x) + "px, " + (200 + i * (cardH * ts + 36) - a.y) + "px, 0) scale(" + ts + ")";
+            return;
+          }
           // left/top stay at the first state (set in the markup); the slide is a compositor-friendly transform, so no
           // layout or repaint of the blurred glass per frame (that made Safari stutter).
           el.style.transform = "translate3d(" + (lerp(a.x, b.x, p) - a.x) + "px, " + (lerp(a.y, b.y, p) - a.y) + "px, 0) scale(" + lerp(a.s, b.s, p) + ")";
         });
-        renderDots();
+        if (mode === "row") renderDots();
       }
       // Indicator: the cards in view (big) are the long solid bars, the peeking one is short and half-faded.
       var dots = Array.prototype.slice.call(document.querySelectorAll(".w4-dot"));
@@ -564,19 +660,21 @@
       }
       var PX = 636;
       window.addEventListener("wheel", function (e) {
+        if (mode === "list") return; // native vertical scroll
         e.preventDefault();
         var d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-        nudge(d / PX);
+        nudge(d / (PX * ts));
       }, { passive: false });
       window.addEventListener("keydown", function (e) {
+        if (mode === "list") return;
         if (e.key === "ArrowRight") snapTo(1);
         if (e.key === "ArrowLeft") snapTo(0);
       });
       var tx = null;
       window.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
       window.addEventListener("touchmove", function (e) {
-        if (tx === null) return;
-        var x = e.touches[0].clientX; nudge((tx - x) / PX); tx = x;
+        if (tx === null || mode === "list") return;
+        var x = e.touches[0].clientX; nudge((tx - x) / (PX * ts)); tx = x;
       }, { passive: true });
       window.addEventListener("touchend", function () { tx = null; });
       dots.forEach(function (d) {
@@ -586,7 +684,10 @@
           else if (go === "1") snapTo(1);
         });
       });
-      render();
+      layout();
+      window.addEventListener("resize", layout);
+      window.addEventListener("load", layout);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout); // text metrics change once Figtree arrives
     })();
   </script>
   <script src="../js/main.js?v=45"></script>

@@ -742,6 +742,23 @@ button { font-family: inherit; cursor: pointer; }
   background: linear-gradient(203deg, #ffdfd4 8.57%, #ffc4af 91.43%);
   box-shadow: 0 4px 20px 0 rgba(255, 196, 175, 0.5);
 }
+/* ---- Home, 650px breakpoint (Figma: "Home (Breakpoint: 650px)", node 1470-3556) ----
+   Same 1440x900 background canvas (centered, cover-scaled as before), but the five shapes are resized
+   and moved so they read on a narrow screen. Positions/sizes are canvas px from the frame's SVG export;
+   the two squares keep their rotation about their own top-left corner. Radii and shadows are scaled
+   to match. (The card's own side margin stays at the 24px the home stage has always used.) */
+@media (max-width: 650px) {
+  .home-bg__shape--1 { left: 203px; top: 40.2631px; width: 338.927px; height: 338.927px; }
+  .home-bg__shape-fill--1 { border-radius: 8.13424px; box-shadow: 0 2.61266px 13.0633px 0 rgba(255, 182, 182, 0.5); }
+  .home-bg__shape--2 { left: 771.666px; top: 576px; width: 390.004px; height: 390.004px; }
+  .home-bg__shape-fill--2 { border-radius: 9.3601px; box-shadow: 0 2.33194px 11.6597px 0 rgba(255, 182, 182, 0.5); }
+  .home-bg__shape--3 { left: 915px; top: 269px; width: 285px; height: 285px; }
+  .home-bg__shape-fill--3 { box-shadow: 0 3.49693px 17.4847px 0 rgba(255, 215, 215, 0.5); }
+  .home-bg__shape--4 { left: 647px; top: -59px; width: 328px; height: 328px; }
+  .home-bg__shape-fill--4 { box-shadow: 0 2.74477px 13.7238px 0 rgba(255, 209, 184, 0.5); }
+  .home-bg__shape--5 { left: 304px; top: 576px; width: 357px; height: 357px; }
+  .home-bg__shape-fill--5 { box-shadow: 0 2.84462px 14.2231px 0 rgba(255, 196, 175, 0.5); }
+}
 /* Entrance: each shape falls in from above the frame with a light spring/
    overshoot landing, staggered slightly per shape. The float animation
    (below) is chained right after each one's own drop via animation-delay,
@@ -1113,7 +1130,7 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   aspect-ratio: 1 / 1;
   border-radius: 127.286px;
-  background: rgba(255, 218, 218, 0.5);
+  background: rgba(174, 131, 131, 0.15);
   transition: background 0.2s ease;
 }
 /* Hover: a skewed #D7A4A4 bar sweeps across the circle (Codrops ButtonHoverStyles
@@ -1139,9 +1156,13 @@ button { font-family: inherit; cursor: pointer; }
   pointer-events: none;
 }
 .hero-nav__item::before { display: none; }
-.hero-nav__item:hover .hero-nav__icon::before,
-.hero-nav__item:hover::before {
-  transform: translate3d(0, 0, 0); /* flat at the end so it covers the whole shape, corners included */
+/* Hover effects are skipped on touch screens (primary pointer coarse): there is no hover to show, and the sweep would stick
+   after a tap. */
+@media not all and (pointer: coarse) {
+  .hero-nav__item:hover .hero-nav__icon::before,
+  .hero-nav__item:hover::before {
+    transform: translate3d(0, 0, 0); /* flat at the end so it covers the whole shape, corners included */
+  }
 }
 .hero-nav__icon svg {
   position: relative;
@@ -1149,8 +1170,10 @@ button { font-family: inherit; cursor: pointer; }
 .hero-nav__icon svg path {
   transition: stroke 0.25s ease;
 }
-.hero-nav__item:hover .hero-nav__icon svg path {
-  stroke: #fff;
+@media not all and (pointer: coarse) {
+  .hero-nav__item:hover .hero-nav__icon svg path {
+    stroke: #fff;
+  }
 }
 /* Glyph + label widths, as fractions of the 80px item width (Work / About / Resume). */
 .hero-nav__icon svg { display: block; height: auto; }
@@ -1164,8 +1187,10 @@ button { font-family: inherit; cursor: pointer; }
 .hero-nav__label path {
   transition: fill 0.25s ease;
 }
-.hero-nav__item:hover .hero-nav__label path {
-  fill: #ae8383;
+@media not all and (pointer: coarse) {
+  .hero-nav__item:hover .hero-nav__label path {
+    fill: #ae8383;
+  }
 }
 .hero-nav__item:nth-child(1) .hero-nav__label { width: 0.525em; }  /* 42 */
 .hero-nav__item:nth-child(2) .hero-nav__label { width: 0.625em; }  /* 50 */
@@ -1191,7 +1216,7 @@ button { font-family: inherit; cursor: pointer; }
     gap: 12px;
     padding: 16px;
     border-radius: 99px;
-    background: rgba(255, 218, 218, 0.5);
+    background: rgba(174, 131, 131, 0.15);
     transition: background 0.2s ease;
   }
   .hero-nav__item {
@@ -1201,7 +1226,9 @@ button { font-family: inherit; cursor: pointer; }
   .hero-nav__item::before { display: block; }
   .hero-nav__icon::before { display: none; }
   .hero-nav__label { position: relative; }
-  .hero-nav__item:hover .hero-nav__label path { fill: #fff; }
+  @media not all and (pointer: coarse) {
+    .hero-nav__item:hover .hero-nav__label path { fill: #fff; }
+  }
   .hero-nav__icon,
   .hero-nav__item:hover .hero-nav__icon {
     flex: none;
