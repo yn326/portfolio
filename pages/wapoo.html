@@ -4,11 +4,22 @@
   <meta charset="UTF-8" />
   <script>
     /* Safari mis-evaluates the tan(atan2()) viewport-ratio trick the background shapes are scaled with (huge in a small
-       window, tiny when it grows), so the cover scale is computed here and the CSS only uses its own formula as a fallback. */
+       window, tiny when it grows), so the cover scale is computed here and the CSS only uses its own formula as a fallback.
+       Phones report a 980px-wide, desktop-sized viewport for the first few milliseconds, before the viewport meta applies,
+       and don't always fire a resize event when it settles, so the scale is re-checked every frame for the first second
+       (it only writes when the size actually changed). */
     (function () {
-      var d = document.documentElement;
-      function s() { d.style.setProperty("--cover-scale", Math.max(d.clientWidth / 1440, d.clientHeight / 900)); }
-      s(); addEventListener("resize", s);
+      var d = document.documentElement, last = "";
+      function s() {
+        var w = d.clientWidth, h = d.clientHeight, key = w + "x" + h;
+        if (key === last) return;
+        last = key;
+        d.style.setProperty("--cover-scale", Math.max(w / 1440, h / 900));
+      }
+      s();
+      addEventListener("resize", s); addEventListener("DOMContentLoaded", s); addEventListener("load", s); addEventListener("pageshow", s);
+      var n = 0;
+      (function tick() { s(); if (++n < 60) requestAnimationFrame(tick); })();
     })();
   </script>
   <script src="../js/case-transition.js?v=27"></script>
@@ -34,7 +45,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=265" />
+  <link rel="stylesheet" href="../css/style.css?v=266" />
 </head>
 <body>
   <div class="case-bg case-bg--wapoo" aria-hidden="true">
