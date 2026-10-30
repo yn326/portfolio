@@ -211,6 +211,83 @@ function initPageNavFade() {
   update();
 }
 
+// EXPERIMENT switch for the top nav:
+//   true  = the nav is pinned to the viewport. It fades away as you scroll down, and
+//           slides back in with a progressive blur along the top edge as soon as you scroll up.
+//   false = the old behaviour (initPageNavFade: fades away near the top and stays gone).
+const NAV_REVEAL = true;
+
+function initPageNavReveal() {
+  const nav = document.querySelector(".page-nav, .case-nav");
+  if (!nav) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const FADE_DISTANCE = 120; // same top-of-page fade as initPageNavFade
+  const RETREAT_PX = 28;
+  const FOLLOW = 56; // natural top is 80px; pinned sits 24px from the top of the window
+  const DIRECTION_PX = 8; // ignore tiny scroll jitters
+
+  // A full-width progressive blur along the top edge (three stacked blur layers with
+  // different strengths and fade-out masks, see .nav-blur in style.css). It is a
+  // sibling of the nav (not a child) because the nav carries a view-transition-name,
+  // which makes it a backdrop root and would stop a blur inside it from seeing the page
+  // behind it. It sits right before the nav so both share a stacking context (page
+  // wrappers like .a2-page create their own).
+  const capsule = document.createElement("div");
+  capsule.className = "nav-blur";
+  capsule.setAttribute("aria-hidden", "true");
+  for (let i = 0; i < 3; i++) capsule.appendChild(document.createElement("i"));
+  nav.parentNode.insertBefore(capsule, nav);
+  nav.classList.add("is-reveal");
+
+  let lastY = window.scrollY;
+  let revealed = false; // true once the reader scrolls up, until they scroll down again
+  let ticking = false;
+
+  function update() {
+    ticking = false;
+    const y = Math.max(window.scrollY, 0);
+    const dy = y - lastY;
+    if (dy > DIRECTION_PX) revealed = false;
+    else if (dy < -DIRECTION_PX) revealed = true;
+    if (Math.abs(dy) > DIRECTION_PX) lastY = y;
+
+    let opacity;
+    let shift;
+    if (revealed) {
+      // Pinned 24px from the top of the window. Within the last FOLLOW px of the
+      // scroll it rides along with the page instead (top = 80 - scrollY), so it
+      // glides down into its normal spot and never sits on the glass tab.
+      opacity = 1;
+      shift = -Math.min(y, FOLLOW);
+    } else if (y < FADE_DISTANCE) {
+      // Scrolling down from the top: ride away with the page (shift = -y, i.e. exactly
+      // where the old in-page nav would be) plus the extra drift, while fading. The glass
+      // tab below it moves at the same speed, so the two never overlap.
+      const progress = y / FADE_DISTANCE;
+      opacity = 1 - progress;
+      shift = -y - progress * RETREAT_PX;
+    } else {
+      opacity = 0;
+      shift = -(FOLLOW + RETREAT_PX);
+    }
+    nav.style.opacity = String(opacity);
+    nav.style.transform = `translate(-50%, ${shift.toFixed(2)}px)`;
+    nav.style.pointerEvents = opacity < 0.01 ? "none" : "";
+    // No transform easing while the nav tracks the scroll position (it would lag behind it).
+    const following = revealed ? y <= FOLLOW + DIRECTION_PX : y < FADE_DISTANCE;
+    nav.style.transition = following ? "opacity 0.3s ease" : "";
+    capsule.classList.toggle("is-on", revealed && y > FOLLOW);
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  update();
+}
+
 // Home background shapes: the drop-in used to run unconditionally from the
 // moment style.css was parsed, which meant a slow first paint (bad network,
 // a cold cache) ate into the animation's own timeline -- the shapes could
@@ -420,7 +497,8 @@ function initSmoothAnchors() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initWorkRing();
-  initPageNavFade();
+  if (NAV_REVEAL) initPageNavReveal();
+  else initPageNavFade();
   initNoteModal();
   initAboutPhotoHover();
   initScrollspy();

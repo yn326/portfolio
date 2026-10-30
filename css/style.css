@@ -3975,6 +3975,59 @@ section.case-final.reveal-ready.is-revealed {
      keeps that compositor-driven instead of triggering paint every tick. */
   will-change: opacity;
 }
+/* NAV_REVEAL experiment (main.js): the nav is pinned to the viewport and slides back
+   in with a progressive blur along the top edge when scrolling up. */
+body .page-nav.is-reveal {
+  position: fixed;
+  z-index: 45;
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.3, 1, 0.8, 1);
+}
+.nav-blur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 44;
+  pointer-events: none;
+  /* No opacity / mask / filter on this wrapper: any of them would make it a backdrop
+     root and stop the child blur layers from seeing the page. It slides instead. */
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+.nav-blur.is-on {
+  transform: translateY(0);
+}
+/* soft white wash that fades out downward, under the blur layers */
+.nav-blur::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+}
+.nav-blur i {
+  position: absolute;
+  inset: 0;
+}
+/* Progressive blur: strongest at the very top, each layer fading out sooner. */
+.nav-blur i:nth-child(1) {
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+}
+.nav-blur i:nth-child(2) {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 70%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 70%);
+}
+.nav-blur i:nth-child(3) {
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 40%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 40%);
+}
 .page-nav a {
   display: block;
 }
