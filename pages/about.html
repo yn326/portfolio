@@ -121,7 +121,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=304" />
+  <link rel="stylesheet" href="../css/style.css?v=307" />
   <style>
     /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }
@@ -252,6 +252,8 @@
     }
     .a2-comm__photo { width: 100%; aspect-ratio: 294 / 200; object-fit: cover; border-radius: 16px; display: block; }
     .a2-meta { display: flex; gap: 32px; flex-wrap: wrap; }
+    /* The three stats share one row: the gaps between them (and between each icon and its text) shrink as the card narrows (script at the end of the page). */
+    .a2-meta span { white-space: nowrap; }
     .a2-meta span { display: inline-flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 300; color: #ae8383; }
     .a2-meta img { width: 24px; height: 24px; }
 
@@ -657,6 +659,30 @@
       fit();
       if (window.ResizeObserver) new ResizeObserver(fit).observe(card);
       window.addEventListener("resize", fit);
+    })();
+  </script>
+  <script>
+    // Community status rows: the three stats stay on one row. As the card narrows, the gaps shrink together (between stats 32px -> 4px,
+    // between each icon and its text 8px -> 2px) instead of letting a stat drop to a new line.
+    (function () {
+      var rows = document.querySelectorAll(".a2-meta");
+      if (!rows.length) return;
+      function fit() {
+        rows.forEach(function (r) {
+          var items = r.children, n = items.length, base = 0, i;
+          r.style.columnGap = "0px";
+          for (i = 0; i < n; i++) { items[i].style.columnGap = "0px"; base += items[i].getBoundingClientRect().width; }
+          // total(t) = base + n*(2 + 6t) + (n-1)*(4 + 28t), t in [0, 1]
+          var fixed = base + n * 2 + (n - 1) * 4, per = n * 6 + (n - 1) * 28,
+            t = Math.max(0, Math.min(1, (r.getBoundingClientRect().width - 1 - fixed) / per));
+          r.style.columnGap = (4 + 28 * t) + "px";
+          for (i = 0; i < n; i++) items[i].style.columnGap = (2 + 6 * t) + "px";
+        });
+      }
+      fit();
+      if (window.ResizeObserver) rows.forEach(function (r) { new ResizeObserver(fit).observe(r); });
+      window.addEventListener("resize", fit);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     })();
   </script>
   <script>
