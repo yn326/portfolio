@@ -121,7 +121,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=299" />
+  <link rel="stylesheet" href="../css/style.css?v=304" />
   <style>
     /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }
@@ -194,8 +194,8 @@
     .a2-id__name span { font-size: 30px; }
     .a2-id__name img { width: 24px; height: 24px; }
     .a2-id__loc { font-size: 16px; color: rgba(95,95,95,.75); margin: 0; }
-    .a2-links { display: flex; flex: none; gap: 16px; flex-wrap: nowrap; width: max-content; transform-origin: 0 0; }
-    /* Email / LinkedIn / Resume always share one row. When the row is wider than the header they scale down together (--k, margins collapse the layout space). */
+    .a2-links { display: flex; flex: none; gap: 16px; flex-wrap: wrap; width: max-content; transform-origin: 0 0; }
+    /* Email / LinkedIn / Resume: one row at full size; narrower, they scale down together to 34px tall, then wrap (see the script at the end of the page; --k via transform + collapsing margins). */
     .a2-links .a2-pill { flex: none; }
     .a2-links .a2-pill:not(.a2-pill--solid) { background: rgba(174,131,131,.15); transition: background .2s ease; }
     .a2-links .a2-pill:not(.a2-pill--solid):hover { background: rgba(174,131,131,.3); }
@@ -213,7 +213,7 @@
     .a2-stat { position: relative; flex: 1 0 0; min-width: 0; display: block; padding: 24px; border-radius: 24px; }
     .a2-stat b { display: block; font-weight: 300; font-size: 30px; margin-bottom: 8px; padding-right: 32px; }
     .a2-stat > div { min-width: 0; white-space: normal; overflow-wrap: break-word; }
-    .a2-stat span { font-size: 18px; }
+    .a2-stat span { display: block; font-size: 18px; }
     .a2-stats { perspective: 900px; }
     .a2-stat { backface-visibility: hidden; }
     .a2-shuffle.is-spin img { animation: a2-spin .6s ease; }
@@ -517,10 +517,28 @@
         d.innerHTML = '<div><b></b><span></span></div><img alt="" src="' + I + c[2] + '.svg" />';
         d.querySelector("b").textContent = c[0]; d.querySelector("span").textContent = c[1];
       }
+      // The number stays on one line and the label on at most two: if they would wrap further, shrink just that text until it fits.
+      function lineH(el) {
+        var t = el.textContent; el.textContent = "A"; var h = el.offsetHeight; el.textContent = t; return h;
+      }
+      function shrink(el, lines, floor) {
+        el.style.fontSize = "";
+        var size = parseFloat(getComputedStyle(el).fontSize), max = lines * lineH(el);
+        while (el.offsetHeight > max + 1 && size > floor) { size -= 1; el.style.fontSize = size + "px"; max = lines * lineH(el); }
+      }
+      function fit(d) {
+        if (!d.isConnected) return;
+        shrink(d.querySelector("b"), 1, 10); shrink(d.querySelector("span"), 2, 10);
+      }
+      function fitAll() { for (var k = 0; k < box.children.length; k++) fit(box.children[k]); }
       function render() {
         box.textContent = "";
         shown.forEach(function (i) { var d = document.createElement("div"); d.className = "a2-stat a2-tint"; fill(d, i); box.appendChild(d); });
+        fitAll();
       }
+      if (window.ResizeObserver) new ResizeObserver(fitAll).observe(box);
+      window.addEventListener("resize", fitAll);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
       function pick() {
         var rest = POOL.map(function (_, i) { return i; }).filter(function (i) { return shown.indexOf(i) < 0; }), out = [];
         while (out.length < 4) out.push(rest.splice(Math.floor(Math.random() * rest.length), 1)[0]);
@@ -533,11 +551,11 @@
         shown = pick();
         var cards = box.children, HALF = 420;
         for (var k = 0; k < cards.length; k++) (function (el, n) {
-          if (reduce || !el.animate) { fill(el, shown[n]); return; }
+          if (reduce || !el.animate) { fill(el, shown[n]); fit(el); return; }
           // Flip in place: turn edge-on, swap the stats, turn back out the other side.
           var out = el.animate([{ transform: "rotateY(0deg)" }, { transform: "rotateY(90deg)" }], { duration: HALF, delay: n * 170, easing: "cubic-bezier(.32, 0, .67, 0)", fill: "forwards" });
           out.onfinish = function () {
-            fill(el, shown[n]);
+            fill(el, shown[n]); fit(el);
             var back = el.animate([{ transform: "rotateY(-90deg)" }, { transform: "rotateY(0deg)" }], { duration: HALF, easing: "cubic-bezier(.33, 1, .68, 1)" });
             out.cancel();
             if (n === cards.length - 1) back.onfinish = function () { busy = false; };
@@ -642,15 +660,23 @@
     })();
   </script>
   <script>
-    // Email / LinkedIn / Resume: one row; scale all three down together when the header is narrower than the row.
+    // Email / LinkedIn / Resume: one row at full size; when the header is narrower they scale down together until the buttons are 34px tall
+    // (of 38px), and below that they stay at that size and wrap onto the next row.
     (function () {
       var id = document.querySelector(".a2-id"), links = document.querySelector(".a2-links");
       if (!id || !links) return;
+      var KMIN = 34 / 38;
       function fit() {
-        links.style.transform = ""; links.style.margin = "";
-        var w = links.offsetWidth, h = links.offsetHeight,
-          cs = getComputedStyle(id), k = Math.min(1, (id.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) / w);
-        if (k < 1) { links.style.transform = "scale(" + k + ")"; links.style.margin = "0 " + (-w * (1 - k)) + "px " + (-h * (1 - k)) + "px 0"; }
+        links.style.transform = ""; links.style.margin = ""; links.style.width = "";
+        var w = Math.ceil(links.getBoundingClientRect().width) + 1, cs = getComputedStyle(id),
+          avail = id.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), k = Math.min(1, avail / w);
+        if (k >= 1) return;
+        k = Math.max(k, KMIN);
+        var lw = k * w > avail + 0.5 ? avail / k : w;
+        links.style.width = lw + "px";
+        links.style.transform = "scale(" + k + ")";
+        var h = links.offsetHeight;
+        links.style.margin = "0 " + (-lw * (1 - k)) + "px " + (-h * (1 - k)) + "px 0";
       }
       fit();
       if (window.ResizeObserver) new ResizeObserver(fit).observe(id);
