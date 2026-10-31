@@ -121,7 +121,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=266" />
+  <link rel="stylesheet" href="../css/style.css?v=295" />
   <style>
     /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }
@@ -178,10 +178,15 @@
     /* hero */
     .a2-hero { display: flex; flex-direction: column; gap: 40px; }
     .a2-hero__top { display: flex; flex-direction: column; gap: 24px; }
-    .a2-banner { position: relative; width: 100%; aspect-ratio: 1170 / 255; }
-    .a2-banner__shape { position: absolute; left: 0; top: 0; width: 100%; height: calc(200 / 255 * 100%); }
-    .a2-banner__shape img { width: 100%; height: 100%; display: block; }
-    .a2-avatar { position: absolute; left: calc(120 / 1170 * 100%); top: calc(75 / 255 * 100%); width: calc(180 / 1170 * 100%); aspect-ratio: 1; }
+    /* Cover: fixed 255px tall (200px shape + the 55px the avatar hangs below it); only its width follows the card. The shape's
+       path is rebuilt for the current width (see the script at the end of the page), so the avatar notch keeps its size. */
+    .a2-banner { position: relative; width: 100%; height: calc(255px * var(--s, 1)); }
+    /* From 900px down to 600px of window width the whole header (cover + avatar) scales down together: --s = window width / 900 (set by the script
+       at the end of the page). The inner box is laid out at full size, (width / --s) wide, and scaled by --s from its top-left corner. */
+    .a2-banner__inner { position: absolute; left: 0; top: 0; width: calc(100% / var(--s, 1)); height: 255px; transform: scale(var(--s, 1)); transform-origin: 0 0; }
+    .a2-banner__shape { position: absolute; left: 0; top: 0; width: 100%; height: 200px; }
+    .a2-banner__svg { display: block; overflow: visible; }
+    .a2-avatar { position: absolute; left: var(--av-left, 120px); top: 75px; width: 180px; height: 180px; }
     .a2-avatar img { width: 100%; height: 100%; display: block; }
     .a2-id { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 0 40px; flex-wrap: wrap; }
     .a2-id__who { display: flex; flex-direction: column; gap: 8px; }
@@ -189,7 +194,9 @@
     .a2-id__name span { font-size: 30px; }
     .a2-id__name img { width: 24px; height: 24px; }
     .a2-id__loc { font-size: 16px; color: rgba(95,95,95,.75); margin: 0; }
-    .a2-links { display: flex; gap: 16px; flex-wrap: wrap; }
+    .a2-links { display: flex; flex: none; gap: 16px; flex-wrap: nowrap; width: max-content; transform-origin: 0 0; }
+    /* Email / LinkedIn / Resume always share one row. When the row is wider than the header they scale down together (--k, margins collapse the layout space). */
+    .a2-links .a2-pill { flex: none; }
     .a2-links .a2-pill:not(.a2-pill--solid) { background: rgba(174,131,131,.15); transition: background .2s ease; }
     .a2-links .a2-pill:not(.a2-pill--solid):hover { background: rgba(174,131,131,.3); }
     .a2-pill--solid img { filter: brightness(0) invert(1); }
@@ -201,16 +208,18 @@
     .a2-pill--solid:hover .a2-resume-ic__l2, .a2-pill--solid:focus-visible .a2-resume-ic__l2 { transform: scaleX(1); transition-delay: .2s; }
     @media (prefers-reduced-motion: reduce) { .a2-resume-ic__l1, .a2-resume-ic__l2 { transition: none; } }
     .a2-stats { display: flex; gap: 16px; padding: 0 40px; }
-    .a2-stat { flex: 1 0 0; min-width: 0; display: flex; justify-content: space-between; padding: 24px; border-radius: 24px; }
-    .a2-stat b { display: block; font-weight: 300; font-size: 30px; margin-bottom: 8px; }
-    .a2-stat > div { flex: none; white-space: nowrap; } /* Figma: caption stays on one line (it may run under the icon's column, which sits higher) */
+    /* The icon is pinned to the card's top-right corner, inside the 24px padding. The number leaves room for it; the caption below
+       may use the full width (it runs under the icon's column, as in Figma) and wraps onto the next row when the card gets narrow. */
+    .a2-stat { position: relative; flex: 1 0 0; min-width: 0; display: block; padding: 24px; border-radius: 24px; }
+    .a2-stat b { display: block; font-weight: 300; font-size: 30px; margin-bottom: 8px; padding-right: 32px; }
+    .a2-stat > div { min-width: 0; white-space: normal; overflow-wrap: break-word; }
     .a2-stat span { font-size: 18px; }
     .a2-stats { perspective: 900px; }
     .a2-stat { backface-visibility: hidden; }
     .a2-shuffle.is-spin img { animation: a2-spin .6s ease; }
     @keyframes a2-spin { to { transform: rotate(-360deg); } }
     @media (prefers-reduced-motion: reduce) { .a2-shuffle.is-spin img { animation: none; } }
-    .a2-stat img { width: 24px; height: 24px; flex: none; }
+    .a2-stat img { position: absolute; top: 24px; right: 24px; width: 24px; height: 24px; }
     .a2-hero__foot { display: flex; justify-content: flex-end; padding: 0 40px; margin-top: -24px; }
     .a2-shuffle { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; font: inherit; font-size: 18px; color: #5f5f5f; cursor: pointer; transition: color .25s ease; }
     .a2-shuffle:hover { color: #ae8383; }
@@ -228,25 +237,39 @@
     .a2-comm__head { display: flex; align-items: center; gap: 16px; }
     .a2-comm__logo { width: 50px; height: 50px; flex: none; object-fit: cover; }
     .a2-comm__head p { margin: 0; font-size: 22px; font-weight: 300; line-height: normal; }
-    .a2-comm__body { display: flex; flex-direction: column; gap: 16px; }
+    /* When the two cards sit side by side and one description wraps onto more lines, the shorter card's extra space goes between its
+       text and its photo, so both photos and status rows line up at the bottom. */
+    .a2-comm__body { display: flex; flex: 1 1 auto; flex-direction: column; justify-content: space-between; gap: 16px; }
+    /* Side by side (window 832px or wider): the two cards share their rows (title / text + photo / status), so the photos and
+       status rows line up even when one title, description or status row wraps onto more lines than the other's. */
+    @media (min-width: 832px) {
+      .a2-comm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr auto; column-gap: 16px; row-gap: 0; }
+      .a2-comm__item { display: grid; grid-template-rows: subgrid; grid-row: span 3; row-gap: 24px; }
+    }
+    /* 831px and below: one Communities card per row. */
+    @media (max-width: 831px) {
+      .a2-comm { flex-direction: column; }
+    }
     .a2-comm__photo { width: 100%; aspect-ratio: 294 / 200; object-fit: cover; border-radius: 16px; display: block; }
     .a2-meta { display: flex; gap: 32px; flex-wrap: wrap; }
     .a2-meta span { display: inline-flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 300; color: #ae8383; }
     .a2-meta img { width: 24px; height: 24px; }
 
     .a2-exp { display: flex; flex-direction: column; gap: 24px; }
-    .a2-exp__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .a2-exp__who { display: flex; align-items: center; gap: 24px; min-width: 0; }
+    .a2-exp__row { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .a2-exp__who { display: flex; flex: 1 1 0; align-items: center; gap: 24px; min-width: 0; }
     .a2-exp__logo { width: 80px; height: 80px; flex: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .a2-exp__logo img { display: block; object-fit: cover; }
     .a2-exp__who p { margin: 0; }
     .a2-exp__who .co { font-size: 22px; font-weight: 300; line-height: normal; }
     .a2-exp__who .role { font-size: 18px; line-height: normal; margin-top: 8px; }
-    .a2-exp .a2-pill { font-weight: 300; background: rgba(174,131,131,.15); flex: none; }
+    .a2-exp .a2-pill { font-weight: 300; background: rgba(174,131,131,.15); flex: none; white-space: nowrap; }
 
     /* side */
     .a2-repeat { display: flex; flex-direction: column; gap: 24px; }
-    .a2-repeat__art { position: relative; width: 240px; height: 163.64px; margin: 0 auto; }
+    /* The player graphic is drawn for the full-width card (342px wide). When the card is narrower it scales down with it (--m = card
+       width / 342, set by the script at the end of the page) from its top-center, and the space it no longer needs is pulled back. */
+    .a2-repeat__art { position: relative; width: 240px; height: 163.64px; align-self: center; margin: 0 0 calc(-163.64px * (1 - var(--m, 1))); transform: scale(var(--m, 1)); transform-origin: 50% 0; }
     .a2-repeat__vinyl { position: absolute; left: 120.09px; top: 16.36px; width: 130.91px; height: 130.91px; }
     .a2-repeat__vinyl img { position: absolute; inset: -8.33%; width: 116.66%; height: 116.66%; max-width: none; }
     .a2-repeat__cover { position: absolute; left: 11px; top: 0; width: 163.64px; height: 163.64px; box-sizing: border-box; border-radius: 26.18px;
@@ -281,7 +304,7 @@
     .a2-actions { display: flex; flex-direction: column; gap: 24px; }
     .a2-act { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #5f5f5f; text-decoration: none; font-size: 18px; font-weight: 300; line-height: normal; transition: color .25s ease; }
     .a2-act:hover, .a2-act:focus-visible { color: #ae8383; }
-    .a2-act__who { display: flex; align-items: center; gap: 12px; min-width: 0; white-space: nowrap; }
+    .a2-act__who { display: flex; flex: 1 1 0; align-items: center; gap: 12px; min-width: 0; white-space: normal; } /* the label wraps instead of running into the arrow */
     .a2-act__tile { width: 50px; height: 50px; flex: none; border-radius: 8px; overflow: hidden; }
     .a2-act__tile rect { fill: rgba(174,131,131,.15); transition: fill .25s ease; }
     .a2-act__tile path { stroke: #5f5f5f; transition: stroke .25s ease; }
@@ -294,15 +317,37 @@
     .a2-act:hover .a2-act__sweep, .a2-act:focus-visible .a2-act__sweep { transform: none; } /* flat at the end so it covers the whole tile, corners included */
     .a2-act:hover .a2-act__tile path, .a2-act:focus-visible .a2-act__tile path { stroke: #fff; }
     .a2-act:hover .a2-act__arrow path, .a2-act:focus-visible .a2-act__arrow path { stroke: #ae8383; }
+    /* From 1182px down the side column moves under the main column and its three cards sit side by side in one row; from 900px
+       down they stack again (a row of three would be too narrow). */
+    @media (max-width: 1182px) {
+      .a2-grid { grid-template-columns: minmax(0, 1fr); }
+      .a2-grid > .a2-col:last-child { flex-direction: row; align-items: stretch; }
+      .a2-grid > .a2-col:last-child > .a2-glass { flex: 1 1 0; min-width: 0; }
+      .a2-grid > .a2-col:last-child > .a2-know { flex-grow: 1.3; } /* "You may know" gets 30% more width than each of the other two */
+    }
+    /* From 1100px down "You may know" takes a full row of its own (on top) and the other two cards share the row below it. */
+    @media (max-width: 1100px) {
+      .a2-grid > .a2-col:last-child { flex-wrap: wrap; }
+      .a2-grid > .a2-col:last-child > .a2-know { order: -1; flex: 1 1 100%; }
+      .a2-grid > .a2-col:last-child > .a2-repeat,
+      .a2-grid > .a2-col:last-child > .a2-actions { flex: 1 1 calc(50% - 20px); }
+    }
+    @media (max-width: 639px) {
+      .a2-exp .a2-pill { display: none; }
+    }
+    @media (max-width: 649px) {
+      .a2-grid > .a2-col:last-child > .a2-repeat,
+      .a2-grid > .a2-col:last-child > .a2-actions { flex: 1 1 100%; }
+    }
     @media (max-width: 1000px) {
       .a2-grid { grid-template-columns: minmax(0, 1fr); }
-      .a2-comm { flex-direction: column; }
-      .a2-stats { flex-wrap: wrap; } .a2-stat { flex: 1 1 40%; } .a2-stat > div { flex: 1 1 auto; white-space: normal; }
+    }
+    /* Stat cards: 2 x 2 from 1100px down (earlier than the page's own 1000px layout change, so the four cards never get cramped). */
+    @media (max-width: 1100px) {
+      .a2-stats { flex-wrap: wrap; } .a2-stat { flex: 1 1 40%; }
     }
     @media (max-width: 700px) {
-      .a2-glass { padding: 24px; }
       .a2-id, .a2-stats, .a2-hero__foot { padding: 0; }
-      .a2-exp__row { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -360,8 +405,10 @@
     <section class="a2-glass a2-hero" aria-label="Profile" data-tab="1">
       <div class="a2-hero__top">
         <div class="a2-banner">
-          <div class="a2-banner__shape"><img src="../assets/images/about-page/banner.svg?v=2" alt="" /></div>
+          <div class="a2-banner__inner">
+          <div class="a2-banner__shape"><svg class="a2-banner__svg" width="1170" height="200" viewBox="0 0 1170 200" fill="none" aria-hidden="true"><path class="a2-cov-fill" d="M1130 0C1152.09 0 1170 17.9086 1170 40V160C1170 182.091 1152.09 200 1130 200H349.928C332.421 200 320 182.507 320 165C320 104.249 270.751 55 210 55C149.249 55 100 104.249 100 165C100 182.507 87.5788 200 70.0721 200H40C17.9086 200 3.22172e-07 182.091 0 160V40C0 17.9086 17.9086 1.06706e-06 40 0H1130Z" fill="url(#a2-cov-g)" fill-opacity="0.2"/><path class="a2-cov-fill" d="M1130 0C1152.09 0 1170 17.9086 1170 40V160C1170 182.091 1152.09 200 1130 200H349.928C332.421 200 320 182.507 320 165C320 104.249 270.751 55 210 55C149.249 55 100 104.249 100 165C100 182.507 87.5788 200 70.0721 200H40C17.9086 200 3.22172e-07 182.091 0 160V40C0 17.9086 17.9086 1.06706e-06 40 0H1130Z" fill="url(#a2-cov-p)" fill-opacity="0.2"/><defs><linearGradient id="a2-cov-g" x1="1170" y1="100" x2="0" y2="100" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD7D7"/><stop offset="1" stop-color="#FFB6B6"/></linearGradient><pattern id="a2-cov-p" patternUnits="userSpaceOnUse" patternTransform="matrix(30 0 0 30 582.5 97.5)" viewBox="0 0 30 30" width="1" height="1"><circle cx="2.5" cy="2.5" r="2.5" fill="#5F5F5F" fill-opacity="0.5"/></pattern></defs></svg></div>
           <div class="a2-avatar"><img src="../assets/images/about-page/avatar.png" alt="Raina" /></div>
+          </div>
         </div>
         <div class="a2-id">
           <div class="a2-id__who">
@@ -525,5 +572,86 @@
   </script>
   <script src="../js/main.js?v=45"></script>
   <span id="page-parsed" hidden></span>
+  <script>
+    // Cover + avatar: at full size (window 900px and wider) the cover stays 200px tall and the avatar 180px; only the width follows the card. Between 900px and 600px the whole header scales down (see .a2-banner__inner); below 600px it keeps that size and only the width shrinks. The cover path is rebuilt
+    // for the current width: top corners 40px, bottom corners 40px (shrinking when the notch needs the room), and the avatar notch
+    // (a 220px circle with soft 35px shoulders, 280px wide in all) keeps its size. The notch sits 120px from the left at full
+    // size and slides left on narrow cards (the avatar goes with it) so it never runs into the corners.
+    (function () {
+      var banner = document.querySelector(".a2-banner");
+      if (!banner) return;
+      var fills = banner.querySelectorAll(".a2-cov-fill"), svg = banner.querySelector(".a2-banner__svg");
+      var grad = banner.querySelector("#a2-cov-g"), pat = banner.querySelector("#a2-cov-p");
+      var K = 0.5523, last = "";
+      function f(n) { return Math.round(n * 1000) / 1000; }
+      function build(W, want) {
+        var r = Math.max(0, Math.min(40, (W - 280) / 2));            // bottom corner radius
+        var cx = Math.max(r + 140, Math.min(want, W - r - 140));     // notch center (want = 210 in the design)
+        var dx = cx - 210;
+        var d = "M" + f(W - 40) + " 0C" + f(W - 40 + 40 * K) + " 0 " + W + " " + f(40 - 40 * K) + " " + W + " 40V" + f(200 - r) +
+          "C" + W + " " + f(200 - r + r * K) + " " + f(W - r + r * K) + " 200 " + f(W - r) + " 200" +
+          "H" + f(349.928 + dx) +
+          "C" + f(332.421 + dx) + " 200 " + f(320 + dx) + " 182.507 " + f(320 + dx) + " 165" +
+          "C" + f(320 + dx) + " 104.249 " + f(270.751 + dx) + " 55 " + f(210 + dx) + " 55" +
+          "C" + f(149.249 + dx) + " 55 " + f(100 + dx) + " 104.249 " + f(100 + dx) + " 165" +
+          "C" + f(100 + dx) + " 182.507 " + f(87.5788 + dx) + " 200 " + f(70.0721 + dx) + " 200" +
+          "H" + f(r) + "C" + f(r - r * K) + " 200 0 " + f(200 - r + r * K) + " 0 " + f(200 - r) +
+          "V40C0 " + f(40 - 40 * K) + " " + f(40 - 40 * K) + " 0 40 0H" + f(W - 40) + "Z";
+        return { d: d, cx: cx };
+      }
+      function layout() {
+        // Scale: 1 down to a 900px-wide window, then in proportion to the window width (width / 900) down to 600px, where it
+        // stops at 2/3 (cover 133px tall, avatar 120px); below 600px only the width keeps shrinking.
+        var sc = Math.min(1, Math.max(document.documentElement.clientWidth, 600) / 900);
+        banner.style.setProperty("--s", sc);
+        var W = Math.round(banner.clientWidth / sc * 10) / 10; // the cover's own (unscaled) width
+        // Between a 500px and a 450px window the part of the cover left of the avatar also gives up 28px (design px), so the
+        // avatar slides a little to the left (it stops 4px short of the bottom-left corner's curve); after that only the right
+        // side keeps shrinking.
+        var t = Math.min(1, Math.max(0, (500 - document.documentElement.clientWidth) / 50));
+        var key = W + "|" + sc + "|" + t;
+        if (!banner.clientWidth || key === last) return;
+        last = key;
+        var b = build(W, 210 - 28 * t);
+        fills.forEach(function (p) { p.setAttribute("d", b.d); });
+        svg.setAttribute("width", W);
+        svg.setAttribute("viewBox", "0 0 " + W + " 200");
+        grad.setAttribute("x1", W);
+        pat.setAttribute("patternTransform", "matrix(30 0 0 30 " + (W / 2 - 2.5) + " 97.5)");
+        banner.style.setProperty("--av-left", (b.cx - 90) + "px");
+      }
+      layout();
+      if (window.ResizeObserver) new ResizeObserver(layout).observe(banner);
+      window.addEventListener("resize", layout);
+    })();
+  </script>
+  <script>
+    // On Repeat: scale the album graphic with the card (see .a2-repeat__art).
+    (function () {
+      var card = document.querySelector(".a2-repeat");
+      if (!card) return;
+      function fit() { card.style.setProperty("--m", Math.min(1, card.getBoundingClientRect().width / 342)); }
+      fit();
+      if (window.ResizeObserver) new ResizeObserver(fit).observe(card);
+      window.addEventListener("resize", fit);
+    })();
+  </script>
+  <script>
+    // Email / LinkedIn / Resume: one row; scale all three down together when the header is narrower than the row.
+    (function () {
+      var id = document.querySelector(".a2-id"), links = document.querySelector(".a2-links");
+      if (!id || !links) return;
+      function fit() {
+        links.style.transform = ""; links.style.margin = "";
+        var w = links.offsetWidth, h = links.offsetHeight,
+          cs = getComputedStyle(id), k = Math.min(1, (id.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) / w);
+        if (k < 1) { links.style.transform = "scale(" + k + ")"; links.style.margin = "0 " + (-w * (1 - k)) + "px " + (-h * (1 - k)) + "px 0"; }
+      }
+      fit();
+      if (window.ResizeObserver) new ResizeObserver(fit).observe(id);
+      window.addEventListener("resize", fit);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    })();
+  </script>
 </body>
 </html>
