@@ -121,7 +121,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=295" />
+  <link rel="stylesheet" href="../css/style.css?v=299" />
   <style>
     /* Work 4.0 background shapes (kept in step with the .w4__* rules in work.html). */
     .w4-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; container-type: size; }
@@ -331,6 +331,11 @@
       .a2-grid > .a2-col:last-child > .a2-know { order: -1; flex: 1 1 100%; }
       .a2-grid > .a2-col:last-child > .a2-repeat,
       .a2-grid > .a2-col:last-child > .a2-actions { flex: 1 1 calc(50% - 20px); }
+    }
+    @media (max-width: 499px) {
+      .a2-glass[data-tab="1"], .a2-glass[data-tab="3"] { padding: 24px; }
+      /* Communities heading keeps the 40px inset (24px + 16px); the cards below sit at 24px. */
+      .a2-glass[data-tab="3"] > .a2-h { margin: 16px 16px 0; }
     }
     @media (max-width: 639px) {
       .a2-exp .a2-pill { display: none; }
