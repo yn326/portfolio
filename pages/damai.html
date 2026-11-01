@@ -46,6 +46,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css?v=312" />
+  <link rel="stylesheet" href="../css/damai-scale.css?v=10" media="(min-width: 651px)" />
+  <link rel="stylesheet" href="../css/damai-narrow.css?v=10" media="(max-width: 650px)" />
   <style>
     /* TEMPORARY: blur the content of these screenshots for now. The wrapper keeps the 1px stroke
        and rounded corners sharp; only the picture inside is blurred. To show the images again,
@@ -137,7 +139,7 @@
 
       <div class="case-hero__card">
         <div class="case-hero__titlerow">
-          <h1 class="case-hero__title">Damai Entertainment (Alibaba Group)</h1>
+          <h1 class="case-hero__title">Damai Entertainment <span style="white-space:nowrap">(Alibaba Group)</span></h1>
           <p class="case-hero__desc">B2B mobile app for real-time event ticketing data</p>
         </div>
         <div class="case-hero__meta">
@@ -734,5 +736,55 @@
   </div>
 
   <script src="../js/main.js?v=45"></script>
+  <script>
+    // Background shapes: same behaviour as the Work page. The 1440x900 canvas is centred and cropped as the window narrows, so the
+    // shapes near its left/right edges (the orange circle on the right and the pink square on the left) would slide out of view
+    // first. Their distance from the centre line is capped at SHAPE_K x the visible half-width, so they move toward the centre in
+    // proportion as the window narrows (at full width they sit where the design puts them: 600 and 590.5 from the centre).
+    (function () {
+      var SHAPE_K = 1.12, d = document.documentElement, last = "";
+      var e9 = document.querySelector(".case-bg__shape--e9"), r6 = document.querySelector(".case-bg__shape--r6");
+      if (!e9 || !r6) return;
+      function place() {
+        var vw = d.clientWidth, vh = d.clientHeight, key = vw + "x" + vh;
+        if (key === last) return;
+        last = key;
+        var half = vw / (2 * Math.max(vw / 1440, vh / 900)); // visible half-width, in canvas px
+        e9.style.left = (720 + Math.min(600, SHAPE_K * half) - 102) + "px";      // 204px circle, design centre x 1320
+        r6.style.left = (720 - Math.min(590.5, SHAPE_K * half) - 128.743) + "px"; // 257.486px square, design centre x 129.5
+      }
+      place();
+      addEventListener("resize", place); addEventListener("DOMContentLoaded", place); addEventListener("load", place); addEventListener("pageshow", place);
+      // phones report a desktop-sized viewport for the first moments: keep re-checking for a second (it only writes on a change)
+      var n = 0;
+      (function tick() { place(); if (++n < 60) requestAnimationFrame(tick); })();
+    })();
+  </script>
+  <script>
+    // Narrow layout (css/damai-narrow.css): the footer sits inside the glass tab, under the last section. In the wide layout it stays
+    // its own glass tab below the page, so it moves between the two when the window crosses the breakpoint.
+    (function () {
+      var footer = document.querySelector(".site-footer"), tab = document.querySelector(".glass-card--case");
+      if (!footer || !tab) return;
+      var home = footer.parentNode, after = footer.nextSibling, narrow = window.matchMedia("(max-width: 650px)");
+      function place() {
+        if (narrow.matches) { if (footer.parentNode !== tab) tab.appendChild(footer); }
+        else if (footer.parentNode !== home) home.insertBefore(footer, after);
+      }
+      place();
+      if (narrow.addEventListener) narrow.addEventListener("change", place); else narrow.addListener(place);
+    })();
+  </script>
+  <script>
+    // Hero: the four phone mockups (675 x 380) scale down together once the frame is narrower than they are (css/damai-scale.css, css/damai-narrow.css).
+    (function () {
+      var frame = document.querySelector(".case-hero__collage-frame--damai");
+      if (!frame) return;
+      function fit() { frame.style.setProperty("--hd", Math.min(1, (frame.clientWidth - 48) / 675)); }
+      fit();
+      if (window.ResizeObserver) new ResizeObserver(fit).observe(frame);
+      window.addEventListener("resize", fit);
+    })();
+  </script>
 </body>
 </html>

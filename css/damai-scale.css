@@ -1,0 +1,123 @@
+/* Damai case study, wide to narrow. No Figma frame for it: this applies what was settled for MUJI (css/muji-scale.css) to Damai's own parts.
+   Loaded by pages/damai.html with media="(min-width: 651px)"; below that css/damai-narrow.css takes over. Text keeps its size the whole way,
+   what changes is the layout:
+   1. Above 1338px the tab stays 1250px wide and the margins around it grow (the wide design); the scrollspy sits in the middle of the margin.
+   2. Below that the tab narrows, the gap between its edge and the frames goes from 40px to 24px, then the frames narrow with it.
+   Breakpoints (window width): 1135 project gallery shots go one pair per row,  1025 hero title above its description (+ scrollspy off at 1024),
+   899 user group personas stack,  1273 / 753 pain point cards 4 -> 2 x 2 -> 1 per row,  771 final design videos go under their text,  1253 favorites / table notes centre on their picture. */
+
+/* ---- Shell: the tab sits in the normal flow so the footer and the page height follow its real height ---- */
+.page-canvas--damai { --spy-margin: 68px; } /* the strip beside the tab while the scrollspy shows: 20px bar, 24px each side of it */
+.page-canvas--damai::after { display: none; }
+.page-canvas--damai .glass-card--case {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  /* --spy-margin (68px) of margin at the least while the scrollspy is showing (it sits in the middle of that margin), 24px once it is gone */
+  width: min(1250px, calc(100% - 2 * var(--spy-margin)));
+  margin: 142px auto 0;
+  /* The gap between the tab's edge and the white frames goes from 40px to 24px as the tab narrows (it reaches 24px just as the tab is 48px
+     narrower than its 1250px, where the frames would otherwise start to shrink), so the frames hold their full 1170px a little longer. */
+  padding-left: clamp(24px, calc((100% - 2 * var(--spy-margin) - 1170px) / 2), 40px);
+  padding-right: clamp(24px, calc((100% - 2 * var(--spy-margin) - 1170px) / 2), 40px);
+}
+@media (max-width: 1024px) {
+  .page-canvas--damai .glass-card--case { width: calc(100% - 48px); }
+}
+/* Scrollspy: in the middle of the strip between the tab and the window edge (the current section's bar is 20px wide), never closer than 10px to either edge. */
+.page-canvas--damai .scrollspy { right: max(calc(var(--spy-margin) / 2 - 18px), calc((100% - 1250px) / 4 - 18px)); } /* -18px: 10px (half the 20px bar) + 8px padding of each bar's row */
+/* Footer: its own tab under the page, 34px below the tab, 80px of page below it, as wide as the tab. */
+.page-canvas--damai .site-footer {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: min(1250px, calc(100% - 2 * var(--spy-margin)));
+  height: auto;
+  min-height: 192px;
+  margin: 34px auto 80px;
+}
+@media (max-width: 1024px) {
+  .page-canvas--damai .site-footer { width: calc(100% - 48px); }
+}
+@media (max-width: 900px) {
+  .page-canvas--damai .site-footer { flex-direction: column; justify-content: flex-start; gap: 32px; }
+  .page-canvas--damai .site-footer__left { gap: 24px; }
+  .page-canvas--damai .site-footer__cols { align-self: stretch; justify-content: space-between; gap: 24px; }
+  .page-canvas--damai .site-footer__hi svg { flex: none; }
+}
+/* The scrollspy only exists while the strip between the tab and the window edge can hold it (the tab's --spy-margin, down to 1025px). */
+@media (max-width: 1024px) {
+  .page-canvas--damai .scrollspy { display: none; }
+}
+
+/* ---- Parts that squeeze instead of overflowing (all widths) ---- */
+.page-canvas--damai .case-hero__meta { flex-wrap: wrap; gap: 24px 40px; }
+.page-canvas--damai .case-hero__meta-info { flex-wrap: wrap; gap: 24px 40px; }
+/* Hero: the four phone mockups (675 x 380 board) scale down as one piece when the frame is narrower than the board (--hd, set in damai.html) */
+.page-canvas--damai .case-hero__collage-frame--damai { position: relative; display: block; height: calc(400px * var(--hd, 1)); padding: 24px; }
+.page-canvas--damai .case-hero__collage--damai {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  flex: none;
+  transform: translate(-50%, -50%) scale(var(--hd, 1));
+}
+/* Context: the two phone screenshots wrap onto two rows if they have to */
+.page-canvas--damai .case-section__images--phone { flex-wrap: wrap; justify-content: center; gap: 24px 80px; }
+/* User groups: the four pain point cards and the concept cards share their row, then wrap into a grid (same sizes as the design at full width) */
+.page-canvas--damai .case-usergroups__painpoints { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; gap: 30px; }
+/* every card is as tall as the tallest one; in that one the picture row sits 24px under the text, in the others it drops to the bottom */
+.page-canvas--damai .case-usergroups__card { width: auto; height: auto; min-height: 0; gap: 24px; }
+.page-canvas--damai .case-concept-types { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; }
+/* Design decisions: shots with their notes, in a grid so each shot stays next to its own notes */
+.page-canvas--damai .case-pgallery__row { display: grid; grid-template-columns: auto minmax(0, 292px) auto minmax(0, 292px); justify-content: center; align-items: center; gap: 40px; }
+.page-canvas--damai .case-pdetails__row,
+.page-canvas--damai .case-favorites__row { flex-wrap: wrap; gap: 32px 80px; }
+.page-canvas--damai .case-favorites__group { max-width: 100%; }
+.page-canvas--damai .case-favorites__content { flex-wrap: wrap; justify-content: center; gap: 24px 40px; }
+
+@media (max-width: 1273px) {
+  /* never 3 cards on one row and 1 alone: 2 x 2 ... */
+  .page-canvas--damai .case-usergroups__painpoints { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 753px) {
+  /* ... then one per row */
+  .page-canvas--damai .case-usergroups__painpoints { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1253px) {
+  /* Favorited projects / table design: once the two groups stack, each group's notes share the picture's vertical centre */
+  .page-canvas--damai .case-favorites__content { align-items: center; justify-content: space-evenly; width: 100%; gap: 24px 16px; }
+  /* the picture and its notes are spread evenly over a row at most 620px wide: the gap between them equals the space at each side,
+     and shrinks with them as the window narrows (16px at the least) */
+  .page-canvas--damai .case-favorites__group { width: 100%; max-width: 620px; }
+  .page-canvas--damai .case-favorites__verdict { align-self: center; width: 100%; max-width: 460px; }
+}
+@media (max-width: 1135px) {
+  /* Project gallery / session details: one pair (shot + its notes) per row */
+  /* one pair per row: spread evenly over a row at most 732px wide, so the gap between picture and notes equals the space at each side
+     and shrinks with them as the window narrows (16px at the least) */
+  .page-canvas--damai .case-pgallery__row { grid-template-columns: auto minmax(0, 292px); justify-content: space-evenly; width: 100%; max-width: 732px; margin-inline: auto; gap: 40px 16px; } /* 40px between the two pairs: the same as between the description and the first picture */
+}
+@media (max-width: 1025px) {
+  .page-canvas--damai .case-hero__titlerow { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .page-canvas--damai .case-hero__desc { max-width: none; }
+}
+@media (max-width: 899px) {
+  /* User groups: one persona per row, no divider */
+  .page-canvas--damai .case-usergroups__personas { flex-direction: column; gap: 24px; }
+  .page-canvas--damai .case-usergroups__divider { display: none; }
+}
+/* Final designs: text + video share a row; the gap between them is whatever is left (80px at most, 24px at least) and the text can
+   narrow to 220px, so the row never leaves the frame. */
+.page-canvas--damai .case-final-row,
+.page-canvas--damai .case-final-row--reverse { width: 100%; max-width: 644px; gap: 24px; justify-content: space-between; }
+.page-canvas--damai .case-final-row__text { flex: 0 1 300px; width: auto; min-width: 220px; }
+@media (max-width: 771px) {
+  /* Final designs: the text takes the full width of the frame, the video is centred under it */
+  .page-canvas--damai .case-final-row,
+  .page-canvas--damai .case-final-row--reverse { flex-direction: column; align-items: center; justify-content: flex-start; gap: 24px; }
+  .page-canvas--damai .case-final-row__text { flex: none; width: 100%; min-width: 0; } /* the text starts at the frame's left edge */
+  .page-canvas--damai .case-final-row__video { max-width: 100%; height: auto; }
+}
