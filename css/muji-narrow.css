@@ -1,7 +1,7 @@
 /* MUJI case study, narrow layout. Rebuilt from the Figma frame "MUJI (narrow)" (node 1497:635, 650px wide).
    Loaded by pages/muji.html only, with media="(max-width: 650px)", on top of style.css, so the wide page is untouched.
    Everything is scoped to .page-canvas--muji. Measurements come straight from the Figma frame:
-   glass tab 40px 24px padding / 40px gap, white section frames 602px wide (32px padding, 32px between their parts), type 14 / 24 / 20 / 16. */
+   glass tab 40px 24px padding / 40px gap, white section frames 602px wide (24px padding, 32px between their parts), type 14 / 24 / 18 / 16 (body and buttons are the wide layout's 18px; captions and tags stay at the narrow design's 16px). */
 
 /* ---- Page shell ---- */
 /* The tab sits in the normal flow (instead of absolutely positioned) so the footer and the page height follow its real height. */
@@ -13,7 +13,7 @@
   top: auto;
   transform: none;
   width: 100%;
-  margin: 142px 0 80px; /* 80px of page below the tab, the same space the wide layout leaves under its footer */
+  margin: 142px 0 40px; /* 40px of page below the tab */
   padding: 40px 24px;
   gap: 40px;
   border-radius: 40px;
@@ -47,9 +47,8 @@
 .page-canvas--muji .site-footer__left { align-self: stretch; gap: 24px; }
 .page-canvas--muji .site-footer__cols { align-self: stretch; justify-content: space-between; gap: 24px; }
 .page-canvas--muji .site-footer__hi svg { flex: none; }
-.page-canvas--muji .site-footer__col { font-size: 20px; }
-/* Back to top: same size as the "View Final Designs" button (20px text, 12px / 20px padding) */
-.page-canvas--muji .site-footer__top { padding: 12px 20px; font-size: 20px; background: rgba(95, 95, 95, 0.15); }
+/* Back to top: same size as the "View Final Designs" button (18px text, 12px / 20px padding) */
+.page-canvas--muji .site-footer__top { padding: 12px 20px; font-size: 18px; background: rgba(95, 95, 95, 0.15); }
 .page-canvas--muji .site-footer__top:hover { background: rgba(95, 95, 95, 0.25); }
 
 /* ---- Top bar (Frame 229): 16px side padding ---- */
@@ -80,10 +79,10 @@
 .page-canvas--muji .case-hero__collage-img--product { left: 165px; top: 66px; width: 400px; height: 300px; border-radius: 9.6px; }
 .page-canvas--muji .case-hero__collage-img--desktop { left: 101px; top: 35px; width: 400px; height: 345px; border-radius: 9.6px; }
 /* Frame 230: title + description stacked, info in two columns then Skills, button underneath */
-.page-canvas--muji .case-hero__card { padding: 32px; gap: 24px; }
+.page-canvas--muji .case-hero__card { padding: 24px; gap: 24px; }
 .page-canvas--muji .case-hero__titlerow { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 8px; }
-.page-canvas--muji .case-hero__title { font-size: 34px; }
-.page-canvas--muji .case-hero__desc { font-size: 22px; font-weight: 300; line-height: 26px; max-width: none; }
+.page-canvas--muji .case-hero__title { font-size: 30px; }
+.page-canvas--muji .case-hero__desc { font-size: 24px; font-weight: 300; line-height: 29px; max-width: none; }
 .page-canvas--muji .case-hero__meta { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 32px; padding: 24px 0 0; }
 .page-canvas--muji .case-hero__meta-info {
   display: grid;
@@ -93,15 +92,15 @@
   gap: 24px 0;
 }
 .page-canvas--muji .case-hero__meta-info > div:nth-child(3) { grid-column: 1 / -1; }
-.page-canvas--muji .case-hero__meta-info span { font-size: 20px; line-height: normal; }
-.page-canvas--muji .case-hero__cta { padding: 12px 20px; font-size: 22px; line-height: 26px; }
+.page-canvas--muji .case-hero__meta-info span { font-size: 18px; line-height: 22px; }
+.page-canvas--muji .case-hero__cta { padding: 12px 20px; font-size: 18px; line-height: normal; }
 
-/* ---- White section frames: 32px padding (40px in the wide layout), 32px between their parts, 20px body, 16px captions ---- */
-.page-canvas--muji .case-section.case-section--built { padding: 32px; gap: 32px; }
+/* ---- White section frames: 24px padding (40px in the wide layout), 32px between their parts, 20px body, 16px captions ---- */
+.page-canvas--muji .case-section.case-section--built { padding: 24px; gap: 32px; }
 /* style.css gives every paragraph in a section a 1.7 line height; the narrow design uses 'normal' (the callout keeps its 1.4) */
 .page-canvas--muji .case-section p { line-height: normal; }
-.page-canvas--muji .case-section .case-section__callout p { line-height: 1.4; }
-.page-canvas--muji .case-section .case-section__body { font-size: 20px; }
+.page-canvas--muji .case-section .case-section__callout p { font-size: 18px; line-height: 1.4; }
+.page-canvas--muji .case-section .case-section__body { font-size: 18px; }
 
 /* Context (Frame 231): the two screenshots stack */
 .page-canvas--muji .case-section__images { flex-direction: column; align-items: stretch; gap: 16px; }
@@ -117,15 +116,20 @@
 .page-canvas--muji .case-section__insights { flex-direction: column; gap: 24px; }
 .page-canvas--muji .case-section__insight { flex: none; align-self: stretch; }
 .page-canvas--muji .case-section__insight-text h3,
-.page-canvas--muji .case-section__insight-text p { font-size: 20px; }
+.page-canvas--muji .case-section__insight-text p { font-size: 18px; }
 
 /* Personas (Frame 232): one persona per row, no divider */
-.page-canvas--muji .case-persona-group { align-items: stretch; gap: 32px; }
-.page-canvas--muji .case-persona-row { flex-direction: column; gap: 32px; }
+.page-canvas--muji #personas.case-section--built { gap: 24px; }
+.page-canvas--muji .case-persona-group { align-items: stretch; gap: 24px; }
+.page-canvas--muji .case-persona-row { flex-direction: column; gap: 24px; }
 .page-canvas--muji .case-persona-divider { display: none; }
 .page-canvas--muji .case-persona-card { flex: none; gap: 24px; }
 .page-canvas--muji .case-persona-card__text h3,
-.page-canvas--muji .case-persona-card__text p { font-size: 20px; }
+.page-canvas--muji .case-persona-card__text p { font-size: 18px; }
+.page-canvas--muji .case-persona-credit { text-align: center; }
+/* Persona pictures: 80px (100px in the wide layout), beside their text at every phone width */
+.page-canvas--muji .case-persona-card__avatar { width: 80px; height: 80px; }
+.page-canvas--muji .case-persona-card__avatar::after { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
 
 /* User research (Frame 248): each screenshot is followed by its card(s), so the cards go back into the flow.
    The images' wrapper dissolves and order interleaves them: image, card(s), image, card, ... */
@@ -155,7 +159,7 @@
 .page-canvas--muji .case-research__callout--4,
 .page-canvas--muji .case-research__callout--5 { margin-top: -8px; }
 .page-canvas--muji .case-research__header { font-size: 20px; line-height: 1.4; }
-.page-canvas--muji .case-research__callout p { font-size: 20px; }
+.page-canvas--muji .case-research__callout p { font-size: 18px; }
 /* the rule is a 0-height line in Figma (its 1px stroke overhangs), so it adds no height */
 .page-canvas--muji .case-research__divider { margin-bottom: -1px; }
 
@@ -164,7 +168,7 @@
 .page-canvas--muji .case-concept__stages { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 32px; }
 .page-canvas--muji .case-concept__stage { width: 100%; gap: 8px; }
 .page-canvas--muji .case-concept__stage:nth-child(2) { gap: 16px; }
-.page-canvas--muji .case-concept__stage-title { font-size: 20px; font-weight: 300; }
+.page-canvas--muji .case-concept__stage-title { font-size: 18px; font-weight: 300; }
 .page-canvas--muji .case-concept__stage-title strong { font-weight: 400; }
 .page-canvas--muji .case-concept__version { gap: 4px; }
 .page-canvas--muji .case-concept__stage:nth-child(2) .case-concept__version { gap: 12px; }
@@ -180,7 +184,7 @@
 .page-canvas--muji .case-section .case-decision__image-group img,
 .page-canvas--muji .case-decision__image-group--tall img { height: auto; }
 .page-canvas--muji .case-decision__caption { font-size: 16px; }
-.page-canvas--muji .case-decision__point-text p { font-size: 20px; }
+.page-canvas--muji .case-decision__point-text p { font-size: 18px; }
 .page-canvas--muji .case-decision__point-text p.case-decision__tag { font-size: 16px; }
 /* Reviewing the shopping cart (second frame): the two current points sit 12px apart, and the second redesign point has 12px above its tag */
 .page-canvas--muji #design-decisions + .case-section--decision .case-decision__col--current .case-decision__points { gap: 12px; }
@@ -193,11 +197,11 @@
 .page-canvas--muji .case-section img.case-decision__collage-popup { left: 51.93%; top: auto; bottom: -0.07%; width: 48.1%; height: auto; aspect-ratio: 251.09 / 212; }
 
 /* ---- Final designs (the dark red frames): one column, every screenshot full width, 12px to its caption, 32px between ---- */
-.page-canvas--muji .case-final { padding: 32px; gap: 32px; }
+.page-canvas--muji .case-final { padding: 24px; gap: 32px; }
 .page-canvas--muji .case-final__intro { gap: 16px; }
-.page-canvas--muji .case-final__body { font-size: 20px; }
+.page-canvas--muji .case-final__body { font-size: 18px; }
 .page-canvas--muji .case-final__summary { flex-direction: column; gap: 0; margin-top: -16px; } /* 16px under the heading (the frame's 32px gap - 16) */
-.page-canvas--muji .case-final__summary p { flex: none; font-size: 20px; }
+.page-canvas--muji .case-final__summary p { flex: none; font-size: 18px; }
 /* only the first summary paragraph is in the narrow design */
 .page-canvas--muji .case-final__summary p:not(:first-of-type),
 .page-canvas--muji .case-final__divider { display: none; }

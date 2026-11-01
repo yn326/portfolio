@@ -208,6 +208,7 @@
   .page-canvas--muji .case-persona-group { align-items: stretch; gap: 32px; }
   .page-canvas--muji .case-persona-row { flex-direction: column; align-items: stretch; gap: 32px; }
   .page-canvas--muji .case-persona-divider { display: none; }
+  .page-canvas--muji .case-persona-credit { text-align: center; }
   .page-canvas--muji .case-persona-card { flex: none; }
 }
 
