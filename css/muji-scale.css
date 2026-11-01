@@ -1,0 +1,217 @@
+/* MUJI case study, wide to narrow. Loaded by pages/muji.html with media="(min-width: 651px)"; below that css/muji-narrow.css takes over.
+   Text keeps its size the whole way. What changes is how things are laid out:
+   1. Above 1298px the tab stays 1250px wide and the margins around it grow (the wide design).
+   2. Below that the margins stay at 24px, the tab narrows, and the frames inside it narrow with it. Side-by-side parts squeeze
+      first (photo pairs, columns, cards), then drop onto their own rows at the breakpoints below. The hero photo row scales
+      down as one piece (--hw / --hs, set by the script in muji.html).
+   Breakpoints (window width): 1297 research callouts + concept notes -> stacked layout,  1099 concept stages, summary columns,
+   1027 hero photos switch to the narrow board,  999 decisions / final designs / hero card stack,  899 personas stack. */
+
+/* ---- Shell: the tab sits in the normal flow so the footer and the page height follow its real height ---- */
+.page-canvas--muji { --spy-margin: 68px; } /* the strip beside the tab while the scrollspy shows: 20px bar, 24px each side of it */
+.page-canvas--muji::after { display: none; }
+.page-canvas--muji .glass-card--case {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  /* --spy-margin (68px) of margin at the least while the scrollspy is showing (it sits in the middle of that margin), 24px once it is gone */
+  width: min(1250px, calc(100% - 2 * var(--spy-margin)));
+  margin: 142px auto 0;
+  /* The gap between the tab's edge and the white frames goes from 40px to 24px as the tab narrows (it reaches 24px just as the tab is 48px
+     narrower than its 1250px, where the frames would otherwise start to shrink), so the frames hold their full 1170px a little longer. */
+  padding-left: clamp(24px, calc((100% - 2 * var(--spy-margin) - 1170px) / 2), 40px);
+  padding-right: clamp(24px, calc((100% - 2 * var(--spy-margin) - 1170px) / 2), 40px);
+}
+@media (max-width: 1024px) {
+  .page-canvas--muji .glass-card--case { width: calc(100% - 48px); }
+}
+/* Scrollspy: in the middle of the strip between the tab and the window edge (the current section's bar is 20px wide), never closer than 10px to either edge. */
+.page-canvas--muji .scrollspy { right: max(calc(var(--spy-margin) / 2 - 18px), calc((100% - 1250px) / 4 - 18px)); } /* -18px: 10px (half the 20px bar) + 8px padding of each bar's row */
+/* Footer: its own tab under the page, 34px below the tab, 80px of page below it, as wide as the tab. */
+.page-canvas--muji .site-footer {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: min(1250px, calc(100% - 2 * var(--spy-margin)));
+  height: auto;
+  min-height: 192px;
+  margin: 34px auto 80px;
+}
+@media (max-width: 1024px) {
+  .page-canvas--muji .site-footer { width: calc(100% - 48px); }
+}
+@media (max-width: 900px) {
+  .page-canvas--muji .site-footer { flex-direction: column; justify-content: flex-start; gap: 32px; }
+  .page-canvas--muji .site-footer__left { gap: 24px; }
+  .page-canvas--muji .site-footer__cols { align-self: stretch; justify-content: space-between; gap: 24px; }
+  .page-canvas--muji .site-footer__hi svg { flex: none; }
+}
+/* The scrollspy only exists while the strip between the tab and the window edge can hold it (the tab's --spy-margin, down to 1025px). */
+@media (max-width: 1024px) {
+  .page-canvas--muji .scrollspy { display: none; }
+}
+
+/* ---- Parts that squeeze instead of overflowing (all widths) ---- */
+/* the competitor logo row is wider than the frame once the frame narrows: clip it to the white frame */
+.page-canvas--muji .case-section--built.case-section--centered { overflow: hidden; }
+/* ...and its gap tightens as the window narrows, so more logos stay in view: 60px at 1298px and up, 40px (the narrow design) by 898px */
+.page-canvas--muji .case-section__logo-row { gap: clamp(40px, calc(60px - (1298px - 100vw) / 20), 60px); }
+.page-canvas--muji .case-section__images { flex-wrap: wrap; }
+.page-canvas--muji .case-section__image-group { max-width: 100%; }
+.page-canvas--muji .case-section__image-group img { max-width: 100%; height: auto; }
+.page-canvas--muji .case-section__insights { flex-wrap: wrap; }
+.page-canvas--muji .case-section__insight { flex: 1 1 240px; }
+.page-canvas--muji .case-hero__meta { flex-wrap: wrap; gap: 24px 40px; }
+.page-canvas--muji .case-hero__meta-info { flex-wrap: wrap; gap: 24px 40px; }
+.page-canvas--muji .case-persona-card { min-width: 0; }
+/* side by side, both cards are as tall as the taller one, so the two profile pictures sit at the same height */
+.page-canvas--muji .case-persona-row { align-items: stretch; }
+/* Hero photo row (1096 x 345 board): scales down as one piece when the frame is narrower than it */
+.page-canvas--muji .case-hero__collage {
+  transform: scale(var(--hw, 1));
+  transform-origin: 50% 0;
+  margin-bottom: calc(-345px * (1 - var(--hw, 1)));
+}
+/* Design decisions: the two columns share the row in their design proportions (493 : 525) */
+.page-canvas--muji .case-decision__col--current { flex: 493 1 0; width: auto; min-width: 0; }
+.page-canvas--muji .case-decision__col--redesign { flex: 525 1 0; width: auto; min-width: 0; }
+.page-canvas--muji .case-decision__compare { gap: 72px; }
+.page-canvas--muji .case-section .case-decision__image-group img,
+.page-canvas--muji .case-decision__image-group--tall img { height: auto; }
+.page-canvas--muji .case-decision__image-group--tall .case-decision__collage { height: auto; aspect-ratio: 522 / 353.65; }
+.page-canvas--muji .case-section img.case-decision__collage-base { left: 0; top: 0; width: 67.09%; height: auto; aspect-ratio: 348.09 / 296.47; }
+.page-canvas--muji .case-section img.case-decision__collage-popup { left: 51.93%; top: auto; bottom: -0.07%; width: 48.1%; height: auto; aspect-ratio: 251.09 / 212; }
+/* Final designs: the current / redesign pair shares the row in its design proportions (400 : 666; nav 327 : 729) */
+.page-canvas--muji .case-final__current,
+.page-canvas--muji .case-final__cat-current,
+.page-canvas--muji .case-final__item-current { flex: 400 1 0; width: auto; min-width: 0; }
+.page-canvas--muji .case-final__redesign,
+.page-canvas--muji .case-final__cat-redesign { flex: 666 1 0; min-width: 0; }
+.page-canvas--muji .case-final__nav-col--current { flex: 327 1 0; width: auto; min-width: 0; }
+.page-canvas--muji .case-final__nav-col--redesign { flex: 729 1 0; width: auto; min-width: 0; }
+.page-canvas--muji .case-final__compare--nav { gap: 0; }
+.page-canvas--muji .case-final__compare { gap: 24px; }
+.page-canvas--muji .case-final__current img,
+.page-canvas--muji .case-final__shot img,
+.page-canvas--muji .case-final__nav-col img,
+.page-canvas--muji .case-final__cat-current img,
+.page-canvas--muji .case-final__cat-shot img,
+.page-canvas--muji .case-final__item-shot img { width: 100%; height: auto; }
+.page-canvas--muji .case-final__item-shot { width: 100%; }
+.page-canvas--muji .case-final__summary p { min-width: 0; }
+
+/* ---- Below the wide design (<= 1297px) ---- */
+@media (max-width: 1297px) {
+  /* Research: the callouts leave the photos' margins and sit under their screenshots, as in the narrow layout */
+  .page-canvas--muji .case-research { position: static; }
+  .page-canvas--muji .case-research__images { display: contents; }
+  .page-canvas--muji .case-section .case-research__image { width: min(100%, 700px); height: auto; align-self: center; }
+  .page-canvas--muji .case-research .case-section__heading-group { order: 0; }
+  .page-canvas--muji .case-research__image:nth-child(1) { order: 1; }
+  .page-canvas--muji .case-research__callout--1 { order: 2; }
+  .page-canvas--muji .case-research__image:nth-child(2) { order: 3; }
+  .page-canvas--muji .case-research__callout--2 { order: 4; }
+  .page-canvas--muji .case-research__image:nth-child(3) { order: 5; }
+  .page-canvas--muji .case-research__callout--3 { order: 6; }
+  .page-canvas--muji .case-research__callout--4 { order: 7; }
+  .page-canvas--muji .case-research__image:nth-child(4) { order: 8; }
+  .page-canvas--muji .case-research__callout--5 { order: 9; }
+  .page-canvas--muji .case-research__callout { position: static; width: min(100%, 700px); align-self: center; margin-top: -16px; padding: 16px 16px 20px; }
+  .page-canvas--muji .case-research__divider { margin-bottom: -1px; }
+  /* Concept ideation: the side notes only fit the full-width design, so they go; the stages squeeze */
+  .page-canvas--muji .case-concept__note { display: none; }
+  .page-canvas--muji .case-concept__stages { gap: 24px; justify-content: center; }
+  .page-canvas--muji .case-concept__stage { flex: 0 1 300px; width: auto; min-width: 0; }
+}
+@media (max-width: 1099px) {
+  /* Concept stages: one stage per row, its versions side by side in that row */
+  .page-canvas--muji .case-concept__stages { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 40px; }
+  .page-canvas--muji .case-concept__stage {
+    flex: none;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .page-canvas--muji .case-concept__stage-title { flex: 0 0 100%; }
+  .page-canvas--muji .case-concept__version { flex: 1 1 0; min-width: 0; max-width: 300px; }
+  .page-canvas--muji .case-section .case-concept__version img { height: auto; }
+  /* Home page summary: the three paragraphs stack */
+  .page-canvas--muji .case-final__summary { flex-direction: column; gap: 16px; }
+  .page-canvas--muji .case-final__summary p { flex: none; }
+  .page-canvas--muji .case-final__divider { display: none; }
+}
+@media (max-width: 899px) {
+  /* Concept stages: every version on its own row */
+  .page-canvas--muji .case-concept__stage { flex-direction: column; flex-wrap: nowrap; align-items: center; width: min(100%, 400px); align-self: center; gap: 8px; }
+  .page-canvas--muji .case-concept__stage:nth-child(2) { gap: 16px; }
+  .page-canvas--muji .case-concept__stage-title { flex: none; }
+  .page-canvas--muji .case-concept__version { flex: none; width: 100%; max-width: none; gap: 4px; }
+  .page-canvas--muji .case-concept__stage:nth-child(2) .case-concept__version { gap: 12px; }
+}
+@media (max-width: 1027px) {
+  /* Hero photos: three overlapping photos on a board that is 602px wide at its tightest and up to 774px wide while the frame
+     allows it (--hp / --bw / --hs come from the script in muji.html): the two in the back come out further as the frame widens */
+  .page-canvas--muji .case-hero__collage-frame {
+    position: relative;
+    display: block;
+    height: calc(400px * var(--hs, 1));
+    padding: 0;
+    border-radius: 40px;
+    overflow: hidden;
+  }
+  .page-canvas--muji .case-hero__collage {
+    position: absolute;
+    left: max(0px, calc(50% - var(--bw, 602px) / 2));
+    top: 0;
+    width: var(--bw, 602px);
+    height: 400px;
+    margin: 0;
+    transform: scale(var(--hs, 1));
+    transform-origin: 0 0;
+  }
+  .page-canvas--muji .case-hero__collage-img--pens { left: 37px; top: 65px; width: 400px; height: 300px; border-radius: 12px; }
+  .page-canvas--muji .case-hero__collage-img--desktop { left: calc(37px + var(--hp, 64px)); top: 35px; width: 400px; height: 345px; border-radius: 9.6px; }
+  .page-canvas--muji .case-hero__collage-img--product { left: calc(37px + 2 * var(--hp, 64px)); top: 66px; width: 400px; height: 300px; border-radius: 9.6px; }
+}
+@media (max-width: 1025px) {
+  /* Hero card: title above the description */
+  .page-canvas--muji .case-hero__titlerow { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .page-canvas--muji .case-hero__desc { max-width: none; }
+}
+@media (max-width: 999px) {
+  /* Decisions and final designs: current above redesign, every screenshot the full width of the frame */
+  .page-canvas--muji .case-decision__compare { flex-direction: column; align-items: center; gap: 40px; }
+  .page-canvas--muji .case-decision__col--current,
+  .page-canvas--muji .case-decision__col--redesign { flex: none; width: 100%; max-width: 520px; }
+  .page-canvas--muji .case-final__compare,
+  .page-canvas--muji .case-final__redesign,
+  .page-canvas--muji .case-final__cat-redesign,
+  .page-canvas--muji .case-final__item-current {
+    flex-direction: column;
+    align-items: stretch;
+    flex: none;
+    width: 100%;
+    gap: 40px;
+  }
+  .page-canvas--muji .case-final__current,
+  .page-canvas--muji .case-final__cat-current,
+  .page-canvas--muji .case-final__nav-col--current,
+  .page-canvas--muji .case-final__nav-col--redesign { flex: none; width: 100%; }
+}
+@media (max-width: 899px) {
+  /* Personas: one per row, no divider */
+  .page-canvas--muji .case-persona-group { align-items: stretch; gap: 32px; }
+  .page-canvas--muji .case-persona-row { flex-direction: column; align-items: stretch; gap: 32px; }
+  .page-canvas--muji .case-persona-divider { display: none; }
+  .page-canvas--muji .case-persona-card { flex: none; }
+}
+
+/* Below 750px the row of competitor logos is dropped altogether */
+@media (max-width: 749px) {
+  .page-canvas--muji .case-section__logo-row { display: none; }
+}

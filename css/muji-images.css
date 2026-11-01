@@ -1,0 +1,41 @@
+/* MUJI case study: image proportions, as set in the Figma frames (the 1px borders sit inside these boxes). Loaded at every width. */
+.page-canvas--muji img[src$="/current-home-page.jpg"] { aspect-ratio: 2940 / 1670; }
+.page-canvas--muji img[src$="/current-product-gallery-page.jpg"] { aspect-ratio: 2940 / 1670; }
+.page-canvas--muji img[src$="/user-research-1.jpg"] { aspect-ratio: 2940 / 1672; }
+.page-canvas--muji img[src$="/user-research-2.jpg"] { aspect-ratio: 522 / 296.67; }
+.page-canvas--muji img[src$="/user-research-3.jpg"] { aspect-ratio: 522 / 296.67; }
+.page-canvas--muji img[src$="/user-research-4.jpg"] { aspect-ratio: 522 / 296.67; }
+.page-canvas--muji img[src$="/stage1-ver1.jpg"] { aspect-ratio: 300 / 191; }
+.page-canvas--muji img[src$="/stage1-ver2.jpg"] { aspect-ratio: 300 / 235; }
+.page-canvas--muji img[src$="/stage1-ver3.jpg"] { aspect-ratio: 300 / 182; }
+.page-canvas--muji img[src$="/stage2-ver1.jpg"] { aspect-ratio: 300 / 310; }
+.page-canvas--muji img[src$="/stage2-ver2.jpg"] { aspect-ratio: 300 / 184; }
+.page-canvas--muji img[src$="/stage3.jpg"] { aspect-ratio: 300 / 340; }
+.page-canvas--muji img[src$="/current1.jpg"] { aspect-ratio: 2940 / 1670; }
+.page-canvas--muji img[src$="/redesign1.jpg"] { aspect-ratio: 4096 / 2185; }
+.page-canvas--muji img[src$="/redesign2.jpg"] { aspect-ratio: 525 / 334; }
+.page-canvas--muji img[src$="/current3.jpg"] { aspect-ratio: 2940 / 1670; }
+.page-canvas--muji img[src$="/redesign3.jpg"] { aspect-ratio: 4096 / 2185; }
+.page-canvas--muji img[src$="/homepage-current.webp"] { aspect-ratio: 2940 / 1670; }
+.page-canvas--muji img[src$="/desktop2.webp"] { aspect-ratio: 4096 / 3554; }
+.page-canvas--muji img[src$="/desktop3.webp"] { aspect-ratio: 666 / 323; }
+.page-canvas--muji img[src$="/desktop4.webp"] { aspect-ratio: 4096 / 1497; }
+.page-canvas--muji img[src$="/desktop5.webp"] { aspect-ratio: 4096 / 2458; }
+.page-canvas--muji img[src$="/nav-current.webp"] { aspect-ratio: 2940 / 1106; }
+.page-canvas--muji img[src$="/nav-redesign.webp"] { aspect-ratio: 640 / 108; }
+.page-canvas--muji img[src$="/category-current.webp"] { aspect-ratio: 926 / 514; }
+.page-canvas--muji img[src$="/category-redesign1.webp"] { aspect-ratio: 1800 / 960; }
+.page-canvas--muji img[src$="/category-redesign2.webp"] { aspect-ratio: 1800 / 960; }
+.page-canvas--muji img[src$="/item-current1.webp"] { aspect-ratio: 2912 / 1238; }
+.page-canvas--muji img[src$="/item-current2.webp"] { aspect-ratio: 2912 / 1358; }
+.page-canvas--muji img[src$="/item-redesign1.webp"] { aspect-ratio: 4096 / 2901; }
+.page-canvas--muji img[src$="/item-redesign2.webp"] { aspect-ratio: 4096 / 2241; }
+.page-canvas--muji img[src$="/checkout-current1.webp"] { aspect-ratio: 368 / 208; }
+.page-canvas--muji img[src$="/checkout-current2.webp"] { aspect-ratio: 2940 / 1670; }
+.page-canvas--muji img[src$="/checkout-redesign1.webp"] { aspect-ratio: 4096 / 2185; }
+.page-canvas--muji img[src$="/checkout-redesign2.webp"] { aspect-ratio: 525 / 334; }
+.page-canvas--muji img[src$="/checkout-redesign3.webp"] { aspect-ratio: 4096 / 2185; }
+
+/* Final designs: the screenshots carry their own rounded corners (transparent webp), so the red frame shows through them at any size.
+   No border or CSS radius on them: those only drew a square outline / clipped the picture at a size that didn't match its corner. */
+.page-canvas--muji .case-final img { border: 0; border-radius: 0; }
