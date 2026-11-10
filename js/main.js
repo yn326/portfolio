@@ -326,6 +326,8 @@ function initPageNavReveal() {
   function update() {
     ticking = false;
     const y = Math.max(window.scrollY, 0);
+    // a page can take the bar over for a range of positions (the case studies show it at the top of the white page, see js/case-exp-extras.js): then it is left alone here, not set twice per frame
+    if (window.__caseNavHold && window.__caseNavHold(y)) { lastY = y; return; }
     const dy = y - lastY;
     if (dy > DIRECTION_PX) revealed = false;
     else if (dy < -DIRECTION_PX) revealed = true;

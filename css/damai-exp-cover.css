@@ -75,48 +75,37 @@
 .page-canvas--damai .dm-hero-text__meta .label { font-weight: 400; }
 .page-canvas--damai .dm-hero-text__meta .value { font-weight: 300; }
 
-/* ---- "Scroll" under the tab (fades as the tab grows): the 40px button's top is 782px from the window's top, the label 838px (Figma), or 118px / 62px from the bottom in a shorter window ---- */
+/* ---- "Scroll" under the tab (fades as the tab grows): the 30px chevron's top is 788px from the window's top, the label 830px (Figma), or 112px from the bottom in a shorter window ---- */
 .page-canvas--damai .dm-scroll {
   position: fixed;
   left: 50%;
-  top: min(782px, calc(100vh - 118px));
+  top: min(788px, calc(100vh - 112px));
   z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 113px;
   margin: 0 0 0 -56.5px;
   pointer-events: none;
   color: #5f5f5f;
   font-family: "Figtree", sans-serif;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 600;
   line-height: normal;
   letter-spacing: 1.4px;
   text-transform: uppercase;
   opacity: calc(1 - var(--g, 0) * 4);
 }
-/* the button is made of the same glass layers as the tabs and the traffic lights: the tab's glass (15% white, blur + saturation, the soft inner light / dark edge), the
-   traffic lights' diagonal highlight (::before) and bright rim (::after), at the size of a small circle; it floats down and back up (4px) */
-@keyframes dm-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } } /* down from its resting place (Y 782, 32px under the tab), never closer to the tab */
+/* the arrow is a plain 30px chevron (Figma "lucide/chevron-down", stroke 2.5px, no circle behind it); it floats down and back up (10px) */
+@keyframes dm-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } } /* down from its resting place (Y 788), never closer to the tab */
 .page-canvas--damai .dm-scroll__btn {
   position: relative;
   display: block;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  -webkit-backdrop-filter: blur(8px) saturate(130%);
-  backdrop-filter: blur(8px) saturate(130%);
-  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.05), inset -1px -1px 4px rgba(255, 255, 255, 0.4);
+  width: 30px;
+  height: 30px;
   animation: dm-bob 3.4s ease-in-out infinite;
 }
-.page-canvas--damai .dm-scroll__btn::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.5) 100%); }
-.page-canvas--damai .dm-scroll__btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 42%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.95) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 @media (prefers-reduced-motion: reduce) { .page-canvas--damai .dm-scroll__btn { animation: none; } }
 .page-canvas--damai .dm-scroll__btn svg { position: absolute; inset: 0; display: block; }
 

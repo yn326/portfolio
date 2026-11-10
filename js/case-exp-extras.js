@@ -43,23 +43,38 @@
   // ---- 3. the navigation at the top of the white page ----
   var nav = document.querySelector(".page-nav");
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Reloading (or coming back with Back / Forward) part-way down: the page is first drawn at the top and then put back at the saved place, so the navigation bar (which is shown at the top) would
+  // flash for a moment and fade away again. Here it is hidden from the first drawing when the saved place is below where it fades away (120px), and handed back to the normal scroll logic
+  // (main.js and this section) once the page has got there.
+  (function () {
+    if (!nav || reduce) return;
+    var saved = 0;
+    try {
+      var nt = performance.getEntriesByType("navigation")[0], v = sessionStorage.getItem("xScroll:" + location.pathname);
+      if (nt && (nt.type === "reload" || nt.type === "back_forward") && v !== null) saved = +v || 0;
+    } catch (e) {}
+    if (saved <= 120) return;
+    nav.style.transition = "none"; nav.style.opacity = "0"; nav.style.pointerEvents = "none"; nav.style.transform = "translate(-50%, -84px)";
+    var t0 = performance.now();
+    (function wait() {
+      if (Math.abs(window.scrollY - saved) < 3 || performance.now() - t0 > 3500) { window.dispatchEvent(new Event("scroll")); return; }
+      requestAnimationFrame(wait);
+    })();
+  })();
   if (nav && !reduce) {
     var STAY = 140; // it stays for this many px of scrolling past the white-out, then fades like it does on the other pages
     var ticking = false;
-    function force() {
-      ticking = false;
-      var y = window.scrollY;
-      if (y < G() - 1 || y > G() + STAY + 80) return; // outside: main.js decides
+    // main.js calls this for every scroll position (before it does anything to the bar): inside the range below the bar is mine, outside it is main.js's again. (It used to be a second scroll
+    // listener that set the bar to shown while main.js set it to hidden in the same frame: the bar flickered, most of all when the page was reloaded part-way down.)
+    window.__caseNavHold = function (y) {
+      if (y < G() - 1 || y > G() + STAY + 80) return false;
       var o = y <= G() + STAY ? 1 : 1 - (y - G() - STAY) / 80;
-      // only take over where main.js has hidden it (it never shows it below 120px unless the reader scrolled up)
-      if (parseFloat(nav.style.opacity || "1") >= o) return;
       nav.style.opacity = String(o);
       nav.style.transform = "translate(-50%, -56px)"; // pinned 24px from the top of the window
       nav.style.pointerEvents = o < 0.01 ? "none" : "";
       nav.style.transition = "opacity 0.3s ease";
-    }
-    addEventListener("scroll", function () { if (ticking) return; ticking = true; requestAnimationFrame(force); }, { passive: true });
-    force();
+      return true;
+    };
   }
   // ---- 4. sections slide up a little and fade in as they first scroll into view (the same effect as main.js gives the other case studies) ----
   (function () {
