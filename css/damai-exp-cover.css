@@ -1,0 +1,225 @@
+/* Damai case study, first screen ("Damai 3.0", Figma node 1552:6753, 1440 x 900). Experiment copy; loaded by pages/damai-exp.html at every width.
+   The glass tab is 1040 x 600 and centred in the window: traffic lights top left, the back button and address bar (562 wide) centred at the top,
+   the illustration panel (960 x 352, 40px radius) under them, then the title / description on the left and Year / Role on the right, 40px from
+   the bottom. A MUJI tab and a Wapoo tab peek in from the window's edges, and "Scroll" sits at the bottom. All values are Figma's. */
+
+/* ---- Top bar: lights at the tab's edges, back button + address bar centred, 16px apart ---- */
+.page-canvas--damai .dm-topbar { position: relative; justify-content: center; align-items: flex-start; gap: 16px; height: 46px; margin-bottom: -8px; } /* 46px bar, 32px to the panel (the tab's 40px gap minus 8) */
+.page-canvas--damai .dm-topbar .case-topbar__url { flex: 0 1 500px; min-width: 0; height: 46px; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
+.page-canvas--damai .dm-topbar__lights { position: absolute; left: 0; top: 15px; } /* the site's own .traffic-lights (css/style.css: three 16px glass dots, 8px apart); 40px from the tab's top, the bar starts at 25px */
+
+/* ---- Illustration panel ---- */
+.page-canvas--damai .dm-illus {
+  position: relative;
+  align-self: stretch;
+  height: calc(352px * var(--hd, 1));
+  border-radius: 40px;
+  overflow: hidden;
+  background: linear-gradient(to left, rgba(181, 154, 227, calc(0.15 + 0.35 * var(--g, 0))), rgba(253, 147, 134, calc(0.15 + 0.35 * var(--g, 0)))); /* 15% on the glass, 50% on the white page (Figma "Damai (English)") */
+}
+.page-canvas--damai .dm-illus__contour { position: absolute; left: 0; top: 50%; width: 100%; height: calc(314px * var(--hd, 1)); transform: translateY(-50%); object-fit: cover; pointer-events: none; }
+/* the pieces sit on a 960 x 352 board that stays centred (and scales down as a whole, --hd, when the panel is narrower than 960) */
+.page-canvas--damai .dm-illus__stage { position: absolute; left: 50%; top: 0; width: 960px; height: 352px; transform: translateX(-50%) scale(var(--hd, 1)); transform-origin: 50% 0; }
+.page-canvas--damai .dm-illus__stage > * { position: absolute; }
+.page-canvas--damai .dm-card-shadow {
+  box-shadow: 0 8px 15px rgba(147, 119, 238, 0.25);
+}
+.page-canvas--damai .dm-card-shadow::after { /* the inner light / dark edge */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 2px 2px 4px rgba(147, 119, 238, 0.1), inset -4px -4px 4px rgba(0, 0, 0, 0.1);
+}
+/* chart card: 240 x 150, six bars, tilted -7deg inside its 256.491 x 178.131 box */
+.page-canvas--damai .dm-bars-wrap { left: 110px; top: 94px; width: 256.491px; height: 178.131px; display: flex; align-items: center; justify-content: center; }
+.page-canvas--damai .dm-bars { position: relative; flex: none; display: flex; gap: 8px; align-items: flex-end; height: 150px; padding: 16px; border-radius: 24px; background: #f7e5ef; overflow: hidden; transform: rotate(-7deg); box-sizing: border-box; }
+.page-canvas--damai .dm-bars i { display: block; flex: none; width: 28px; border-radius: 8px; background: #c6b5fd; }
+/* phone: 200 x 350, tilted 5deg inside its 229.743 x 366.099 box (it runs off the panel's bottom edge) */
+.page-canvas--damai .dm-phone-wrap { left: 528.64px; top: 48px; width: 229.743px; height: 366.099px; display: flex; align-items: center; justify-content: center; }
+.page-canvas--damai .dm-phone { position: relative; flex: none; display: flex; flex-direction: column; align-items: center; gap: 24px; width: 200px; height: 350px; padding: 16px 24px; border-radius: 24px; background: #f5e6f3; overflow: hidden; transform: rotate(5deg); box-sizing: border-box; }
+.page-canvas--damai .dm-phone__pill { flex: none; width: 50px; height: 10px; border-radius: 99px; background: rgba(172, 141, 255, 0.2); }
+.page-canvas--damai .dm-phone__rows { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.page-canvas--damai .dm-phone__row { display: flex; align-items: center; gap: 16px; width: 100%; padding: 12px 16px; border-radius: 16px; overflow: hidden; box-sizing: border-box; background: #c6b5fd; }
+.page-canvas--damai .dm-phone__row:nth-child(1) { background: #9377ee; }
+.page-canvas--damai .dm-phone__row:nth-child(3) { background: #e6d4f5; }
+.page-canvas--damai .dm-phone__row img { flex: none; width: 32px; height: 32px; display: block; }
+.page-canvas--damai .dm-phone__lines { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.page-canvas--damai .dm-phone__lines b { display: block; height: 10px; border-radius: 99px; background: #f5e6f3; }
+.page-canvas--damai .dm-phone__lines b:nth-child(1) { width: 50px; }
+.page-canvas--damai .dm-phone__lines b:nth-child(2) { width: 70px; }
+/* sparkles (a 5% margin round the drawing, as in Figma) and the two pins (56 x 56 boxes with their shadow around them) */
+.page-canvas--damai .dm-spark img,
+.page-canvas--damai .dm-pin img { position: absolute; display: block; max-width: none; }
+.page-canvas--damai .dm-spark img { left: -5%; top: -5%; width: 110%; height: 110%; }
+.page-canvas--damai .dm-spark--1 { left: 371.04px; top: 60.02px; width: 20.64px; height: 20.66px; transform: rotate(2deg); }
+.page-canvas--damai .dm-spark--2 { left: 870.05px; top: 104.02px; width: 19.97px; height: 19.99px; }
+.page-canvas--damai .dm-spark--3 { left: 108px; top: 278.01px; width: 21.7px; height: 21.65px; transform: rotate(-5deg); }
+.page-canvas--damai .dm-pin { width: 56px; height: 56px; }
+.page-canvas--damai .dm-pin img { left: -26.79%; top: -12.5%; width: 153.58%; height: 153.57%; }
+.page-canvas--damai .dm-pin--check { left: 448px; top: 228px; }
+.page-canvas--damai .dm-pin--x { left: 834px; top: 172px; transform: scaleX(-1); }
+
+/* ---- Title / description and Year / Role: on the glass, no white card ---- */
+.page-canvas--damai .case-hero { gap: 32px; }
+.page-canvas--damai .dm-hero-text { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px; align-self: stretch; color: #5f5f5f; font-family: "Figtree", sans-serif; }
+.page-canvas--damai .dm-hero-text__main { display: flex; flex: 1 1 380px; min-width: 0; flex-direction: column; gap: 8px; }
+.page-canvas--damai .dm-hero-text .case-hero__title { font-size: 30px; font-weight: 300; line-height: normal; }
+.page-canvas--damai .dm-hero-text .case-hero__desc { max-width: none; font-size: 24px; font-weight: 300; line-height: normal; }
+.page-canvas--damai .dm-hero-text__meta { display: flex; flex: none; align-items: center; gap: 40px; font-size: 18px; line-height: normal; }
+.page-canvas--damai .dm-hero-text__meta > div { display: flex; flex-direction: column; gap: 8px; }
+.page-canvas--damai .dm-hero-text__meta span { display: block; line-height: 22px; }
+.page-canvas--damai .dm-hero-text__meta > div:nth-child(1) { min-width: 113px; }
+.page-canvas--damai .dm-hero-text__meta > div:nth-child(2) { min-width: 107px; }
+.page-canvas--damai .dm-hero-text__meta .label { font-weight: 400; }
+.page-canvas--damai .dm-hero-text__meta .value { font-weight: 300; }
+
+/* ---- "Scroll" under the tab (fades as the tab grows): the 40px button's top is 782px from the window's top, the label 838px (Figma), or 118px / 62px from the bottom in a shorter window ---- */
+.page-canvas--damai .dm-scroll {
+  position: fixed;
+  left: 50%;
+  top: min(782px, calc(100vh - 118px));
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 113px;
+  margin: 0 0 0 -56.5px;
+  pointer-events: none;
+  color: #5f5f5f;
+  font-family: "Figtree", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  opacity: calc(1 - var(--g, 0) * 4);
+}
+/* the button is made of the same glass layers as the tabs and the traffic lights: the tab's glass (15% white, blur + saturation, the soft inner light / dark edge), the
+   traffic lights' diagonal highlight (::before) and bright rim (::after), at the size of a small circle; it floats down and back up (4px) */
+@keyframes dm-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } } /* down from its resting place (Y 782, 32px under the tab), never closer to the tab */
+.page-canvas--damai .dm-scroll__btn {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  backdrop-filter: blur(8px) saturate(130%);
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.05), inset -1px -1px 4px rgba(255, 255, 255, 0.4);
+  animation: dm-bob 3.4s ease-in-out infinite;
+}
+.page-canvas--damai .dm-scroll__btn::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.5) 100%); }
+.page-canvas--damai .dm-scroll__btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 42%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.95) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+@media (prefers-reduced-motion: reduce) { .page-canvas--damai .dm-scroll__btn { animation: none; } }
+.page-canvas--damai .dm-scroll__btn svg { position: absolute; inset: 0; display: block; }
+
+/* ---- The MUJI and Wapoo tabs peeking in from the window's edges: plain glass tabs (540 x 450, 36px padding and radius, centred on the window's centre -936 / +931) with the
+   three glass lights, nothing else; the Work page's cards lose their pictures and text on the way here (css/ and the script in pages/work-exp.html) ---- */
+.page-canvas--damai .dm-peek {
+  position: fixed;
+  top: 50%;
+  width: 780px;
+  height: 450px;
+  margin-top: -225px;
+  box-sizing: border-box;
+  padding: 30px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  backdrop-filter: blur(8px) saturate(130%);
+  box-shadow: inset 4px 4px 16px rgba(0, 0, 0, 0.05), inset -4px -4px 16px rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  opacity: calc(1 - var(--g, 0) * 2);
+}
+/* the same diagonal highlight and bright rim as the Work page's cards (so nothing changes when the card becomes this tab) */
+.page-canvas--damai .dm-peek::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 16%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 62%, rgba(255,255,255,.06) 84%, rgba(255,255,255,.2) 100%); }
+.page-canvas--damai .dm-peek::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from 0deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.9) 15.3%, rgba(255,255,255,0) 16.4%, rgba(255,255,255,.9) 17.5%,
+    rgba(255,255,255,.9) 65.3%, rgba(255,255,255,0) 66.4%, rgba(255,255,255,.9) 67.5%, rgba(255,255,255,.9) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.page-canvas--damai .dm-peek--muji, .page-canvas--damai .dm-peek--left { left: calc(50% - 1446px); } /* (780 wide: its right edge is where the 540 wide one's was, 69px into the window) */
+.page-canvas--damai .dm-peek--wapoo, .page-canvas--damai .dm-peek--right { left: calc(50% + 661px); }
+.page-canvas--damai .dm-peek .traffic-lights { gap: 6px; } /* the middle tab's lights at the edge tab's 0.75 scale: 12px dots, 6px apart, 30px from the corner */
+.page-canvas--damai .dm-peek .traffic-light { width: 12px; height: 12px; }
+
+/* ---- Wapoo's first screen ("Wapoo 3.0", Figma node 1569:7132): the same tab as Damai's, with its own illustration: three short-video phone screens and two white pills on a dotted ground ---- */
+.page-canvas--wapoo .dm-illus--wapoo { background: linear-gradient(to right, rgba(200, 149, 241, calc(0.15 + 0.35 * var(--g, 0))), rgba(166, 216, 249, calc(0.15 + 0.35 * var(--g, 0)))); }
+.page-canvas--wapoo .dm-illus--wapoo .dm-spark--2 img,
+.page-canvas--wapoo .dm-illus--wapoo .dm-spark--3 img { left: -5%; top: -5%; width: 110%; height: 110%; }
+.wp-phone { position: absolute; display: flex; align-items: center; justify-content: center; }
+.wp-phone > div { position: relative; flex: none; }
+.wp-phone img { position: absolute; display: block; max-width: none; left: -8.33%; top: -2.55%; width: 116.66%; height: 110.91%; } /* the drawing has a margin round the phone for its shadow */
+.wp-pill { position: absolute; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 99px; background: #fff; filter: drop-shadow(0 8px 7.5px rgba(69, 219, 233, 0.25)); }
+.wp-pill::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 1px 1px 4px rgba(240, 112, 143, 0.15), inset -2px -2px 4px rgba(0, 0, 0, 0.25); }
+.wp-pill img { display: block; flex: none; }
+.wp-pill__lines { display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.wp-pill__lines b { display: block; height: 4px; border-radius: 99px; background: rgba(95, 95, 95, 0.25); }
+.wp-pill__lines b:nth-child(1) { width: 48px; }
+.wp-pill__lines b:nth-child(2) { width: 32px; }
+
+/* ---- Narrow (650px and below): no peeks, no lights, no "Scroll"; the panel scales down with the tab (--hd) ---- */
+@media (max-width: 650px) {
+  .page-canvas--damai .dm-peek,
+  .page-canvas--damai .dm-scroll,
+  .page-canvas--damai .dm-topbar__lights { display: none; }
+  .page-canvas--damai .dm-topbar { margin-bottom: 0; }
+  .page-canvas--damai .dm-topbar .case-topbar__url { flex: 1 1 0; }
+  .page-canvas--damai .dm-illus { border-radius: 24px; }
+  .page-canvas--damai .dm-hero-text { flex-direction: column; gap: 24px; }
+  .page-canvas--damai .dm-hero-text .case-hero__title { font-size: 30px; }
+  .page-canvas--damai .dm-hero-text__meta { gap: 32px; }
+}
+
+/* ---- MUJI's first screen ("Muji 3.0", Figma node 1663:11117): the same tab, with its own illustration: two tilted (-10deg) rows of product cards and a "cart" button with a cursor ---- */
+.page-canvas--muji .dm-illus--muji { background: linear-gradient(to right, rgba(251, 171, 123, 0.15), rgba(249, 137, 115, 0.15)); }
+.mj-row { position: absolute; display: flex; align-items: center; justify-content: center; width: 1043.649px; height: 290.893px; }
+.mj-row__in { flex: none; display: flex; gap: 16px; align-items: center; transform: rotate(-10deg); }
+.mj-card { position: relative; flex: none; display: flex; align-items: center; gap: 16px; box-sizing: border-box; width: 248px; padding: 16px; border-radius: 24px; filter: drop-shadow(0 8px 7.5px rgba(139, 0, 19, 0.25)); }
+.mj-card::before { content: ""; position: absolute; inset: 0; border-radius: 24px; background: var(--c, #ffefec); }
+.mj-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 2px 2px 4px rgba(139, 0, 19, 0.1), inset -4px -4px 4px rgba(0, 0, 0, 0.1); }
+.mj-card > * { position: relative; z-index: 1; }
+.mj-tile { position: relative; flex: none; display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; overflow: hidden; border-radius: 12.8px; background: #f7e7e1; }
+.mj-tile img { display: block; max-width: none; }
+.mj-tile--g24 > span { position: relative; display: block; width: 48px; height: 60px; }
+.mj-tile--g24 > span img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mj-tile--g24 > span i { position: absolute; left: 16px; top: 10.4px; width: 20.8px; height: 4.8px; border-radius: 79.2px; background: #fff; }
+.mj-tile--g25 > span { position: absolute; left: 14.16px; top: 18.4px; width: 55.672px; height: 43.2px; }
+.mj-tile--g25 > span img { position: absolute; left: 0; top: 0; width: 105.54%; height: 100%; }
+.mj-tile--g26 > span, .mj-tile--g27 > span { position: relative; display: block; width: 48px; height: 56.4px; }
+.mj-tile--g26 > span img, .mj-tile--g27 > span img { position: absolute; left: 0; top: -4.26%; width: 100%; height: 104.26%; }
+.mj-lines { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.mj-lines b { display: block; height: 12px; border-radius: 99px; background: #f7e7e1; }
+.mj-lines b:nth-child(1) { width: 120px; }
+.mj-lines b:nth-child(2) { width: 80px; }
+.mj-cart { position: absolute; display: flex; align-items: center; justify-content: center; left: 477.7px; top: 188.79px; width: 247.411px; height: 109.579px; margin: -54.79px 0 0 -123.7px; }
+.mj-cart__in { position: relative; flex: none; display: flex; align-items: center; gap: 17.28px; padding: 12.96px 17.28px; border-radius: 8.64px; transform: rotate(-10deg); background: #e37c6e; box-shadow: 0 8.64px 16.2px rgba(139, 0, 19, 0.25); overflow: hidden; }
+.mj-cart__in::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 2.16px 2.16px 4.32px rgba(139, 0, 19, 0.1), inset -4.32px -4.32px 4.32px rgba(0, 0, 0, 0.1); }
+.mj-cart__in img { display: block; flex: none; width: 43.2px; height: 43.2px; }
+.mj-cart__in b { display: block; flex: none; width: 144px; height: 12.6px; border-radius: 106.92px; background: #fff; }
+.mj-cursor { position: absolute; display: flex; align-items: center; justify-content: center; left: 541.28px; top: 188.34px; width: 46.338px; height: 46.338px; }
+.mj-cursor__in { position: relative; flex: none; width: 40px; height: 40px; transform: rotate(-10deg); filter: drop-shadow(0 8.64px 8.1px rgba(139, 0, 19, 0.25)); }
+.mj-cursor__in img { position: absolute; display: block; max-width: none; left: 3.336px; top: 3.334px; width: 34.65px; height: 34.62px; }
+
+/* the edge tabs that lead to the other case studies (see js/case-exp-extras.js): clickable, and they slide out a little toward the window on hover */
+.page-canvas--damai .dm-peek.is-link { pointer-events: auto; cursor: pointer; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+.page-canvas--damai .dm-peek--left.is-link:hover, .page-canvas--damai .dm-peek--muji.is-link:hover { transform: translateX(22px); }
+.page-canvas--damai .dm-peek--right.is-link:hover, .page-canvas--damai .dm-peek--wapoo.is-link:hover { transform: translateX(-22px); }
+@media (max-width: 650px) { .page-canvas--damai .dm-peek.is-link { pointer-events: none; } }
+
+/* while the middle tab turns into an edge tab (js/case-exp-extras.js) it is above the clicked tab that grows into the middle */
+.page-canvas--damai .glass-card--case.dx-leaving { z-index: 6; }
+
+/* the clicked edge tab while it grows into the middle (js/case-exp-extras.js) gets the middle tab's rim exactly: the breaks in the bright rim sit at the tab's proportions, not the edge tab's */
+.page-canvas--damai .dm-peek.dx-as-tab::after { background: conic-gradient(from 0deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.9) 15.3%, rgba(255,255,255,0) 16.4%, rgba(255,255,255,.9) 17.5%, rgba(255,255,255,.9) 65.3%, rgba(255,255,255,0) 66.4%, rgba(255,255,255,.9) 67.5%, rgba(255,255,255,.9) 100%); }
+/* ...and the middle tab's three lights too (16px dots, 8px apart, 40px from the corner), so they do not change size or place when the page swaps */
+.page-canvas--damai .dm-peek.dx-as-tab { padding: 40px; }
+.page-canvas--damai .dm-peek.dx-as-tab .traffic-lights { gap: 8px; }
+.page-canvas--damai .dm-peek.dx-as-tab .traffic-light { width: 16px; height: 16px; }

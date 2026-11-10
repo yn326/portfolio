@@ -1,0 +1,140 @@
+/* Damai case study, wide to narrow. No Figma frame for it: this applies what was settled for MUJI (css/muji-scale.css) to Damai's own parts.
+   Loaded by pages/damai.html with media="(min-width: 651px)"; below that css/damai-narrow.css takes over. Text keeps its size the whole way,
+   what changes is the layout:
+   1. Above 1338px the tab stays 1250px wide and the margins around it grow (the wide design); the scrollspy sits in the middle of the margin.
+   2. Below that the tab narrows, the gap between its edge and the frames goes from 40px to 24px, then the frames narrow with it.
+   Breakpoints (window width): 1135 project gallery shots go one pair per row,  1025 hero title above its description (+ scrollspy off at 1024),
+   899 user group personas stack,  1273 / 753 pain point cards 4 -> 2 x 2 -> 1 per row,  771 final design videos go under their text,  1253 favorites / table notes centre on their picture. */
+
+/* ---- Shell: the tab sits in the normal flow so the footer and the page height follow its real height ---- */
+.page-canvas--damai { --spy-margin: 68px; } /* the strip beside the tab while the scrollspy shows: 20px bar, 24px each side of it */
+.page-canvas--damai::after { display: none; }
+.page-canvas--damai .case-pin { display: flow-root; }
+/* the tab's height changes (600px tall, then the whole page) while the page is scrolled: the browser must not "correct" the scroll position for that */
+html, body { overflow-anchor: none; }
+/* the tab stays pinned for as long as there is room under it inside .case-pin: --spacer (set by the script) = the scrolling the opening takes, minus the tab's distance from the top */
+.page-canvas--damai .case-pin::after { content: ""; display: block; height: calc(var(--spacer, 450) * 1px); }
+.page-canvas--damai .glass-card--case {
+  left: auto;
+  /* In a window shorter than 900px the first screen is smaller (--s0, set by the script: 1 at 900px tall, 0.888 at 833px) so the nav (80px from the top), the tab (150px)
+     and "Scroll" at the bottom all fit; the scale goes back to 1 as the tab grows to the window */
+  transform: scale(calc(var(--s0, 1) + (1 - var(--s0, 1)) * var(--g, 0)));
+  transform-origin: 50% 0;
+  /* First screen (Figma "Damai 3.0"): a 1040 x 600 tab centred in the window (24px from the edges at the least, with 40px of padding, so its content is 960 wide).
+     --g (0 to 1, set by the script in damai-exp.html) grows it to the whole window, and its content to the page's usual 1170px column: --w is the tab's width,
+     --i the width of the content, and the padding is half of what is left over (percentages in padding refer to the parent's width, like the width). */
+  --w0: min(1040px, calc(100% - 48px));
+  --i0: calc(var(--w0) - 80px);
+  --base-w: min(1250px, calc(100% - 2 * var(--spy-margin)));
+  --base-pad: clamp(24px, calc((100% - 2 * var(--spy-margin) - 1170px) / 2), 40px);
+  --i1: calc(var(--base-w) - 2 * var(--base-pad));
+  --w: calc(var(--w0) + (100% - var(--w0)) * var(--g, 0));
+  --i: calc(var(--i0) + (var(--i1) - var(--i0)) * var(--g, 0));
+  width: var(--w);
+  margin: calc(var(--top0, 150) * 1px) auto 0;
+  padding-left: calc((var(--w) - var(--i)) / 2);
+  padding-right: calc((var(--w) - var(--i)) / 2);
+  /* 25px above the address bar; it sits --rise px further down once the tab fills the window, so while the tab's top edge rises the content rises less */
+  padding-top: calc(25px + var(--rise, 112) * 1px * var(--g, 0));
+  padding-bottom: 40px;
+  /* 600px tall, then the window's height: only the top of the page shows inside it until it is open (class is-open, from the script), then it is as tall as the page */
+  height: calc(var(--h0, 600px) + (100vh - var(--h0, 600px)) * var(--g, 0));
+  overflow: hidden;
+  border-radius: calc(40px * (1 - var(--g, 0)));
+  /* the glass fills up with white as it grows: 15% (as on every glass tab) to 100% when it covers the window */
+  background: rgba(255, 255, 255, calc(0.15 + 0.85 * var(--g, 0)));
+  /* pinned from the start (see the script in damai-exp.html): its top edge goes from --top0 to 0 as it grows, then the page scrolls on */
+  position: sticky;
+  top: calc(var(--stick, 150) * 1px);
+}
+.page-canvas--damai.is-open .glass-card--case { height: auto; overflow: visible; }
+/* the first screen fills the tab exactly (143px above the panel, 40px below the text): if the content is shorter than that (a narrower window, a shorter title), the title stays 40px from the bottom */
+.page-canvas--damai .case-hero { min-height: calc(var(--h0, 600px) - 143px); }
+.page-canvas--damai .dm-hero-text { margin-top: auto; }
+@media (max-width: 1024px) {
+  .page-canvas--damai .glass-card--case { --base-w: calc(100% - 48px); }
+}
+/* Scrollspy: in the middle of the strip between the tab and the window edge (the current section's bar is 20px wide), never closer than 10px to either edge. */
+.page-canvas--damai .scrollspy { opacity: clamp(0, calc((var(--g, 0) - 0.8) * 5), 1); right: max(calc(var(--spy-margin) / 2 - 18px), calc((100% - 1250px) / 4 - 18px)); } /* -18px: 10px (half the 20px bar) + 8px padding of each bar's row */
+/* Footer: its own tab under the page, 34px below the tab, 80px of page below it, as wide as the tab. */
+.page-canvas--damai .site-footer {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: min(1250px, calc(100% - 2 * var(--spy-margin)));
+  height: auto;
+  min-height: 192px;
+  margin: 34px auto 80px;
+}
+@media (max-width: 1024px) {
+  .page-canvas--damai .site-footer { width: calc(100% - 48px); }
+}
+@media (max-width: 900px) {
+  .page-canvas--damai .site-footer { flex-direction: column; justify-content: flex-start; gap: 32px; }
+  .page-canvas--damai .site-footer__left { gap: 24px; }
+  .page-canvas--damai .site-footer__cols { align-self: stretch; justify-content: space-between; gap: 24px; }
+  .page-canvas--damai .site-footer__hi svg { flex: none; }
+}
+/* The scrollspy only exists while the strip between the tab and the window edge can hold it (the tab's --spy-margin, down to 1025px). */
+@media (max-width: 1024px) {
+  .page-canvas--damai .scrollspy { display: none; }
+}
+
+/* ---- Parts that squeeze instead of overflowing (all widths) ---- */
+/* Context: the two phone screenshots wrap onto two rows if they have to */
+.page-canvas--damai .case-section__images--phone { flex-wrap: wrap; justify-content: center; gap: 24px 80px; }
+/* User groups: the four pain point cards and the concept cards share their row, then wrap into a grid (same sizes as the design at full width) */
+.page-canvas--damai .case-usergroups__painpoints { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; gap: 30px; }
+/* every card is as tall as the tallest one; in that one the picture row sits 24px under the text, in the others it drops to the bottom */
+.page-canvas--damai .case-usergroups__card { width: auto; height: auto; min-height: 0; gap: 24px; }
+.page-canvas--damai .case-concept-types { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; }
+/* Design decisions: shots with their notes, in a grid so each shot stays next to its own notes */
+.page-canvas--damai .case-pgallery__row { display: grid; grid-template-columns: auto minmax(0, 292px) auto minmax(0, 292px); justify-content: center; align-items: center; gap: 40px; }
+.page-canvas--damai .case-pdetails__row,
+.page-canvas--damai .case-favorites__row { flex-wrap: wrap; gap: 32px 80px; }
+.page-canvas--damai .case-favorites__group { max-width: 100%; }
+.page-canvas--damai .case-favorites__content { flex-wrap: wrap; justify-content: center; gap: 24px 40px; }
+
+@media (max-width: 1273px) {
+  /* never 3 cards on one row and 1 alone: 2 x 2 ... */
+  .page-canvas--damai .case-usergroups__painpoints { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 753px) {
+  /* ... then one per row */
+  .page-canvas--damai .case-usergroups__painpoints { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1253px) {
+  /* Favorited projects / table design: once the two groups stack, each group's notes share the picture's vertical centre */
+  .page-canvas--damai .case-favorites__content { align-items: center; justify-content: space-evenly; width: 100%; gap: 24px 16px; }
+  /* the picture and its notes are spread evenly over a row at most 620px wide: the gap between them equals the space at each side,
+     and shrinks with them as the window narrows (16px at the least) */
+  .page-canvas--damai .case-favorites__group { width: 100%; max-width: 620px; }
+  .page-canvas--damai .case-favorites__verdict { align-self: center; width: 100%; max-width: 460px; }
+}
+@media (max-width: 1135px) {
+  /* Project gallery / session details: one pair (shot + its notes) per row */
+  /* one pair per row: spread evenly over a row at most 732px wide, so the gap between picture and notes equals the space at each side
+     and shrinks with them as the window narrows (16px at the least) */
+  .page-canvas--damai .case-pgallery__row { grid-template-columns: auto minmax(0, 292px); justify-content: space-evenly; width: 100%; max-width: 732px; margin-inline: auto; gap: 40px 16px; } /* 40px between the two pairs: the same as between the description and the first picture */
+}
+@media (max-width: 899px) {
+  /* User groups: one persona per row, no divider */
+  .page-canvas--damai .case-usergroups__personas { flex-direction: column; gap: 24px; }
+  .page-canvas--damai .case-usergroups__divider { display: none; }
+}
+/* Final designs: text + video share a row; the gap between them is whatever is left (80px at most, 24px at least) and the text can
+   narrow to 220px, so the row never leaves the frame. */
+.page-canvas--damai .case-final-row,
+.page-canvas--damai .case-final-row--reverse { width: 100%; max-width: 644px; gap: 24px; justify-content: space-between; }
+.page-canvas--damai .case-final-row__text { flex: 0 1 300px; width: auto; min-width: 220px; }
+@media (max-width: 771px) {
+  /* Final designs: the text takes the full width of the frame, the video is centred under it */
+  .page-canvas--damai .case-final-row,
+  .page-canvas--damai .case-final-row--reverse { flex-direction: column; align-items: center; justify-content: flex-start; gap: 24px; }
+  .page-canvas--damai .case-final-row__text { flex: none; width: 100%; min-width: 0; } /* the text starts at the frame's left edge */
+  .page-canvas--damai .case-final-row__video { max-width: 100%; height: auto; }
+}
+
+/* the page's scroll bar stays out of sight while the tab grows (the gutter is still reserved, so nothing shifts when it appears) */
+html:not(.dx-white) { scrollbar-color: transparent transparent; }

@@ -22,8 +22,28 @@
       (function tick() { s(); if (++n < 60) requestAnimationFrame(tick); })();
     })();
   </script>
-  <script src="../js/case-transition.js?v=27"></script>
+  <script src="../js/case-transition.js?v=28"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="expect" href="#page-parsed" blocking="render" /> <!-- the first paint waits for the whole page, so the arrival animation (js/damai-open-exp.js) is in place before it -->
+  <style>
+    /* (the no-transition rule itself is at the end of the head, after css/style.css: of several @view-transition rules the last one counts) */
+    /* No browser page transition into or out of this experiment page (the opening animation is done by pages/work.html itself). Without this, going Back from here to
+       the Work page runs a cross-document view transition whose snapshot of this whole page-tall glass tab keeps its blur live over the Work page: a heavy blur that lingers. */
+    /* With always-visible scrollbars (a mouse, or the system setting) the scrollbar appears once the page has grown tall enough while loading, which moves everything
+       sideways by half its width. Reserve its space from the first paint so nothing shifts (and so the page lays out exactly like its hidden copy in the Work page). */
+    html { scrollbar-gutter: stable; }
+  </style>
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/figtree/v9/_Xmu-HUzqDCFdgfMm4GND65o7Cqcsw.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2" />
+  <script>
+    // The first screen's scale and illustration size depend on the window (css/damai-exp-scale.css, css/damai-exp-cover.css). The script at the end of the page measures them,
+    // but that runs after the first paint: set them here so the page is painted at its real size straight away (otherwise it appears too big and then shrinks).
+    (function () {
+      var r = document.documentElement, cw = r.clientWidth || window.innerWidth, vh = window.innerHeight;
+      r.style.setProperty('--s0', Math.min(1, Math.max(0.6, (vh - 300) / 600)).toFixed(4));
+      r.style.setProperty('--hd', Math.min(1, (cw <= 650 ? cw - 48 : Math.min(1040, cw - 48) - 80) / 960).toFixed(4));
+    })();
+  </script>
   <title>Damai Entertainment – Raina Ni</title>
   <meta name="description" content="Case study: a B2B mobile app for real-time event ticketing data at Damai Entertainment (Alibaba Group). Product design by Raina Ni, Summer 2026." />
   <link rel="canonical" href="https://rainani.com/pages/damai.html" />
@@ -46,8 +66,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css?v=312" />
-  <link rel="stylesheet" href="../css/damai-scale.css?v=10" media="(min-width: 651px)" />
-  <link rel="stylesheet" href="../css/damai-narrow.css?v=10" media="(max-width: 650px)" />
+  <link rel="stylesheet" href="../css/damai-exp-sections.css?v=27" />
+  <link rel="stylesheet" href="../css/damai-exp-cover.css?v=12" />
+  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=2" media="(min-width: 651px)" />
+  <link rel="stylesheet" href="../css/damai-exp-narrow.css?v=1" media="(max-width: 650px)" />
   <style>
     /* TEMPORARY: blur the content of these screenshots for now. The wrapper keeps the 1px stroke
        and rounded corners sharp; only the picture inside is blurred. To show the images again,
@@ -58,6 +80,12 @@
     .blur-cover img { width: 100% !important; height: 100% !important; border: 0 !important; border-radius: 0 !important;
       filter: blur(3px); transform: scale(1.03); }
     .blur-cover--wide img { height: auto !important; filter: blur(5px); transform: scale(1.01); }
+  </style>
+  <style>
+    /* No browser page transition into or out of this experiment page (the opening and closing animations are done by pages/work.html and js/damai-open-exp.js). Without this,
+       leaving this page runs a cross-document view transition whose snapshot of this page-tall glass tab keeps its blur live over the Work page: a heavy blur that lingers.
+       It has to come after css/style.css, which asks for a page transition: of several @view-transition rules the last one counts. */
+    @view-transition { navigation: none; }
   </style>
 </head>
 <body>
@@ -70,13 +98,18 @@
     </div>
   </div>
 
-  <div class="page-canvas page-canvas--case page-canvas--damai">
+  <div class="page-canvas page-canvas--case page-canvas--damai page-canvas--dm4">
     <nav class="scrollspy" aria-label="Section navigation">
     <a class="scrollspy__item" href="#context"><span class="scrollspy__label">Context</span><span class="scrollspy__bar"></span></a>
-    <a class="scrollspy__item" href="#user-groups"><span class="scrollspy__label">User Groups</span><span class="scrollspy__bar"></span></a>
-    <a class="scrollspy__item" href="#concept-ideation"><span class="scrollspy__label">Concept Ideation</span><span class="scrollspy__bar"></span></a>
-    <a class="scrollspy__item" href="#design-decisions"><span class="scrollspy__label">Design Decisions</span><span class="scrollspy__bar"></span></a>
     <a class="scrollspy__item" href="#final-designs"><span class="scrollspy__label">Final Designs</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#user-groups"><span class="scrollspy__label">User Groups</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#pain-points"><span class="scrollspy__label">Pain Points</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#concept-ideation"><span class="scrollspy__label">Concept Ideation</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#project-gallery"><span class="scrollspy__label">Project Gallery</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#favorites"><span class="scrollspy__label">Favorites</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#project-details"><span class="scrollspy__label">Project Details</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#session-details"><span class="scrollspy__label">Session Details</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#table-design"><span class="scrollspy__label">Table Design</span><span class="scrollspy__bar"></span></a>
   </nav>
 
     <nav class="page-nav">
@@ -117,625 +150,343 @@
       </a>
     </nav>
 
+    <!-- First screen (Figma "Damai 3.0"): the MUJI and Wapoo tabs peek in from the window's edges and "Scroll" sits at the bottom (css/damai-exp-cover.css) -->
+    <div class="dm-peek dm-peek--muji" data-peek="muji" aria-hidden="true"><div class="traffic-lights" aria-hidden="true"><span class="traffic-light traffic-light--red"></span><span class="traffic-light traffic-light--white"></span><span class="traffic-light traffic-light--green"></span></div></div>
+    <div class="dm-peek dm-peek--wapoo" data-peek="wapoo" aria-hidden="true"><div class="traffic-lights" aria-hidden="true"><span class="traffic-light traffic-light--red"></span><span class="traffic-light traffic-light--white"></span><span class="traffic-light traffic-light--green"></span></div></div>
+    <div class="dm-scroll" aria-hidden="true"><span class="dm-scroll__btn"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M14 17L20 23L26 17" stroke="#5F5F5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Scroll</span></div>
+
+    <div class="case-pin">
     <div class="glass-card glass-card--case">
-      <div class="case-topbar">
+      <div class="case-topbar dm-topbar">
+        <div class="traffic-lights dm-topbar__lights" aria-hidden="true"><span class="traffic-light traffic-light--red"></span><span class="traffic-light traffic-light--white"></span><span class="traffic-light traffic-light--green"></span></div>
         <a class="case-topbar__back" href="work.html" data-case-color="exit" aria-label="Back to work">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15.833 10H4.167M10 15.833 4.167 10 10 4.167" stroke="#5F5F5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <img src="../assets/images/work/damai3/arrow-left.svg" width="20" height="20" alt="" />
         </a>
         <p class="case-topbar__url"><span>rainani.com/</span><span class="case-topbar__url-em">damai</span></p>
       </div>
 
     <div class="case-hero">
-      <div class="case-hero__collage-frame case-hero__collage-frame--damai">
-        <div class="case-hero__collage case-hero__collage--damai">
-          <img class="case-hero__collage-img case-hero__collage-img--phone case-hero__collage-img--phone1" src="../assets/images/work/damai/english-hero1.png" alt="Maikong project gallery screen" />
-          <img class="case-hero__collage-img case-hero__collage-img--phone case-hero__collage-img--phone2" src="../assets/images/work/damai/english-hero2.png" alt="" />
-          <img class="case-hero__collage-img case-hero__collage-img--phone case-hero__collage-img--phone3" src="../assets/images/work/damai/english-hero3.png" alt="" />
-          <img class="case-hero__collage-img case-hero__collage-img--phone case-hero__collage-img--phone4" src="../assets/images/work/damai/english-hero4.png" alt="Maikong session details screen" />
+      <div class="dm-illus" role="img" aria-label="Illustration: a bar chart card and a ticketing app screen">
+        <img class="dm-illus__contour" src="../assets/images/work/damai3/contour-lines.png" alt="" />
+        <div class="dm-illus__stage">
+          <div class="dm-bars-wrap">
+            <div class="dm-bars dm-card-shadow">
+              <i style="height:50px"></i><i style="height:80px;background:#f4ada0"></i><i style="height:50px"></i><i style="height:100px;background:#9377ee"></i><i style="height:50px"></i><i style="height:50px"></i>
+            </div>
+          </div>
+          <div class="dm-phone-wrap">
+            <div class="dm-phone dm-card-shadow">
+              <span class="dm-phone__pill"></span>
+              <div class="dm-phone__rows">
+                <div class="dm-phone__row"><img src="../assets/images/work/damai3/ticket.svg" alt="" /><div class="dm-phone__lines"><b></b><b></b></div></div>
+                <div class="dm-phone__row"><img src="../assets/images/work/damai3/circle-check.svg" alt="" /><div class="dm-phone__lines"><b></b><b></b></div></div>
+                <div class="dm-phone__row"><img src="../assets/images/work/damai3/map-pin.svg" alt="" /><div class="dm-phone__lines"><b></b><b></b></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="dm-spark dm-spark--1"><img src="../assets/images/work/damai3/sparkle-1.svg" alt="" /></div>
+          <div class="dm-spark dm-spark--2"><img src="../assets/images/work/damai3/sparkle-2.svg" alt="" /></div>
+          <div class="dm-spark dm-spark--3"><img src="../assets/images/work/damai3/sparkle-3.svg" alt="" /></div>
+          <div class="dm-pin dm-pin--check"><img src="../assets/images/work/damai3/pin-check.svg" alt="" /></div>
+          <div class="dm-pin dm-pin--x"><img src="../assets/images/work/damai3/pin-x.svg" alt="" /></div>
         </div>
       </div>
 
-      <div class="case-hero__card">
-        <div class="case-hero__titlerow">
-          <h1 class="case-hero__title">Damai Entertainment <span style="white-space:nowrap">(Alibaba Group)</span></h1>
+      <div class="dm-hero-text">
+        <div class="dm-hero-text__main">
+          <h1 class="case-hero__title">Damai Entertainment (Alibaba)</h1>
           <p class="case-hero__desc">B2B mobile app for real-time event ticketing data</p>
         </div>
-        <div class="case-hero__meta">
-          <div class="case-hero__meta-info">
-            <div>
-              <span class="label">Year</span>
-              <span class="value">Summer 2026</span>
-            </div>
-            <div>
-              <span class="label">Role</span>
-              <span class="value">Design Intern</span>
-            </div>
-            <div>
-              <span class="label">Skills</span>
-              <span class="value">Product Design, B2B Design</span>
-            </div>
-          </div>
-          <a class="case-hero__cta" href="#final-designs">
-            View Final Designs
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 4.167v11.666M15.833 10 10 15.833 4.167 10" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
+        <div class="dm-hero-text__meta">
+          <div><span class="label">Year</span><span class="value">Summer 2026</span></div>
+          <div><span class="label">Role</span><span class="value">Design Intern</span></div>
         </div>
       </div>
     </div>
 
-    <section id="context" class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Context</p>
-          <h2 class="case-section__title">The Damai ticketing app has an outdated design.</h2>
+    <section id="context" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">context</p>
+        <p class="dx-title">The Damai ticketing app has an outdated design.</p>
+        <p class="dx-body">Maikong used to be Damai&rsquo;s app for ticket verification. Yet overtime, it became the tool people use to draw real-time ticketing data on the events they host. The app now runs on a years-old design that&rsquo;s outdated for its new use case.</p>
+      </div>
+      <div class="dx-panel">
+        <figure><div class="dx-shot "><img src="../assets/images/work/damai4/ctx-gallery.jpg" alt="" loading="lazy" /></div><figcaption class="dx-cap">Current product gallery page</figcaption></figure>
+        <figure><div class="dx-shot "><img src="../assets/images/work/damai4/ctx-session.png" alt="" loading="lazy" /></div><figcaption class="dx-cap">Current session details page</figcaption></figure>
+      </div>
+      <div class="dx-callout"><p>How might we redesign Maikong to help event organizers and Damai&rsquo;s internal team manage ticketing and event progress?</p></div>
+    </section>
+    <section id="final-designs" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">Final Designs</p>
+        <p class="dx-title">A redesigned app for event organizers and Damai staff.</p>
+      </div>
+      <div class="dx-slider" data-slider>
+        <div class="dx-slider__text">
+          <div class="dx-fade">
+            <p class="dx-slider__num" data-num>01/03</p>
+            <p class="dx-slider__title" data-title>Simpler ways to look up data</p>
+          </div>
+          <p class="dx-slider__desc dx-fade" data-desc>Streamlined flows and de-cluttered layouts lets users quickly gauge trends at a glance.</p>
+          <div class="dx-slider__ctl">
+            <div class="dx-slider__dots"><button type="button" aria-label="Slide 1"><i></i></button><button type="button" aria-label="Slide 2"><i></i></button><button type="button" aria-label="Slide 3"><i></i></button></div>
+            <div class="dx-slider__arrows"><button type="button" data-prev aria-label="Previous"><img src="../assets/images/work/damai4/chev-next.svg" alt="" /></button><button type="button" data-next aria-label="Next"><img src="../assets/images/work/damai4/chev-next.svg" alt="" /></button></div>
+          </div>
         </div>
-        <p class="case-section__body">Maikong is a mobile application used by Damai Entertainment to provide events organizers and Damai&rsquo;s internal team with real-time ticketing data on the events they host. The app currently runs on a years-old design that&rsquo;s both outdated and hard to use, especially as its use case has expanded. Originally just for on-site ticket verification, Maikong has become the tool to track ticketing progress during events and quickly draw relevant data.</p>
-      </div>
-
-      <div class="case-section__images case-section__images--phone">
-        <figure class="case-section__image-group case-section__image-group--phone">
-          <span class="blur-cover blur-cover--phone"><img src="../assets/images/work/damai/current-project-gallery.jpg" alt="Current Maikong product gallery page" /></span>
-          <figcaption>Current product gallery page</figcaption>
-        </figure>
-        <figure class="case-section__image-group case-section__image-group--phone">
-          <span class="blur-cover blur-cover--phone"><img src="../assets/images/work/damai/current-session-details.jpg" alt="Current Maikong session details page" /></span>
-          <figcaption>Current session details page</figcaption>
-        </figure>
-      </div>
-
-      <div class="case-section__callout">
-        <p>How might we redesign Maikong to help event organizers and Damai&rsquo;s internal team manage ticketing and event progress?</p>
+        <div class="dx-slider__media">
+          <video src="../assets/videos/damai-project.mp4" muted playsinline preload="metadata"></video>
+          <video src="../assets/videos/damai-favorite.mp4" muted playsinline preload="metadata"></video>
+          <video src="../assets/videos/damai-search.mp4" muted playsinline preload="metadata"></video>
+        </div>
       </div>
     </section>
-
-    <section id="user-groups" class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">User groups</p>
-          <h2 class="case-section__title">After 13 interviews across 2 user groups, I synthesized 4 pain points.</h2>
-        </div>
-        <p class="case-section__body">Maikong is used by 2 different user groups with different goals and use cases. Event organizers and Damai&rsquo;s internal staff also see different contents when they access Maikong, which complicates the design of the app. To accommodate for both user groups, we conducted interviews across both groups and synthesized pain points and needs for both.</p>
+    <section id="user-groups" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">user groups</p>
+        <p class="dx-title">I conducted 13 interviews across 2 user groups.</p>
+        <p class="dx-body">Maikong is used by 2 different user groups - event organizers and Damai staff. They have different goals, different use cases, and see different things when they access Maikong.</p>
       </div>
-
-      <div class="case-usergroups__personas">
-        <div class="case-usergroups__persona">
-          <div class="case-usergroups__avatar">
-            <img src="../assets/images/work/damai/event-organizer.png" alt="" />
-            <svg class="case-usergroups__avatar-ring" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="50" cy="50" r="48.75" fill="none" stroke-width="2.5" stroke-dasharray="10 10" />
-            </svg>
-          </div>
-          <div class="case-usergroups__persona-text">
-            <h3>Event Organizer</h3>
-            <p>Use Maikong to track ticketing progress across projects.</p>
-            <p>Can only access one&rsquo;s own projects.</p>
-          </div>
+      <div class="dx-two">
+        <div class="dx-group">
+          <img class="dx-avatar" src="../assets/images/work/damai/event-organizer.png" alt="" />
+          <div class="dx-group__text"><p class="dx-group__name">Event Organizer</p><div><p>Look for general data trends to evaluate how their project is doing.</p><p>Can only access their own projects.</p></div></div>
         </div>
-        <div class="case-usergroups__divider"></div>
-        <div class="case-usergroups__persona">
-          <div class="case-usergroups__avatar">
-            <img src="../assets/images/work/damai/damai-internal-staff.png" alt="" />
-            <svg class="case-usergroups__avatar-ring" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="50" cy="50" r="48.75" fill="none" stroke-width="2.5" stroke-dasharray="10 10" />
-            </svg>
-          </div>
-          <div class="case-usergroups__persona-text">
-            <h3>Damai Internal Staff</h3>
-            <p>Use Maikong to draw relevant data to answer external inquiries.</p>
-            <p>Can access all projects across Damai.</p>
-          </div>
+        <div class="dx-group">
+          <img class="dx-avatar" src="../assets/images/work/damai/damai-internal-staff.png" alt="" />
+          <div class="dx-group__text"><p class="dx-group__name">Damai Internal Staff</p><div><p>Look for specific data points to answer questions from 3rd party.</p><p>Can access all projects.</p></div></div>
         </div>
       </div>
-
-      <div class="case-usergroups__painpoints">
-        <div class="case-usergroups__card">
-          <div>
-            <p class="case-usergroups__number">01</p>
-            <h3>Limited search and filter tools</h3>
-            <p class="case-usergroups__desc">Screens lack search tools and visual distinction, making data hard to find.</p>
-          </div>
-          <div class="case-usergroups__tags case-usergroups__tags--icons">
-            <img class="case-usergroups__tag-icon" src="../assets/images/work/damai/event-organizer.png" alt="Event Organizer" />
-            <img class="case-usergroups__tag-icon" src="../assets/images/work/damai/damai-internal-staff.png" alt="Damai Staff" />
-          </div>
-        </div>
-        <div class="case-usergroups__card">
-          <div>
-            <p class="case-usergroups__number">02</p>
-            <h3>Cluttered mobile layout</h3>
-            <p class="case-usergroups__desc">Dense tables and charts cram the mobile screen, overwhelming users.</p>
-          </div>
-          <div class="case-usergroups__tags">
-            <span class="case-usergroups__tag"><img class="case-usergroups__tag-icon" src="../assets/images/work/damai/event-organizer.png" alt="" />Event Organizer</span>
-          </div>
-        </div>
-        <div class="case-usergroups__card">
-          <div>
-            <p class="case-usergroups__number">03</p>
-            <h3>Hidden interaction rules</h3>
-            <p class="case-usergroups__desc">Settings affect what data is shown, without any visual cue to guide users.</p>
-          </div>
-          <div class="case-usergroups__tags">
-            <span class="case-usergroups__tag"><img class="case-usergroups__tag-icon" src="../assets/images/work/damai/event-organizer.png" alt="" />Event Organizer</span>
-          </div>
-        </div>
-        <div class="case-usergroups__card">
-          <div>
-            <p class="case-usergroups__number">04</p>
-            <h3>Irrelevant information shown</h3>
-            <p class="case-usergroups__desc">Staff are shown irrelevant statistics and projects that clutter their interface.</p>
-          </div>
-          <div class="case-usergroups__tags">
-            <span class="case-usergroups__tag"><img class="case-usergroups__tag-icon" src="../assets/images/work/damai/damai-internal-staff.png" alt="" />Damai Staff</span>
-          </div>
-        </div>
-      </div>
-
-      <p class="case-persona-credit">Illustrations are created with Humation on Figma</p>
+      <p class="dx-note">Illustrations are created with Humation on Figma</p>
     </section>
-
-    <section id="concept-ideation" class="case-section case-section--built">
-      <div class="case-section__heading-group">
-        <p class="case-section__eyebrow">Concept ideation</p>
-        <h2 class="case-section__title">I drew low-fidelity wireframes for 4 main interfaces of the redesigned app.</h2>
+    <section id="pain-points" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">Pain points</p>
+        <p class="dx-title">4 pain points were synthesized across the interviews.</p>
       </div>
-
-      <img class="case-concept__screenshot" src="../assets/images/work/damai/concept-wireframes.png" alt="Low-fidelity wireframes for the redesigned Maikong app's 4 main interfaces" />
-
-      <p class="case-section__body">I received feedback to keep the needs of different types of event organizers in mind. Thus, I conducted 5 additional interviews across organizers of concerts, theatre, and exhibitions to summarize the main differences in their needs and goals.</p>
-
-      <div class="case-concept-types">
-        <div class="case-concept-types__card">
-          <div class="case-concept-types__header">
-            <span class="case-concept-types__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12" /><path d="M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5" /><circle cx="16" cy="7" r="5" /></svg>
-            </span>
-            <h3>Concerts</h3>
-          </div>
-          <div class="case-concept-types__body">
-            <p>Use Maikong for quickly pulling data, not deep analysis.</p>
-            <p>Events are large-scale, with complex check-in data.</p>
+      <div class="dx-pains">
+        <div class="dx-pain">
+          <div class="dx-pain__text"><p class="dx-pain__num">01</p><p class="dx-pain__name">Limited search and filter tools</p><p class="dx-pain__desc">Screens lack search tools and visual distinction, making data hard to find.</p></div>
+          <div class="dx-who"><span class="dx-who__faces"><img src="../assets/images/work/damai/event-organizer.png" alt="" /><img src="../assets/images/work/damai/damai-internal-staff.png" alt="" /></span><span>Both groups</span></div>
+        </div>
+        <div class="dx-pain">
+          <div class="dx-pain__text"><p class="dx-pain__num">02</p><p class="dx-pain__name">Cluttered mobile layout</p><p class="dx-pain__desc">Dense tables and charts cram the mobile screen, overwhelming users.</p></div>
+          <div class="dx-who"><span class="dx-who__faces"><img src="../assets/images/work/damai/event-organizer.png" alt="" /></span><span>Event Organizer</span></div>
+        </div>
+        <div class="dx-pain">
+          <div class="dx-pain__text"><p class="dx-pain__num">03</p><p class="dx-pain__name">Hidden interaction rules</p><p class="dx-pain__desc">Settings affect what data is shown, without any visual cue to guide users.</p></div>
+          <div class="dx-who"><span class="dx-who__faces"><img src="../assets/images/work/damai/event-organizer.png" alt="" /></span><span>Event Organizer</span></div>
+        </div>
+        <div class="dx-pain">
+          <div class="dx-pain__text"><p class="dx-pain__num">04</p><p class="dx-pain__name">Irrelevant information shown</p><p class="dx-pain__desc">Staff are shown irrelevant statistics and projects that clutter their interface.</p></div>
+          <div class="dx-who"><span class="dx-who__faces"><img src="../assets/images/work/damai/damai-internal-staff.png" alt="" /></span><span>Damai Staff</span></div>
+        </div>
+      </div>
+    </section>
+    <section id="concept-ideation" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">concept ideation</p>
+        <p class="dx-title">I drew low-fidelity wireframes for 4 main interfaces of the redesigned app.</p>
+      </div>
+      <div class="dx-panel"><div class="dx-shot dx-shot--wide"><img src="../assets/images/work/damai4/wireframes.png" alt="Low-fidelity wireframes for the 4 main interfaces" loading="lazy" /></div></div>
+      <p class="dx-body">I received feedback that there are different types of event organizers with different needs. Thus, I conducted 5 additional interviews across organizers of concerts, theatre, and exhibitions to summarize their main differences.</p>
+      <div class="dx-cards">
+        <div class="dx-card">
+          <div class="dx-card__head"><img src="../assets/images/work/damai4/icon-mic-1.svg" alt="" /><p>Concerts</p></div>
+          <ul><li><img src="../assets/images/work/damai4/dot.svg" alt="" /><span>Use Maikong to quickly pull data, no deep analysis</span></li><li><img src="../assets/images/work/damai4/dot.svg" alt="" /><span>Events are large-scale, with complex check-in data.</span></li></ul>
+        </div>
+        <div class="dx-card">
+          <div class="dx-card__head"><img src="../assets/images/work/damai4/icon-mic-2.svg" alt="" /><p>Theatre</p></div>
+          <ul><li><img src="../assets/images/work/damai4/dot.svg" alt="" /><span>Use Maikong to analyze ticket usage trend over time</span></li><li><img src="../assets/images/work/damai4/dot.svg" alt="" /><span>Run over a continuous period, not specific days</span></li></ul>
+        </div>
+        <div class="dx-card">
+          <div class="dx-card__head"><img src="../assets/images/work/damai4/icon-mic-3.svg" alt="" /><p>Exhibition</p></div>
+          <ul><li><img src="../assets/images/work/damai4/dot.svg" alt="" /><span>Track paper vs. electronic ticket usage</span></li></ul>
+        </div>
+      </div>
+    </section>
+    <section id="project-gallery" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Project Gallery Page</p>
+        <p class="dx-body">This page provides the user a list of all their projects and an overview dashboard summarizing data such as total sessions and tickets sold.</p>
+      </div>
+      <div class="dx-ba">
+        <div class="dx-col">
+          <div class="dx-col__main">
+            <span class="dx-tag">before</span>
+            <div class="dx-shot "><img src="../assets/images/work/damai4/ctx-gallery.jpg" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>Damai staff see projects irrelevant to them, so they rely on search to find their projects</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>04 <span>Irrelevant information shown</span></p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>Test sessions and actual projects are not visually distinguished</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 <span>Limited search and filter tools</span></p></div></div></div>
           </div>
         </div>
-        <div class="case-concept-types__card">
-          <div class="case-concept-types__header">
-            <span class="case-concept-types__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11h.01" /><path d="M14 6h.01" /><path d="M18 6h.01" /><path d="M6.5 13.1h.01" /><path d="M22 5c0 9-4 12-6 12s-6-3-6-12c0-2 2-3 6-3s6 1 6 3" /><path d="M17.4 9.9c-.8.8-2 .8-2.8 0" /><path d="M10.1 7.1C9 7.2 7.7 7.7 6 8.6c-3.5 2-4.7 3.9-3.7 5.6 4.5 7.8 9.5 8.4 11.2 7.4.9-.5 1.9-2.1 1.9-4.7" /><path d="M9.1 16.5c.3-1.1 1.4-1.7 2.4-1.4" /></svg>
-            </span>
-            <h3>Theatre</h3>
-          </div>
-          <div class="case-concept-types__body">
-            <p>Run over a continuous period, not specific days.</p>
-            <p>Use Maikong to analyze ticket usage trend over time.</p>
-          </div>
-        </div>
-        <div class="case-concept-types__card">
-          <div class="case-concept-types__header">
-            <span class="case-concept-types__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 3 8 9l4 13 4-13-2.5-6" /><path d="M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3z" /><path d="M2 9h20" /></svg>
-            </span>
-            <h3>Exhibition</h3>
-          </div>
-          <div class="case-concept-types__body">
-            <p>Track paper vs. electronic ticket usage since paper tickets are sometimes distributed as souvenirs.</p>
+        <div class="dx-col dx-col--after">
+          <div class="dx-col__main">
+            <span class="dx-tag">after</span>
+            <div class="dx-shot "><img src="../assets/images/work/damai4/gallery-after.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Damai staff can pin relevant projects in the Favorites section for quick access</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>04 <span>Irrelevant information shown</span></p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Test sessions are distinguished by tags</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 <span>Limited search and filter tools</span></p></div></div></div>
           </div>
         </div>
       </div>
     </section>
-
-    <section id="design-decisions" class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Design decisions</p>
-          <h2 class="case-section__title">Project Gallery Page</h2>
-        </div>
-        <p class="case-section__body">This page provides the user a list of all their projects and an overview dashboard summarizing data such as total sessions and tickets sold.</p>
+    <section id="favorites" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Layout Design - Favorited Projects</p>
+        <p class="dx-body">I designed 2 versions of the Favorites section, and each prioritized the needs of different users. Redesign 2 costed Damai staff an extra click, but it&rsquo;s a better trade-off for organizers &mdash; making this our final solution.</p>
       </div>
-
-      <div class="case-pgallery__row">
-        <div class="case-pgallery__shot">
-          <span class="blur-cover blur-cover--phone"><img src="../assets/images/work/damai/current-project-gallery.jpg" alt="Current Project Gallery page" /></span>
-          <p class="case-decision__caption">Current Project Gallery Page</p>
-        </div>
-
-        <div class="case-decision__points case-pgallery__callouts">
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-            <div class="case-decision__point-text">
-              <p>Damai staff see projects irrelevant to them, so they rely on search to find their assigned projects.</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                <p class="case-decision__tag">04 Irrelevant information shown</p>
-              </div>
-            </div>
+      <div class="dx-ba">
+        <div class="dx-col">
+          <div class="dx-col__main">
+            <span class="dx-tag">iteration 1</span>
+            <div class="dx-shot dx-shot--short"><img src="../assets/images/work/damai4/fav-1.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Damai staff can access pinned projects quickly</p></div><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>The summary dashboard, can be pushed out of view, but they do not need it</p></div><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>Event organizers need the summary dashboard.</p></div></div>
           </div>
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-            <div class="case-decision__point-text">
-              <p>Test sessions and actual projects are not visually distinguished.</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                <p class="case-decision__tag">01 Limited search and filter tools</p>
-              </div>
-            </div>
+          <div class="dx-verdict"><p>Prioritizes needs of Damai staff over organizers.</p></div>
+        </div>
+        <div class="dx-col dx-col--after">
+          <div class="dx-col__main">
+            <span class="dx-tag">iteration 2</span>
+            <div class="dx-shot dx-shot--short"><img src="../assets/images/work/damai4/fav-2.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Damai Staff needs an extra click to access the full favorites list</p></div><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>Event organizers can pin projects without losing view of the dashboard</p></div></div>
+          </div>
+          <div class="dx-verdict"><p>Balances needs of Damai staff and organizers.</p></div>
+        </div>
+      </div>
+    </section>
+    <section id="project-details" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Project Details Page</p>
+      </div>
+      <div class="dx-ba">
+        <div class="dx-col">
+          <div class="dx-col__main">
+            <span class="dx-tag">before</span>
+            <div class="dx-shot "><img src="../assets/images/work/damai4/details-before.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>No search feature, users scroll along the list to find a specific session</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 <span>Limited search and filter tools</span></p></div></div></div>
           </div>
         </div>
-
-        <div class="case-pgallery__shot">
-          <img src="../assets/images/work/damai/english-hero1.png" alt="Redesigned Project Gallery page" />
-          <p class="case-decision__caption">Redesigned Project Gallery Page</p>
-        </div>
-
-        <div class="case-decision__points case-pgallery__callouts">
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-            <div class="case-decision__point-text">
-              <p>Damai staff can pin relevant projects in the Favorites section for quick access.</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></svg>
-                <p class="case-decision__tag">04 Irrelevant information shown</p>
-              </div>
-            </div>
-          </div>
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-            <div class="case-decision__point-text">
-              <p>Test sessions are distinguished by tags.</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></svg>
-                <p class="case-decision__tag">01 Limited search and filter tools</p>
-              </div>
-            </div>
+        <div class="dx-col dx-col--after">
+          <div class="dx-col__main">
+            <span class="dx-tag">after</span>
+            <div class="dx-shot dx-shot--plain"><img src="../assets/images/work/damai4/details-after.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Added search feature so users can quickly locate a session within an event</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 <span>Limited search and filter tools</span></p></div></div></div>
           </div>
         </div>
       </div>
     </section>
-
-    <section class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Design decisions</p>
-          <h2 class="case-section__title">Layout Design - Favorited Projects</h2>
-        </div>
-        <p class="case-section__body">I designed 2 versions of the Favorites section, and each prioritized the needs of different users.</p>
+    <section id="session-details" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Session Details Page</p>
+        <p class="dx-body">The session details page is where users view detailed ticketing data for a specific session.</p>
       </div>
-
-      <div class="case-favorites__row">
-        <div class="case-favorites__group">
-          <div class="case-favorites__content">
-            <div class="case-favorites__shot">
-              <img src="../assets/images/work/damai/english-favorites-expanded.png" alt="Redesign 1: Favorites expanded" />
-              <p class="case-decision__caption">Redesign 1 - Favorites expanded</p>
-            </div>
-            <div class="case-favorites__points">
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>Damai staff can access pinned projects quickly.</p>
-                  <p>The summary dashboard, can be pushed out of view, but they do not need it.</p>
-                </div>
-              </div>
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>Event organizers need the summary dashboard.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="case-favorites__verdict">
-            <div class="case-favorites__verdict-inner">
-              <svg xmlns="http://www.w3.org/2000/svg"><rect /></svg>
-              <span>Prioritizes needs of Damai staff over organizers.</span>
-            </div>
+      <div class="dx-ba">
+        <div class="dx-col">
+          <div class="dx-col__main">
+            <span class="dx-tag">before</span>
+            <div class="dx-shot "><img src="../assets/images/work/damai4/ctx-session.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>Unclear that the date selector affects the charts and tables below</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>03 <span>Hidden interaction rules</span></p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>3 tables (each different views of the same data) stacked vertically</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>02 <span>Cluttered mobile layout</span></p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>No search tool for data</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>03 <span>Hidden interaction rules</span></p></div></div></div>
           </div>
         </div>
-
-        <div class="case-favorites__group">
-          <div class="case-favorites__content">
-            <div class="case-favorites__shot">
-              <img src="../assets/images/work/damai/english-favorites-preview.png" alt="Redesign 2: Favorites preview" />
-              <p class="case-decision__caption">Redesign 2 - Favorites preview</p>
-            </div>
-            <div class="case-favorites__points">
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>Damai Staff needs an extra click to access the full favorites list.</p>
-                </div>
-              </div>
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>Event organizers can pin projects without losing view of the dashboard.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="case-favorites__verdict">
-            <div class="case-favorites__verdict-inner">
-              <svg xmlns="http://www.w3.org/2000/svg"><rect /></svg>
-              <span>Balances needs of Damai staff and organizers.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <p class="case-section__body">Redesign 2 costed Damai staff an extra click, but it&rsquo;s a better trade-off for organizers &mdash; making this our final solution.</p>
-    </section>
-
-    <section class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Design decisions</p>
-          <h2 class="case-section__title">Project Details Page</h2>
-        </div>
-        <p class="case-section__body">I added a search function so users can quickly find a specific session under an event, especially useful for events with many sessions.</p>
-      </div>
-
-      <div class="case-pdetails__row">
-        <div class="case-pgallery__shot">
-          <span class="blur-cover blur-cover--phone"><img src="../assets/images/work/damai/current-project-details.jpg" alt="Current Project Details page" /></span>
-          <p class="case-decision__caption">Current project details page</p>
-        </div>
-        <div class="case-pgallery__shot">
-          <img src="../assets/images/work/damai/english-hero3.png" alt="Redesigned Project Details page" />
-          <p class="case-decision__caption">Redesigned project details page</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Design decisions</p>
-          <h2 class="case-section__title">Session Details Page</h2>
-        </div>
-        <p class="case-section__body">The session details page is where users view detailed ticketing data for a specific session.</p>
-      </div>
-
-      <div class="case-pgallery__row">
-        <div class="case-pgallery__shot">
-          <span class="blur-cover blur-cover--phone"><img src="../assets/images/work/damai/current-session-details.jpg" alt="Current Session Details page" /></span>
-          <p class="case-decision__caption">Current session details page</p>
-        </div>
-
-        <div class="case-decision__points case-pgallery__callouts">
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-            <div class="case-decision__point-text">
-              <p>Unclear that the date selector affects the charts and tables below</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                <p class="case-decision__tag">03 Hidden interaction rules</p>
-              </div>
-            </div>
-          </div>
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-            <div class="case-decision__point-text">
-              <p>3 tables (each different views of the same data) stacked vertically</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                <p class="case-decision__tag">02 Cluttered mobile layout</p>
-              </div>
-            </div>
-          </div>
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-            <div class="case-decision__point-text">
-              <p>No search tool for data</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                <p class="case-decision__tag">01 Limited search tools</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="case-pgallery__shot">
-          <img src="../assets/images/work/damai/english-hero4.png" alt="Redesigned Session Details page" />
-          <p class="case-decision__caption">Redesigned session details page</p>
-        </div>
-
-        <div class="case-decision__points case-pgallery__callouts">
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-            <div class="case-decision__point-text">
-              <p>Date selector &ldquo;grouped&rdquo; with the charts and tables via background fill and removed subheadings</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></svg>
-                <p class="case-decision__tag">03 Hidden interaction rules</p>
-              </div>
-            </div>
-          </div>
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-            <div class="case-decision__point-text">
-              <p>Uses tabs to switch between tables, saving vertical space</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></svg>
-                <p class="case-decision__tag">02 Cluttered mobile layout</p>
-              </div>
-            </div>
-          </div>
-          <div class="case-decision__point">
-            <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-            <div class="case-decision__point-text">
-              <p>Added searching tool</p>
-              <div class="case-decision__tag-row">
-                <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></svg>
-                <p class="case-decision__tag">01 Limited search tools</p>
-              </div>
-            </div>
+        <div class="dx-col dx-col--after">
+          <div class="dx-col__main">
+            <span class="dx-tag">after</span>
+            <div class="dx-shot dx-shot--plain"><img src="../assets/images/work/damai4/session-after.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Date selector visually &ldquo;grouped&rdquo; with the charts and tables to hint at relationship</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>03 <span>Hidden interaction rules</span></p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Uses tabs to switch between tables, saving vertical space</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>02 <span>Cluttered mobile layout</span></p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Added searching tool</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 <span>Limited search tools</span></p></div></div></div>
           </div>
         </div>
       </div>
     </section>
-
-    <section class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Design decisions</p>
-          <h2 class="case-section__title">Table Design - Ticket Activity By Type</h2>
-        </div>
-        <p class="case-section__body">Maikong offers a breakdown of ticketing data (eg. price, amount purchased, amount checked in) for each session of an event. While some users find the table format too cluttered, others liked its efficiency. I had to choose between a table or list layout.</p>
+    <section id="table-design" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Table Design - Ticket Activity By Type</p>
+        <p class="dx-body">Maikong offers a breakdown of ticketing data for each session of an event. While some users find the table format too cluttered, others liked its efficiency. I had to choose between a table or list layout. In this case, I added a toggle in the upper-left corner so users can switch between layouts on their own &mdash; accommodating both large and small-scale events, since the same organizer may manage both types.</p>
       </div>
-
-      <div class="case-favorites__row">
-        <div class="case-favorites__group">
-          <div class="case-favorites__content">
-            <div class="case-favorites__shot case-favorites__shot--short">
-              <img src="../assets/images/work/damai/english-table-layout.png" alt="Redesign: Table layout" />
-              <p class="case-decision__caption">Redesigned - Table layout</p>
-            </div>
-            <div class="case-favorites__points">
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>Displays data more densely, faster to scan</p>
-                  <p>Easier to compare data across types</p>
-                </div>
-              </div>
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>Feels overwhelming on mobile</p>
-                </div>
-              </div>
-            </div>
+      <div class="dx-ba">
+        <div class="dx-col">
+          <div class="dx-col__main">
+            <span class="dx-tag">iteration 1</span>
+            <div class="dx-shot dx-shot--short"><img src="../assets/images/work/damai4/fav-1.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Displays data more densely, faster to scan</p></div><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Easier to compare data across types</p></div><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>Feels overwhelming on mobile</p></div></div>
           </div>
-          <div class="case-favorites__verdict">
-            <div class="case-favorites__verdict-inner">
-              <svg xmlns="http://www.w3.org/2000/svg"><rect /></svg>
-              <span>Table layout is more suited for large-scale events</span>
-            </div>
+          <div class="dx-verdict"><p>Table layout more suited for large-scale events</p></div>
+        </div>
+        <div class="dx-col dx-col--after">
+          <div class="dx-col__main">
+            <span class="dx-tag">iteration 2</span>
+            <div class="dx-shot dx-shot--short"><img src="../assets/images/work/damai4/fav-2.png" alt="" loading="lazy" /></div><div class="dx-notes"><div class="dx-row"><img src="../assets/images/work/damai4/icon-check.svg" alt="" /><p>Clean, mobile-friendly layout that only scrolls vertically</p></div><div class="dx-row"><img src="../assets/images/work/damai4/icon-exclaim.svg" alt="" /><p>The same content takes up more vertical space</p></div></div>
           </div>
-        </div>
-
-        <div class="case-favorites__group">
-          <div class="case-favorites__content">
-            <div class="case-favorites__shot case-favorites__shot--short">
-              <img src="../assets/images/work/damai/english-list-layout.png" alt="Redesign: List layout" />
-              <p class="case-decision__caption">Redesigned - List layout</p>
-            </div>
-            <div class="case-favorites__points">
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>Clean, mobile-friendly layout that only scrolls vertically</p>
-                </div>
-              </div>
-              <div class="case-decision__point">
-                <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-                <div class="case-favorites__point-text">
-                  <p>The same content takes up more vertical space</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="case-favorites__verdict">
-            <div class="case-favorites__verdict-inner">
-              <svg xmlns="http://www.w3.org/2000/svg"><rect /></svg>
-              <span>List layout is more suited for small-scale events</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <p class="case-section__body">In this case, I added a toggle in the upper-left corner so users can switch between layouts on their own &mdash; accommodating both large and small-scale events, since the same organizer may manage both types.</p>
-    </section>
-
-    <section class="case-final case-final--rows" id="final-designs">
-      <div class="case-final-row">
-        <div class="case-final-row__text">
-          <div class="case-final__heading-group">
-            <p class="case-final__eyebrow">Final designs</p>
-            <h2 class="case-final__title">Looking up data</h2>
-          </div>
-          <p class="case-final-row__desc">Lets all users quickly gauge trends and numbers from ticketing data.</p>
-        </div>
-        <div class="case-final-row__video">
-          <video src="../assets/videos/damai-project.mp4" autoplay loop muted playsinline></video>
-        </div>
-      </div>
-      <div class="case-final-row case-final-row--reverse">
-        <div class="case-final-row__text">
-          <div class="case-final__heading-group">
-            <p class="case-final__eyebrow">Final designs</p>
-            <h2 class="case-final__title">Adding to favorites</h2>
-          </div>
-          <p class="case-final-row__desc">Lets Damai staff quickly access projects they are responsible for.</p>
-        </div>
-        <div class="case-final-row__video">
-          <video src="../assets/videos/damai-favorite.mp4" autoplay loop muted playsinline></video>
-        </div>
-      </div>
-      <div class="case-final-row">
-        <div class="case-final-row__text">
-          <div class="case-final__heading-group">
-            <p class="case-final__eyebrow">Final designs</p>
-            <h2 class="case-final__title">Searching for projects</h2>
-          </div>
-          <p class="case-final-row__desc">Allows Damai staff and event organizers to find specific projects.</p>
-        </div>
-        <div class="case-final-row__video">
-          <video src="../assets/videos/damai-search.mp4" autoplay loop muted playsinline></video>
+          <div class="dx-verdict"><p>List layout more suited for small-scale events</p></div>
         </div>
       </div>
     </section>
+    <div class="dx-end">
+      <div class="dx-end__left">
+        <a class="dx-end__hi" href="mailto:raina.nyy@gmail.com"><span>Say hi to me at</span><span><em>raina.nyy@gmail.com</em><img src="../assets/images/work/damai4/arrow-up-right.svg" alt="" /></span></a>
+        <button class="dx-end__top" type="button" onclick="window.__caseTop ? __caseTop() : window.scrollTo({top:0,behavior:'smooth'})"><span>Back to top</span><img src="../assets/images/work/damai4/arrow-up.svg" alt="" /></button>
+      </div>
+      <div class="dx-end__cols">
+        <div class="dx-end__col"><p>Pages</p><a href="work.html" data-case-color="exit">Work</a><a href="about.html" data-case-color="exit">About</a><a href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume</a></div>
+        <div class="dx-end__col"><p>Projects</p><a href="muji.html" data-case-color="#8B0013">MUJI USA</a><a href="damai.html" data-case-color="#6665FE">Damai</a><a href="wapoo.html" data-case-color="#45DBE9">Wapoo AI</a></div>
+        <div class="dx-end__col"><p>Contact</p><a href="mailto:raina.nyy@gmail.com">Email</a><a href="https://www.linkedin.com/in/rainani" target="_blank" rel="noopener">LinkedIn</a></div>
+      </div>
     </div>
-    <footer class="site-footer">
-      <div class="site-footer__left">
-        <a class="site-footer__hi" href="mailto:raina.nyy@gmail.com">
-          <span>Say hi to me at</span>
-          <span class="site-footer__hi-email">
-            <em>raina.nyy@gmail.com</em>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          <span class="site-footer__hi-fill" aria-hidden="true">
-            <em>raina.nyy@gmail.com</em>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          </span>
-        </a>
-        <button class="site-footer__top" type="button" onclick="window.smoothScrollTo ? smoothScrollTo(0) : window.scrollTo({top:0,behavior:'smooth'})">
-          <span>Back to top</span>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M15.8333 10L9.99994 4.16669L4.16661 10M9.99994 4.16669V15.8334" stroke="#5F5F5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      <div class="site-footer__cols">
-        <div class="site-footer__col">
-          <p class="site-footer__head">Pages</p>
-          <a href="work.html" data-case-color="exit">Work</a>
-          <a href="about.html" data-case-color="exit">About</a>
-          <a href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume</a>
-        </div>
-        <div class="site-footer__col">
-          <p class="site-footer__head">Projects</p>
-          <a href="muji.html" data-case-color="#8B0013">MUJI USA</a>
-          <a href="damai.html" data-case-color="#6665FE">Damai</a>
-          <a href="wapoo.html" data-case-color="#45DBE9">Wapoo AI</a>
-        </div>
-        <div class="site-footer__col">
-          <p class="site-footer__head">Contact</p>
-          <a href="mailto:raina.nyy@gmail.com">Email</a>
-          <a href="https://www.linkedin.com/in/rainani" target="_blank" rel="noopener">LinkedIn</a>
-        </div>
-      </div>
-    </footer>
+    </div>
+    </div>
   </div>
 
+  <script>
+    // Final designs slider: three slides, a video each. The active dot fills up as its video plays; when the video ends the next slide starts (the last one just stays at the end).
+    // Arrows switch by hand: "previous" is pale on the first slide and "next" is pale on the last, and there is no way round from the last slide to the first except going back.
+    (function () {
+      var root = document.querySelector("[data-slider]");
+      if (!root) return;
+      var slides = [
+        { n: "01/03", t: "Simpler ways to look up data", d: "Streamlined flows and de-cluttered layouts lets users quickly gauge trends at a glance." },
+        { n: "02/03", t: "Adding to favorites", d: "Lets Damai staff quickly access projects they are responsible for." },
+        { n: "03/03", t: "Searching for projects", d: "Allows Damai staff and event organizers to find specific projects." }
+      ];
+      var vids = root.querySelectorAll("video"), dots = root.querySelectorAll(".dx-slider__dots button"), fills = root.querySelectorAll(".dx-slider__dots i");
+      var num = root.querySelector("[data-num]"), title = root.querySelector("[data-title]"), desc = root.querySelector("[data-desc]");
+      var prev = root.querySelector("[data-prev]"), next = root.querySelector("[data-next]");
+      var cur = -1, visible = false, raf = 0, swapT = 0, LAST = slides.length - 1;
+      function paint() {
+        raf = 0;
+        var v = vids[cur], d = v.duration, p = d && isFinite(d) ? v.currentTime / d : 0;
+        fills[cur].style.width = (p * 100).toFixed(2) + "%";
+        if (!v.paused && !v.ended) raf = requestAnimationFrame(paint);
+      }
+      function play() { var v = vids[cur]; if (visible && !v.ended) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } }
+      function show(i) {
+        if (i < 0 || i > LAST || i === cur) return;
+        var first = cur < 0;
+        cur = i;
+        dots.forEach(function (d, k) { d.classList.toggle("is-on", k === i); fills[k].style.width = "0"; });
+        vids.forEach(function (v, k) { v.classList.toggle("is-on", k === i); if (k !== i) v.pause(); });
+        var v = vids[i];
+        try { v.currentTime = 0; } catch (e) {}
+        prev.disabled = i === 0; next.disabled = i === LAST;
+        function apply() {
+          num.textContent = slides[i].n; title.textContent = slides[i].t; desc.textContent = slides[i].d;
+          root.classList.remove("is-swapping");
+        }
+        clearTimeout(swapT);
+        if (first) apply(); else { root.classList.add("is-swapping"); swapT = setTimeout(apply, 250); }
+        play(); cancelAnimationFrame(raf); raf = requestAnimationFrame(paint);
+      }
+      vids.forEach(function (v, k) {
+        v.addEventListener("ended", function () { if (k !== cur) return; fills[k].style.width = "100%"; if (k < LAST) show(k + 1); });
+        v.addEventListener("play", function () { if (k === cur && !raf) raf = requestAnimationFrame(paint); });
+        v.addEventListener("loadedmetadata", function () { if (k === cur) paint(); });
+      });
+      next.addEventListener("click", function () { show(cur + 1); });
+      prev.addEventListener("click", function () { show(cur - 1); });
+      dots.forEach(function (d, k) { d.addEventListener("click", function () { show(k); }); });
+      show(0);
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (es) {
+          visible = es[0].isIntersecting;
+          var v = vids[cur];
+          if (visible) { if (!v.ended) play(); } else v.pause();
+        }, { threshold: 0.2 }).observe(root);
+      }
+    })();
+  </script>
   <script src="../js/main.js?v=45"></script>
+  <script src="../js/damai-open-exp.js?v=38"></script>
+  <script src="../js/case-exp-extras.js?v=68"></script>
   <script>
     // Background shapes: same behaviour as the Work page. The 1440x900 canvas is centred and cropped as the window narrows, so the
     // shapes near its left/right edges (the orange circle on the right and the pink square on the left) would slide out of view
@@ -761,6 +512,117 @@
     })();
   </script>
   <script>
+    // First screen = Figma "Damai 3.0": the glass tab is 1040 x 600, centred in the window, pinned (position: sticky, inside .case-pin) while the first GROW px
+    // of scrolling grow it to the whole window. --g (0 to 1) widens and lengthens it, fills it with white, squares its corners and widens its content
+    // to the page's 1170px column; --stick (its pinned top offset) goes from (window height - 600) / 2 to 0, so sides, top and bottom reach the window's
+    // edges together. Then the page scrolls on (class is-open lifts the tab's fixed height, which changes nothing on screen).
+    (function () {
+      var holdY = null, GROW = 360, canvas = document.querySelector('.page-canvas--damai'), raf = 0, start = 0;
+      window.__caseGrow = GROW;
+      var wide = window.matchMedia('(min-width: 651px)');
+      var cw = 0, vh = 0, h0 = 600, top0 = 0, i0 = 0, i1 = 0; // window width / height, the tab's height and distance from the top at the start, its content's width at the start / end
+      function measure() {
+        cw = canvas.clientWidth; vh = window.innerHeight;
+        var pad1 = Math.min(40, Math.max(24, (cw - 136 - 1170) / 2)), base = cw <= 1024 ? cw - 48 : Math.min(1250, cw - 136);
+        i0 = Math.min(1040, cw - 48) - 80; i1 = base - 2 * pad1;
+        // 600px tall, unless the first screen's content needs more (a narrow window wraps the title): measured with the tab in its starting shape
+        var tab = canvas.querySelector('.glass-card--case'), prev = canvas.style.getPropertyValue('--g');
+        canvas.style.setProperty('--g', '0'); canvas.style.setProperty('--hd', Math.min(1, i0 / 960));
+        var hero = canvas.querySelector('.case-hero');
+        h0 = wide.matches ? Math.max(600, Math.ceil(hero.offsetTop + hero.offsetHeight + 40)) : 600; // layout sizes: unaffected by the scale below
+        canvas.style.setProperty('--s0', Math.min(1, Math.max(0.6, (vh - 300) / 600)).toFixed(4)); // 300px = 150 above the tab + 32 below it + the arrow, label and 45px under them
+        canvas.style.setProperty('--g', prev || '0');
+        canvas.style.setProperty('--h0', h0 + 'px');
+        top0 = 150; // Figma: the tab's top is 150px from the window's top (the navigation is at 80px)
+        canvas.style.setProperty('--top0', top0.toFixed(1));
+        canvas.style.setProperty('--spacer', Math.max(0, GROW - top0).toFixed(1)); // room under the tab to stay pinned: the scrolling it takes, minus its distance from the top
+        canvas.style.setProperty('--rise', (top0 * 0.75).toFixed(1)); // the content sits this much lower inside the tab once it is open: it rises a quarter of what the top edge does
+      }
+      function ease(p) { return p * p * (3 - 2 * p); }
+      function update() {
+        raf = 0;
+        if (!wide.matches) { canvas.style.setProperty('--hd', Math.min(1, (cw - 48) / 960).toFixed(4)); return; }
+        var g = ease(Math.min(1, Math.max(0, ((holdY === null ? window.scrollY : holdY) - start) / GROW)));
+        canvas.style.setProperty('--g', g.toFixed(4));
+        canvas.style.setProperty('--stick', (top0 * (1 - g)).toFixed(2));
+        canvas.style.setProperty('--hd', Math.min(1, (i0 + (i1 - i0) * g) / 960).toFixed(4)); // the illustration board (960 wide) shrinks if its panel is narrower
+        canvas.classList.toggle('is-open', g >= 1);
+        document.documentElement.classList.toggle('dx-white', g >= 1); // (the scroll bar only shows once the tab is white)
+      }
+      // Smooth scrolling (the "Lenis" feel of award sites): the mouse wheel moves a TARGET position and the page glides to it, closing 9% of the
+      // remaining distance every 1/60s (so it starts fast and lands slowly, and a flick carries on a little). Every frame sets the scroll position
+      // and the grow progress together, so the two never disagree. Touch, keys and the scrollbar keep the browser's own scrolling.
+      var cur = window.scrollY, target = cur, dir = 1, frame = 0, last = 0, settle = 0, touching = false;
+      function max() { return document.documentElement.scrollHeight - window.innerHeight; }
+      function run() { if (!frame) { last = performance.now(); frame = requestAnimationFrame(tick); } }
+      function tick(now) {
+        var k = 1 - Math.pow(1 - 0.09, Math.min(50, now - last) / 16.667); // the same glide at any frame rate
+        last = now;
+        cur += (target - cur) * k;
+        if (Math.abs(target - cur) < 0.3) cur = target;
+        window.scrollTo({ top: cur, behavior: 'instant' });
+        update();
+        frame = cur === target ? 0 : requestAnimationFrame(tick);
+      }
+      // Resistance: once scrolling stops partway through the pinned part, the target moves to one end of it and the page glides there: the way
+      // it was heading unless the user got less than a quarter of the way (so a nudge down rolls back, a nudge up from the end returns to the end).
+      function snap() {
+        var p = (target - start) / GROW;
+        if (!wide.matches || touching || p <= 0 || p >= 1) return;
+        target = start + GROW * (dir > 0 ? (p > 0.25 ? 1 : 0) : (p < 0.75 ? 0 : 1));
+        run();
+      }
+      window.addEventListener('wheel', function (e) {
+        if (!wide.matches || e.ctrlKey || e.defaultPrevented) return; // ctrl + wheel is the browser's zoom
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // a sideways swipe (the Final designs strip) is left to the browser
+        e.preventDefault();
+        var d = e.deltaY * (e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? window.innerHeight : 1);
+        if (d) dir = d > 0 ? 1 : -1;
+        target = Math.min(max(), Math.max(0, target + d));
+        clearTimeout(settle);
+        settle = setTimeout(snap, 160);
+        run();
+      }, { passive: false });
+      window.addEventListener('scroll', function () {
+        if (!raf && !frame) raf = requestAnimationFrame(update);
+        var y = window.scrollY;
+        if (Math.abs(y - cur) < 1.5) return; // our own glide
+        if (y !== cur) dir = y > cur ? 1 : -1; // the browser scrolled (touch, keys, scrollbar, a link): follow it
+        cur = target = y;
+        clearTimeout(settle);
+        settle = setTimeout(snap, 160);
+      }, { passive: true });
+      window.addEventListener('touchstart', function () { touching = true; clearTimeout(settle); }, { passive: true });
+      window.addEventListener('touchend', function () { touching = false; settle = setTimeout(snap, 160); }, { passive: true });
+      window.addEventListener('resize', function () { measure(); update(); });
+      measure();
+      update();
+      // Reload: the page comes back at the scroll position it was left at (kept in sessionStorage), and the tab is already as white as that position says.
+      // The browser's own restoring is unreliable here (the page is still short while the pictures load, so it stops early, and the first screen is built from
+      // scroll position 0), so it is done by hand: the position is applied to the tab at once (holdY), then the page scrolls there as soon as it is tall enough.
+      (function () {
+        var KEY = 'xScroll:' + location.pathname, nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0], saved = null, saveRaf = 0;
+        try { if (nav && (nav.type === 'reload' || nav.type === 'back_forward')) { var v = sessionStorage.getItem(KEY); if (v !== null && +v > 0) { saved = +v; if (nav.type === 'back_forward') window.__xRestored = saved; } } } catch (e) {} // (the browser's Back / Forward also come back at the position they were left at, and the page's content then comes in, see js/case-exp-extras.js)
+        function save() { saveRaf = 0; try { sessionStorage.setItem(KEY, String(Math.round(window.scrollY))); } catch (e) {} }
+        window.addEventListener('scroll', function () { if (!saveRaf && holdY === null) saveRaf = requestAnimationFrame(save); }, { passive: true });
+        window.addEventListener('pagehide', function () { if (holdY === null) save(); });
+        if (saved === null) return;
+        try { history.scrollRestoration = 'manual'; } catch (e) {}
+        holdY = saved; update();
+        var tries = 0;
+        function release() { holdY = null; cur = target = window.scrollY; update(); }
+        function step() {
+          if (holdY === null) return;
+          if (saved <= max() + 1) { window.scrollTo({ top: saved, behavior: 'instant' }); release(); return; }
+          if (++tries > 400) { release(); return; } // ~7 seconds: give up (the page never got tall enough)
+          requestAnimationFrame(step);
+        }
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (t) { window.addEventListener(t, function () { if (holdY !== null) release(); }, { passive: true, once: true }); });
+        step();
+      })();
+    })();
+  </script>
+  <script>
     // Narrow layout (css/damai-narrow.css): the footer sits inside the glass tab, under the last section. In the wide layout it stays
     // its own glass tab below the page, so it moves between the two when the window crosses the breakpoint.
     (function () {
@@ -776,15 +638,95 @@
     })();
   </script>
   <script>
-    // Hero: the four phone mockups (675 x 380) scale down together once the frame is narrower than they are (css/damai-scale.css, css/damai-narrow.css).
+    // The back arrow plays the opening backwards (the browser's own Back button cannot be held back by a page, so for that the Work page plays it on arrival: js/damai-open-exp.js). A hidden copy of the Work page (pages/work.html?closing=1, see js/damai-open-exp.js) is
+    // kept ready for it; when the arrow is clicked, the page first goes back to its first screen (if it was scrolled), the copy builds this first screen from what is on screen now and
+    // plays the animations over it, and when it is done the Work page opens. Narrow windows and reduced motion get the plain link.
     (function () {
-      var frame = document.querySelector(".case-hero__collage-frame--damai");
-      if (!frame) return;
-      function fit() { frame.style.setProperty("--hd", Math.min(1, (frame.clientWidth - 48) / 675)); }
-      fit();
-      if (window.ResizeObserver) new ResizeObserver(fit).observe(frame);
-      window.addEventListener("resize", fit);
+      var back = document.querySelector('.case-topbar__back');
+      if (!back) return;
+      var narrow = window.matchMedia('(max-width: 650px)'), reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var frame = null, busy = false, dropTimer = 0;
+      function prepare() {
+        clearTimeout(dropTimer);
+        if (frame || narrow.matches) return;
+        frame = document.createElement('iframe');
+        frame.src = 'work.html?closing=1&case=' + encodeURIComponent(location.pathname.split('/').pop());
+        frame.setAttribute('aria-hidden', 'true');
+        frame.tabIndex = -1;
+        frame.style.cssText = 'position:fixed;left:-100000px;top:0;border:0;visibility:hidden;opacity:0;pointer-events:none;z-index:2147483000;background:transparent;width:' + innerWidth + 'px;height:' + innerHeight + 'px';
+        document.body.appendChild(frame);
+      }
+      function drop() { // the pointer left the arrow without clicking it: do not keep a whole second page running
+        dropTimer = setTimeout(function () { if (!busy && frame) { frame.parentNode.removeChild(frame); frame = null; } }, 5000);
+      }
+      // plays the closing animation, then calls done()
+      function close(done) {
+        if (busy) return;
+        busy = true; window.__caseClosing = true;
+        if (window.__xLock) window.__xLock(9000); // (no clicks, scrolling or keys while the page closes)
+        prepare();
+        var t0 = Date.now(), scrolled = false, scrolling = false, arrivedAt = 0;
+        // Back to the first screen first (the tab shrinks from the white page back to its first size): an even, unhurried movement (not the browser's quick native one), a little longer
+        // the further down the page is, and then a short moment of rest before the closing animation takes over, so the two do not run into each other.
+        function scrollUp() {
+          var y0 = window.scrollY, dur = 800 + Math.min(700, Math.max(0, y0 - 360) * 0.25), s0 = performance.now();
+          scrolling = true;
+          (function step(now) {
+            var t = Math.min(1, (now - s0) / dur), e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            window.scrollTo({ top: y0 * (1 - e), behavior: 'instant' });
+            if (t < 1) requestAnimationFrame(step); else { scrolling = false; arrivedAt = Date.now(); }
+          })(s0);
+        }
+        (function go() {
+          var w = frame && frame.contentWindow;
+          if (scrolling) { /* wait for the scroll */ }
+          else if (window.scrollY >= 2) { // back to the first screen first
+            if (!scrolled) { scrolled = true; scrollUp(); }
+          } else if (w && w.__xReady && Date.now() - t0 > 250 && (!scrolled || Date.now() - arrivedAt > 150)) {
+            try {
+              w.__xPrepareClosing();
+              requestAnimationFrame(function () {
+                frame.style.left = '0';
+                frame.style.opacity = '1';
+                frame.style.visibility = 'visible';
+                // (it takes no clicks: the Work page's own links in it would otherwise take a second click on "Work" and open the page at once, without the animation)
+                requestAnimationFrame(function () { w.__xStartClosing(done); });
+              });
+            } catch (err) { done(); }
+            return;
+          }
+          if (Date.now() - t0 > 8000) done();
+          else setTimeout(go, 60);
+        })();
+      }
+      ['pointerenter', 'focus'].forEach(function (n) { back.addEventListener(n, prepare); });
+      back.addEventListener('touchstart', prepare, { passive: true });
+      ['pointerleave', 'blur'].forEach(function (n) { back.addEventListener(n, drop); });
+      window.addEventListener('pageshow', function (e) { if (e.persisted && frame) { frame.parentNode.removeChild(frame); frame = null; busy = false; window.__caseClosing = false; } });
+      // (on the document, in the capture phase, so that a click on ANY back arrow of the page is taken here, never by the site's pink page transition: whichever copy of the arrow is
+      // under the pointer while the tab is changing, the closing animation is the only way out)
+      document.addEventListener('click', function (e) {
+        var arrow = e.target.closest && e.target.closest('.case-topbar__back');
+        // "Work" in the navigation bar does the same from the first screen (the middle state): the opening played backwards.
+        if (!arrow) arrow = e.target.closest && e.target.closest('.page-nav a[href="work.html"]');
+        if (!arrow) return;
+        if (window.__caseGoing) { e.preventDefault(); e.stopPropagation(); return; } // the tabs are turning: not now
+        // From the white page (the tab mostly grown) neither plays the opening backwards: the site's own transition (the shapes, js/case-transition.js) takes the click
+        if (window.scrollY >= (window.__caseGrow || 360) * 0.5) return;
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.stopPropagation(); // the site's own pink page transition (js/case-transition.js) must not take this click
+        if (narrow.matches || reduce.matches) return;
+        e.preventDefault();
+        close(function () { window.location.href = arrow.href || back.href; });
+      }, true);
     })();
   </script>
+  <script>
+    // arriving with the browser's Forward button: the Work page's cards are put over this page and the opening animation plays (js/damai-open-exp.js)
+    if (window.__damaiArrive) window.__damaiArrive();
+    // no back/forward cache for this page, so that arriving here is always a fresh load that can be prepared before its first paint
+    window.addEventListener('unload', function () {});
+  </script>
+  <span id="page-parsed" hidden></span>
 </body>
 </html>

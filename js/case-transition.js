@@ -466,6 +466,10 @@
     var toCase = /\/(muji|damai|wapoo)\.html$/.test(path);
     var toMain = /\/(work|about|index)\.html$|\/$/.test(path);
     if (!(toCase || (onCasePage && toMain))) return;
+    // Work <-> case study and case study <-> case study are done by js/damai-open-exp.js and js/case-exp-extras.js (the cards opening, the tabs turning), which play their own animation
+    // (on arrival too, for the browser's Back / Forward buttons): the pink sweep must not run over them.
+    var onWork = /\/work\.html$/.test(location.pathname), toWork = /\/work\.html$/.test(path);
+    if ((onWork && toCase) || (onCasePage && (toWork || toCase))) return;
     try {
       sessionStorage.setItem(
         KEY,

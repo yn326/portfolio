@@ -22,22 +22,42 @@
       (function tick() { s(); if (++n < 60) requestAnimationFrame(tick); })();
     })();
   </script>
-  <script src="../js/case-transition.js?v=27"></script>
+  <script src="../js/case-transition.js?v=28"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="expect" href="#page-parsed" blocking="render" /> <!-- the first paint waits for the whole page, so the arrival animation (js/damai-open-exp.js) is in place before it -->
+  <style>
+    /* (the no-transition rule itself is at the end of the head, after css/style.css: of several @view-transition rules the last one counts) */
+    /* No browser page transition into or out of this experiment page (the opening animation is done by pages/work.html itself). Without this, going Back from here to
+       the Work page runs a cross-document view transition whose snapshot of this whole page-tall glass tab keeps its blur live over the Work page: a heavy blur that lingers. */
+    /* With always-visible scrollbars (a mouse, or the system setting) the scrollbar appears once the page has grown tall enough while loading, which moves everything
+       sideways by half its width. Reserve its space from the first paint so nothing shifts (and so the page lays out exactly like its hidden copy in the Work page). */
+    html { scrollbar-gutter: stable; }
+  </style>
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/figtree/v9/_Xmu-HUzqDCFdgfMm4GND65o7Cqcsw.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2" />
+  <script>
+    // The first screen's scale and illustration size depend on the window (css/damai-exp-scale.css, css/damai-exp-cover.css). The script at the end of the page measures them,
+    // but that runs after the first paint: set them here so the page is painted at its real size straight away (otherwise it appears too big and then shrinks).
+    (function () {
+      var r = document.documentElement, cw = r.clientWidth || window.innerWidth, vh = window.innerHeight;
+      r.style.setProperty('--s0', Math.min(1, Math.max(0.6, (vh - 300) / 600)).toFixed(4));
+      r.style.setProperty('--hd', Math.min(1, (cw <= 650 ? cw - 48 : Math.min(1040, cw - 48) - 80) / 960).toFixed(4));
+    })();
+  </script>
   <title>MUJI USA – Raina Ni</title>
-  <meta name="description" content="Case study: reimagining MUJI USA's e-commerce site as a lifestyle destination. Product design by Raina Ni, Spring 2026, via Design Consulting at Cornell." />
+  <meta name="description" content="Case study: reimagining MUJI USA's e-commerce site as a lifestyle destination. Product design by Raina Ni, Spring 2026, via Design Consulting at Cornell.\" />
   <link rel="canonical" href="https://rainani.com/pages/muji.html" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Raina Ni" />
   <meta property="og:title" content="MUJI USA – Raina Ni" />
-  <meta property="og:description" content="Case study: reimagining MUJI USA's e-commerce site as a lifestyle destination. Product design by Raina Ni, Spring 2026, via Design Consulting at Cornell." />
+  <meta property="og:description" content="Case study: reimagining MUJI USA's e-commerce site as a lifestyle destination. Product design by Raina Ni, Spring 2026.\" />
   <meta property="og:url" content="https://rainani.com/pages/muji.html" />
   <meta property="og:image" content="https://rainani.com/assets/images/og-image.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="MUJI USA – Raina Ni" />
-  <meta name="twitter:description" content="Case study: reimagining MUJI USA's e-commerce site as a lifestyle destination. Product design by Raina Ni, Spring 2026, via Design Consulting at Cornell." />
+  <meta name="twitter:description" content="Case study: reimagining MUJI USA's e-commerce site as a lifestyle destination. Product design by Raina Ni, Spring 2026.\" />
   <meta name="twitter:image" content="https://rainani.com/assets/images/og-image.jpg" />
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png?v=4" />
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=4" />
@@ -46,9 +66,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css?v=312" />
-  <link rel="stylesheet" href="../css/muji-images.css?v=2" />
-  <link rel="stylesheet" href="../css/muji-scale.css?v=15" media="(min-width: 651px)" />
-  <link rel="stylesheet" href="../css/muji-narrow.css?v=14" media="(max-width: 650px)" />
+  <link rel="stylesheet" href="../css/damai-exp-sections.css?v=27" />
+  <link rel="stylesheet" href="../css/damai-exp-cover.css?v=12" />
+  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=2" media="(min-width: 651px)" />
+  <link rel="stylesheet" href="../css/damai-exp-narrow.css?v=1" media="(max-width: 650px)" />
+  <style>
+    /* No browser page transition into or out of this experiment page (the opening and closing animations are done by pages/work.html and js/damai-open-exp.js). Without this,
+       leaving this page runs a cross-document view transition whose snapshot of this page-tall glass tab keeps its blur live over the Work page: a heavy blur that lingers.
+       It has to come after css/style.css, which asks for a page transition: of several @view-transition rules the last one counts. */
+    @view-transition { navigation: none; }
+  </style>
 </head>
 <body>
   <div class="case-bg case-bg--muji" aria-hidden="true">
@@ -60,16 +87,19 @@
     </div>
   </div>
 
-  <div class="page-canvas page-canvas--case page-canvas--muji">
+  <div class="page-canvas page-canvas--case page-canvas--damai page-canvas--muji page-canvas--dm4">
     <nav class="scrollspy" aria-label="Section navigation">
     <a class="scrollspy__item" href="#context"><span class="scrollspy__label">Context</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#final-designs"><span class="scrollspy__label">Final Designs</span><span class="scrollspy__bar"></span></a>
     <a class="scrollspy__item" href="#competitor-analysis"><span class="scrollspy__label">Competitor Analysis</span><span class="scrollspy__bar"></span></a>
     <a class="scrollspy__item" href="#personas"><span class="scrollspy__label">Personas</span><span class="scrollspy__bar"></span></a>
     <a class="scrollspy__item" href="#user-research"><span class="scrollspy__label">User Research</span><span class="scrollspy__bar"></span></a>
     <a class="scrollspy__item" href="#my-redesign"><span class="scrollspy__label">My Redesign</span><span class="scrollspy__bar"></span></a>
     <a class="scrollspy__item" href="#concept-ideation"><span class="scrollspy__label">Concept Ideation</span><span class="scrollspy__bar"></span></a>
-    <a class="scrollspy__item" href="#design-decisions"><span class="scrollspy__label">Design Decisions</span><span class="scrollspy__bar"></span></a>
-    <a class="scrollspy__item" href="#final-designs"><span class="scrollspy__label">Final Designs</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#dd-cart"><span class="scrollspy__label">Shopping Cart</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#dd-checkout"><span class="scrollspy__label">Check Out</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#dd-shipping"><span class="scrollspy__label">Shipping</span><span class="scrollspy__bar"></span></a>
+    <a class="scrollspy__item" href="#my-checkout"><span class="scrollspy__label">Checkout Redesign</span><span class="scrollspy__bar"></span></a>
   </nav>
 
     <nav class="page-nav">
@@ -110,652 +140,222 @@
       </a>
     </nav>
 
+    <!-- First screen (Figma "Muji 3.0"): the Damai tab (MUJI is the first card) peek in from the window's edges and "Scroll" sits at the bottom (css/damai-exp-cover.css) -->
+    <div class="dm-peek dm-peek--left" data-peek="none" data-go="wapoo" aria-hidden="true"><div class="traffic-lights" aria-hidden="true"><span class="traffic-light traffic-light--red"></span><span class="traffic-light traffic-light--white"></span><span class="traffic-light traffic-light--green"></span></div></div>
+    <div class="dm-peek dm-peek--right" data-peek="damai" aria-hidden="true"><div class="traffic-lights" aria-hidden="true"><span class="traffic-light traffic-light--red"></span><span class="traffic-light traffic-light--white"></span><span class="traffic-light traffic-light--green"></span></div></div>
+    <div class="dm-scroll" aria-hidden="true"><span class="dm-scroll__btn"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M14 17L20 23L26 17" stroke="#5F5F5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Scroll</span></div>
+
+    <div class="case-pin">
     <div class="glass-card glass-card--case">
-      <div class="case-topbar">
+      <div class="case-topbar dm-topbar">
+        <div class="traffic-lights dm-topbar__lights" aria-hidden="true"><span class="traffic-light traffic-light--red"></span><span class="traffic-light traffic-light--white"></span><span class="traffic-light traffic-light--green"></span></div>
         <a class="case-topbar__back" href="work.html" data-case-color="exit" aria-label="Back to work">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15.833 10H4.167M10 15.833 4.167 10 10 4.167" stroke="#5F5F5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <img src="../assets/images/work/damai3/arrow-left.svg" width="20" height="20" alt="" />
         </a>
         <p class="case-topbar__url"><span>rainani.com/</span><span class="case-topbar__url-em">muji</span></p>
       </div>
 
     <div class="case-hero">
-      <div class="case-hero__collage-frame">
-        <div class="case-hero__collage">
-          <img class="case-hero__collage-img case-hero__collage-img--pens" src="../assets/images/work/muji/muji-hero-pens.jpg" alt="" />
-          <img class="case-hero__collage-img case-hero__collage-img--desktop" src="../assets/images/work/muji/muji-hero.jpg" alt="MUJI homepage redesign" />
-          <img class="case-hero__collage-img case-hero__collage-img--product" src="../assets/images/work/muji/muji-hero-product.jpg" alt="" />
+      <div class="dm-illus dm-illus--muji" role="img" aria-label="Illustration: rows of product cards and a shopping cart button">
+        <div class="dm-illus__stage">
+          <div class="mj-row" style="left:-64px;top:-110px"><div class="mj-row__in"><div class="mj-card" style="--c:#ffefec"><span class="mj-tile mj-tile--g24"><span><img src="../assets/images/work/muji3/group24.svg" alt="" /><i></i></span></span><span class="mj-lines"><b></b><b></b></span></div><div class="mj-card" style="--c:#fff3ee"><span class="mj-tile mj-tile--g25"><span><img src="../assets/images/work/muji3/group25.svg" alt="" /></span></span><span class="mj-lines"><b></b><b></b></span></div><div class="mj-card" style="--c:#fff2ef"><span class="mj-tile mj-tile--g26"><span><img src="../assets/images/work/muji3/group26.svg" alt="" /></span></span><span class="mj-lines"><b></b><b></b></span></div><div class="mj-card" style="--c:#ffefec"><span class="mj-tile mj-tile--g24"><span><img src="../assets/images/work/muji3/group24.svg" alt="" /><i></i></span></span><span class="mj-lines"><b></b><b></b></span></div></div></div>
+          <div class="mj-row" style="left:119px;top:171px"><div class="mj-row__in"><div class="mj-card" style="--c:#ffefec"><span class="mj-tile mj-tile--g24"><span><img src="../assets/images/work/muji3/group24.svg" alt="" /><i></i></span></span><span class="mj-lines"><b></b><b></b></span></div><div class="mj-card" style="--c:#fff2ef"><span class="mj-tile mj-tile--g27"><span><img src="../assets/images/work/muji3/group27.svg" alt="" /></span></span><span class="mj-lines"><b></b><b></b></span></div><div class="mj-card" style="--c:#ffefec"><span class="mj-tile mj-tile--g24"><span><img src="../assets/images/work/muji3/group24.svg" alt="" /><i></i></span></span><span class="mj-lines"><b></b><b></b></span></div><div class="mj-card" style="--c:#fff3ee"><span class="mj-tile mj-tile--g25"><span><img src="../assets/images/work/muji3/group25.svg" alt="" /></span></span><span class="mj-lines"><b></b><b></b></span></div></div></div>
+          <div class="mj-cart"><div class="mj-cart__in"><img src="../assets/images/work/muji3/cart.svg" alt="" /><b></b></div></div>
+          <div class="mj-cursor"><div class="mj-cursor__in"><img src="../assets/images/work/muji3/cursor.svg" alt="" /></div></div>
         </div>
       </div>
 
-      <div class="case-hero__card">
-        <div class="case-hero__titlerow">
+      <div class="dm-hero-text">
+        <div class="dm-hero-text__main">
           <h1 class="case-hero__title">MUJI USA</h1>
           <p class="case-hero__desc">E-commerce site reimagined as a lifestyle brand destination</p>
         </div>
-        <div class="case-hero__meta">
-          <div class="case-hero__meta-info">
-            <div>
-              <span class="label">Year</span>
-              <span class="value">Spring 2026</span>
-            </div>
-            <div>
-              <span class="label">Role</span>
-              <span class="value">Designer</span>
-            </div>
-            <div>
-              <span class="label">Skills</span>
-              <span class="value">UX Design, E-commerce Design, Web Design</span>
-            </div>
-          </div>
-          <a class="case-hero__cta" href="#final-designs">
-            View Final Designs
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 4.167v11.666M15.833 10 10 15.833 4.167 10" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
+        <div class="dm-hero-text__meta">
+          <div><span class="label">Year</span><span class="value">Spring 2026</span></div>
+          <div><span class="label">Role</span><span class="value">Designer</span></div>
         </div>
       </div>
     </div>
 
-    <section id="context" class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Context</p>
-          <h2 class="case-section__title">MUJI's site needs to be redesigned for younger audiences.</h2>
-        </div>
-        <p class="case-section__body">As MUJI's e-commerce grows, younger shoppers need an easier way to explore its huge product catalog. Our team redesigns that experience to feel simple and intuitive, without losing MUJI's minimalist identity.</p>
+    <section id="context" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">context</p>
+        <p class="dx-title">MUJI&rsquo;s site needs to be redesigned for younger audiences.</p>
+        <p class="dx-body">As MUJI&rsquo;s e-commerce grows, younger shoppers need an easier way to explore its huge product catalog. Our team redesigns that experience to feel simple and intuitive, without losing MUJI&rsquo;s minimalist identity.</p>
       </div>
-
-      <div class="case-section__images">
-        <figure class="case-section__image-group">
-          <img src="../assets/images/work/muji/current-home-page.jpg" alt="Current MUJI home page" />
-          <figcaption>Current home page</figcaption>
-        </figure>
-        <figure class="case-section__image-group">
-          <img src="../assets/images/work/muji/current-product-gallery-page.jpg" alt="Current MUJI product gallery page" />
-          <figcaption>Current product gallery page</figcaption>
-        </figure>
+      <div class="dx-panel" style="gap:40px"><div class="dx-wide" style="width:400px;height:227px"><img src="../assets/images/work/muji4/ctx-1.png" alt="" loading="lazy" /></div><div class="dx-wide" style="width:400px;height:227px"><img src="../assets/images/work/muji4/ctx-2.png" alt="" loading="lazy" /></div></div>
+      <div class="dx-callout"><p>How might we help MUJI communicate their product offerings to a broader, younger audience through their digital e-commerce platform?</p></div>
+    </section>
+    <section id="final-designs" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">Final Designs</p>
+        <p class="dx-title">A checkout that nudges, without shouting</p>
       </div>
-
-      <div class="case-section__callout">
-        <p>How might we help MUJI communicate their product offerings to a broader, younger audience through their digital e-commerce platform?</p>
+      <div class="dx-wide dx-wide--ratio" style="aspect-ratio:3678/2160;border-radius:40px;border:0;box-shadow:none"><video src="../assets/videos/muji-checkout.mp4" autoplay muted loop playsinline preload="metadata" aria-label="The redesigned checkout flow"></video></div>
+    </section>
+    <section id="competitor-analysis" class="dx-sec" style="gap:40px">
+      <div class="dx-head">
+        <p class="dx-eyebrow">competitor analysis</p>
+        <p class="dx-title">We gathered 3 insights on how 14 competitors communicate their products.</p>
+        <p class="dx-body">We researched brands that overlap with MUJI in both product category and lifestyle positioning, analyzing how they communicated products and drove purchase intent in their e-commerce sites and physical stores.</p>
+      </div>
+      <div class="dx-logos"><img src="../assets/images/work/muji4/l1.png" alt="" style="width:86.4px;height:86.4px" /><img src="../assets/images/work/muji4/l2.png" alt="" style="width:78.4px;height:51.756px" /><img src="../assets/images/work/muji4/l3.png" alt="" style="width:67.2px;height:83.582px" /><img src="../assets/images/work/muji4/l4.png" alt="" style="width:99.2px;height:59.52px" /><img src="../assets/images/work/muji4/l5.png" alt="" style="width:84px;height:84px" /><img src="../assets/images/work/muji4/l6.png" alt="" style="width:76px;height:76px" /><img src="../assets/images/work/muji4/l7.png" alt="" style="width:99.2px;height:55.8px" /><img src="../assets/images/work/muji4/l8.png" alt="" style="width:112px;height:30.427px" /></div>
+      <div class="dx-pains" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+<div class="dx-pain" style="gap:8px;--bg:#fff2e9"><div class="dx-pain__text"><p class="dx-pain__num">01</p><p class="dx-pain__name">Brand storytelling is important</p></div><p class="dx-pain__desc">Communicating where a brand comes from builds the trust that drives purchases</p></div>
+<div class="dx-pain" style="gap:8px;--bg:#fff2e9"><div class="dx-pain__text"><p class="dx-pain__num">02</p><p class="dx-pain__name">Clear hierarchies eases browsing</p></div><p class="dx-pain__desc">Sites with large catalogs felt most usable when products were presented in a clear structure.</p></div>
+<div class="dx-pain" style="gap:8px;--bg:#fff2e9"><div class="dx-pain__text"><p class="dx-pain__num">03</p><p class="dx-pain__name">Bridge digital and physical shopping</p></div><p class="dx-pain__desc">A brand&rsquo;s identity lives in its physical stores, carrying that online keeps the experience intentional and consistent.</p></div>
       </div>
     </section>
-
-    <section id="competitor-analysis" class="case-section case-section--built case-section--centered">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Competitor analysis</p>
-          <h2 class="case-section__title">After researching 14 competitors, we gathered 3 insights on how they communicate their products.</h2>
-        </div>
-        <p class="case-section__body">We researched brands that overlap with MUJI in both product category and lifestyle positioning, analyzing how they communicated products and drove purchase intent in their e-commerce sites and physical stores.</p>
+    <section id="personas" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">personas</p>
+        <p class="dx-title">The Loyal Customer and The Curious Passerby</p>
       </div>
-
-      <div class="case-section__logo-row">
-        <img class="case-section__logo" style="width:86.4px;height:86.4px;" src="../assets/images/work/muji/zara-logo.png" alt="Zara" />
-        <img class="case-section__logo" style="width:78.4px;height:51.76px;" src="../assets/images/work/muji/hm-logo.png" alt="H&amp;M" />
-        <img class="case-section__logo" style="width:67.2px;height:83.58px;" src="../assets/images/work/muji/miniso-logo.png" alt="Miniso" />
-        <img class="case-section__logo" style="width:99.2px;height:59.52px;" src="../assets/images/work/muji/aesop-logo.png" alt="Aesop" />
-        <img class="case-section__logo" style="width:84px;height:84px;" src="../assets/images/work/muji/tosummer-logo.png" alt="To Summer" />
-        <img class="case-section__logo" style="width:76px;height:76px;" src="../assets/images/work/muji/uniqlo-logo.png" alt="Uniqlo" />
-        <img class="case-section__logo" style="width:99.2px;height:55.8px;" src="../assets/images/work/muji/westelm-logo.png" alt="West Elm" />
-        <img class="case-section__logo" style="width:112px;height:30.43px;" src="../assets/images/work/muji/teso-logo.png" alt="Teso Life" />
+      <div class="dx-two">
+        <div class="dx-group"><span class="dx-avatar-l"><img src="../assets/images/work/muji4/pf1.png" alt="" style="left:-10px;top:123.37px;width:127.5px;height:170.531px" /><img src="../assets/images/work/muji4/pf2.png" alt="" style="left:-10px;top:69.18px;width:127.5px;height:127.5px" /><img src="../assets/images/work/muji4/pf3.png" alt="" style="left:-10px;top:-12.1px;width:127.5px;height:127.5px" /></span><div class="dx-group__text"><p class="dx-group__name">The Loyal Customer</p><div><p>Shopped multiple times at MUJI before, often in-person. Familiar with MUJI&rsquo;s brand identity.</p></div></div></div>
+        <div class="dx-group"><span class="dx-avatar-l"><img src="../assets/images/work/muji4/pm1.png" alt="" style="left:-10px;top:120.32px;width:118.75px;height:158.828px" /><img src="../assets/images/work/muji4/pm2.png" alt="" style="left:-10px;top:69.85px;width:118.75px;height:118.75px" /><img src="../assets/images/work/muji4/pm3.png" alt="" style="left:-10px;top:-5.85px;width:118.75px;height:118.75px" /><img src="../assets/images/work/muji4/pm4.png" alt="" style="left:-10px;top:-5.85px;width:118.75px;height:118.75px" /></span><div class="dx-group__text"><p class="dx-group__name">The Curious Passerby</p><div><p>Has heard of MUJI from a friend or has passed by a shop before. Unfamiliar with the product catalog.</p></div></div></div>
       </div>
-
-      <div class="case-section__insights">
-        <div class="case-section__insight">
-          <span class="case-section__insight-badge">1</span>
-          <div class="case-section__insight-text">
-            <h3>Brand storytelling is important</h3>
-            <p>Communicating where a brand comes from builds the trust that drives purchases.</p>
-          </div>
-        </div>
-        <div class="case-section__insight">
-          <span class="case-section__insight-badge">2</span>
-          <div class="case-section__insight-text">
-            <h3>Clear hierarchies eases browsing</h3>
-            <p>Sites with large catalogs felt most usable when products were presented in a clear structure.</p>
-          </div>
-        </div>
-        <div class="case-section__insight">
-          <span class="case-section__insight-badge">3</span>
-          <div class="case-section__insight-text">
-            <h3>Bridge digital and physical shopping</h3>
-            <p>A brand's identity lives in its physical stores, carrying that online keeps the experience intentional and consistent.</p>
-          </div>
-        </div>
+      <p class="dx-note">Illustrations are created with Humation on Figma</p>
+    </section>
+    <section id="user-research" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">User Research</p>
+        <p class="dx-title">After 14 interviews of both user types, we spotted 4 gaps in the current web experience.</p>
+      </div>
+      <div class="dx-research"><div class="dx-research__text"><p class="dx-pain__num">01</p><p class="dx-pain__name">Intrusive promotion</p><p class="dx-pain__desc">Intrusive pop-ups make navigation difficult and undermines MUJI&rsquo;s minimalist identity.</p></div><div class="dx-research__shot"><img src="../assets/images/work/muji4/ur-1.png" alt="" loading="lazy" /></div></div>
+      <div class="dx-research"><div class="dx-research__text"><p class="dx-pain__num">02</p><p class="dx-pain__name">Poor web navigation</p><p class="dx-pain__desc">The nav bar was hard to read and poorly organized, making it hard to find specific products.</p></div><div class="dx-research__shot"><img src="../assets/images/work/muji4/ur-2.png" alt="" loading="lazy" /><img src="../assets/images/work/muji4/ur-2m.svg" alt="" style="z-index:1;object-fit:fill" /></div></div>
+      <div class="dx-research"><div class="dx-research__text"><p class="dx-pain__num">03</p><p class="dx-pain__name">Lack of guidance for product discovery</p><p class="dx-pain__desc">There are no best-seller information or category displays, making it hard to discover products.</p></div><div class="dx-research__shot"><img src="../assets/images/work/muji4/ur-3.png" alt="" loading="lazy" /><img src="../assets/images/work/muji4/ur-3m.svg" alt="" style="z-index:1;object-fit:fill" /></div></div>
+      <div class="dx-research"><div class="dx-research__text"><p class="dx-pain__num">04</p><p class="dx-pain__name">Missing the in-store atmosphere</p><p class="dx-pain__desc">MUJI stores has a calm and clean vibe, but the website feels more functional than immersive.</p></div><div class="dx-research__shot"><img src="../assets/images/work/muji4/ur-4.png" alt="" loading="lazy" /></div></div>
+    </section>
+    <section id="my-redesign" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">my redesign</p>
+        <p class="dx-title">I led the redesign of the checkout flow.</p>
+        <p class="dx-body">Our team divided the site into 5 sections and redesigned each to improve the pain points above. I owned the end-to-end redesign of the checkout flow while also providing feedback on the work of teammates in weekly meetings.</p>
       </div>
     </section>
-
-    <section id="personas" class="case-section case-section--built case-section--centered">
-      <div class="case-section__heading-group">
-        <p class="case-section__eyebrow">Personas</p>
-        <h2 class="case-section__title">The Loyal Customer and The Curious Passerby</h2>
+    <section id="concept-ideation" class="dx-sec" style="margin-top:40px">
+      <div class="dx-head">
+        <p class="dx-eyebrow">Concept ideation</p>
+        <p class="dx-title">I drew low-fidelity mockups for the 3 stages of the checkout process.</p>
+        <p class="dx-body">Overall, the client and I aimed to preserve the promotional elements of the checkout flow and keep encouraging purchases, while also improving usability and guidance on product discovery. The direction of my following iterations were also informed by the more detailed feedback below.</p>
       </div>
-
-      <div class="case-persona-group">
-        <div class="case-persona-row">
-          <div class="case-persona-card">
-            <div class="case-persona-card__avatar">
-              <img src="../assets/images/work/muji/persona-loyal-customer.png" alt="" />
-            </div>
-            <div class="case-persona-card__text">
-              <h3>The Loyal Customer</h3>
-              <p>Shopped multiple times at MUJI before, often in-person. Familiar with MUJI&rsquo;s brand identity.</p>
-            </div>
-          </div>
-
-          <div class="case-persona-divider"></div>
-
-          <div class="case-persona-card">
-            <div class="case-persona-card__avatar">
-              <img src="../assets/images/work/muji/persona-curious-passerby.png" alt="" />
-            </div>
-            <div class="case-persona-card__text">
-              <h3>The Curious Passerby</h3>
-              <p>Has heard of MUJI from a friend or has passed by a shop before. Unfamiliar with MUJI&rsquo;s full product catalog.</p>
-            </div>
-          </div>
-        </div>
-
-        <p class="case-persona-credit">Illustrations are created with Humation on Figma</p>
+      <div class="dx-concept">
+        <div class="dx-concept__row"><div class="dx-crop" style="width:284px;height:168px"><img src="../assets/images/work/muji4/c1.png" alt="" loading="lazy" style="height:158.64%;left:-2.64%;top:-21.72%;width:369.25%" /></div><div class="dx-crop" style="width:276px;height:159px"><img src="../assets/images/work/muji4/c1.png" alt="" loading="lazy" style="height:109.89%;left:-101.28%;top:-9.89%;width:302.05%" /><img src="../assets/images/work/muji4/c1.png" alt="" loading="lazy" style="height:163.52%;left:-253.74%;top:-22.05%;width:370.07%" /></div><div class="dx-crop" style="width:276px;height:168px"><img src="../assets/images/work/muji4/c2.png" alt="" loading="lazy" style="height:109.81%;left:-4.35%;top:-4.73%;width:108.7%" /></div></div>
+        <div class="dx-concept__row"><div class="dx-crop" style="width:284px;height:298px"><img src="../assets/images/work/muji4/c3.png" alt="" loading="lazy" style="height:129.53%;left:-2.66%;top:-1.92%;width:105.67%" /></div><div class="dx-crop" style="width:281px;height:218px"><img src="../assets/images/work/muji4/c4.png" alt="" loading="lazy" style="height:107.92%;left:-3.91%;top:-4%;width:106.76%" /></div><div class="dx-crop" style="width:282px;height:326px"><img src="../assets/images/work/muji4/c5.png" alt="" loading="lazy" style="height:117.79%;left:-3.2%;top:-2.06%;width:106.41%" /></div></div>
       </div>
     </section>
-
-    <section id="user-research" class="case-section case-section--built case-section--centered case-research">
-      <div class="case-section__heading-group">
-        <p class="case-section__eyebrow">User Research</p>
-        <h2 class="case-section__title">After 14 interviews covering both personas, we identified 5 gaps in the current web experience.</h2>
+    <section id="dd-cart" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Adding an item to the shopping cart</p>
       </div>
-
-      <div class="case-research__images">
-        <img class="case-research__image" src="../assets/images/work/muji/user-research-1.jpg" alt="User research screenshot 1" />
-        <img class="case-research__image" src="../assets/images/work/muji/user-research-2.jpg" alt="User research screenshot 2" />
-        <img class="case-research__image" src="../assets/images/work/muji/user-research-3.jpg" alt="User research screenshot 3" />
-        <img class="case-research__image" src="../assets/images/work/muji/user-research-4.jpg" alt="User research screenshot 4" />
-      </div>
-
-      <div class="case-research__callout case-research__callout--1">
-        <div class="case-research__header">
-          <span class="case-research__number">01</span>
-          <h3>Intrusive promotion</h3>
+      <div class="dx-ba">
+        <div class="dx-col" style="justify-content:flex-start">
+          <span class="dx-tag">before</span>
+          <div class="dx-wide" style="width:384px;height:218px"><img src="../assets/images/work/muji4/d1-before.png" alt="" loading="lazy" /></div>
+          <div class="dx-notes"><div class="dx-row"><img src="../assets/images/work/muji4/exclaim.svg" alt="" /><p>Static notification at the top of the screen without a button to open the cart directly.</p></div></div>
         </div>
-        <div class="case-research__divider"></div>
-        <p>Intrusive pop-ups make navigation difficult and undermines MUJI&rsquo;s minimalist identity.</p>
-      </div>
-      <div class="case-research__callout case-research__callout--2">
-        <div class="case-research__header">
-          <span class="case-research__number">02</span>
-          <h3>Poor web navigation</h3>
-        </div>
-        <div class="case-research__divider"></div>
-        <p>The nav bar was hard to read and poorly organized, making it hard to find specific products.</p>
-      </div>
-      <div class="case-research__callout case-research__callout--3">
-        <div class="case-research__header">
-          <span class="case-research__number">03</span>
-          <h3>Lack of guidance for product discovery</h3>
-        </div>
-        <div class="case-research__divider"></div>
-        <p>There are no best-seller information or category displays, making it hard to discover products.</p>
-      </div>
-      <div class="case-research__callout case-research__callout--4">
-        <div class="case-research__header">
-          <span class="case-research__number">04</span>
-          <h3>Missing the in-store atmosphere</h3>
-        </div>
-        <div class="case-research__divider"></div>
-        <p>MUJI stores has a calm and clean vibe, but the website feels more functional than immersive.</p>
-      </div>
-      <div class="case-research__callout case-research__callout--5">
-        <div class="case-research__header">
-          <span class="case-research__number">05</span>
-          <h3>Choice of photos</h3>
-        </div>
-        <div class="case-research__divider"></div>
-        <p>Product photos feels more professional than intimate, missing the warmth of the in-store experience.</p>
-      </div>
-    </section>
-
-    <section id="my-redesign" class="case-section case-section--built">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">My redesign</p>
-          <h2 class="case-section__title">I led the redesign of the checkout flow.</h2>
-        </div>
-        <p class="case-section__body">Our team divided the site into 5 sections and redesigned each to improve the pain points above. I owned the end-to-end redesign of the checkout flow while also providing feedback on the work of teammates in weekly meetings. To see how the other areas of redesign turned out, feel free to visit the <a class="case-section__link" href="#final-designs">final designs</a>.</p>
-      </div>
-    </section>
-
-    <section id="concept-ideation" class="case-section case-section--built case-section--centered">
-      <div class="case-section__group">
-        <div class="case-section__heading-group">
-          <p class="case-section__eyebrow">Concept ideation</p>
-          <h2 class="case-section__title">I drew low-fidelity mockups for the 3 stages of the checkout process.</h2>
-        </div>
-        <p class="case-section__body">Overall, the client and I aimed to preserve the promotional elements of the checkout flow and keep encouraging purchases, while also improving usability and guidance on product discovery. The direction of my following iterations were also informed by the more detailed feedback below.</p>
-      </div>
-
-      <div class="case-concept__stages">
-        <div class="case-concept__stage">
-          <p class="case-concept__stage-title"><strong>Stage 1.</strong> Adding an item</p>
-          <div class="case-concept__version">
-            <img src="../assets/images/work/muji/stage1-ver1.jpg" alt="Stage 1 Version 1 wireframe" />
-            <p class="case-concept__version-label">Version 1</p>
-          </div>
-          <div class="case-concept__version">
-            <img src="../assets/images/work/muji/stage1-ver2.jpg" alt="Stage 1 Version 2 wireframe" />
-            <p class="case-concept__version-label">Version 2</p>
-          </div>
-          <div class="case-concept__version">
-            <img src="../assets/images/work/muji/stage1-ver3.jpg" alt="Stage 1 Version 3 wireframe" />
-            <p class="case-concept__version-label">Version 3</p>
-          </div>
-        </div>
-
-        <div class="case-concept__stage">
-          <p class="case-concept__stage-title"><strong>Stage 2.</strong> Reviewing your cart</p>
-          <div class="case-concept__version">
-            <img src="../assets/images/work/muji/stage2-ver1.jpg" alt="Stage 2 Version 1 wireframe" />
-            <p class="case-concept__version-label">Version 1</p>
-          </div>
-          <div class="case-concept__version">
-            <img src="../assets/images/work/muji/stage2-ver2.jpg" alt="Stage 2 Version 2 wireframe" />
-            <p class="case-concept__version-label">Version 2</p>
-          </div>
-        </div>
-
-        <div class="case-concept__stage">
-          <p class="case-concept__stage-title"><strong>Stage 3.</strong> Filling payment information</p>
-          <div class="case-concept__version">
-            <img src="../assets/images/work/muji/stage3.jpg" alt="Stage 3 wireframe" />
-          </div>
-        </div>
-
-        <div class="case-concept__note case-concept__note--bad" style="width:200px; left:186px; top:114px;">
-          <div class="case-concept__note-inner"><svg><rect/></svg><span>A toaster leaves no space to insert promotional elements</span></div>
-        </div>
-        <div class="case-concept__note case-concept__note--good" style="width:180px; left:186px; top:369px;">
-          <div class="case-concept__note-inner"><svg><rect/></svg><span>A collapsable sidebar leaves plentiful space for promotion</span></div>
-        </div>
-        <div class="case-concept__note case-concept__note--bad" style="width:180px; left:600px; top:231px;">
-          <div class="case-concept__note-inner"><svg><rect/></svg><span>Account for both established users and first-time guest users</span></div>
-        </div>
-        <div class="case-concept__note case-concept__note--good" style="left:600px; top:466px;">
-          <div class="case-concept__note-inner"><svg><rect/></svg><span style="width:201px;">Product recommendations and free shipping progress bar are both great promotional features</span></div>
+        <div class="dx-col dx-col--after" style="justify-content:flex-start">
+          <span class="dx-tag">after</span>
+          <div class="dx-wide" style="width:409px;height:218px"><img src="../assets/images/work/muji4/final-1.png" alt="" loading="lazy" /></div>
+          <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji4/check.svg" alt="" /><p>Cart drawer slides in automatically after adding to cart, providing space for upsell.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>02 Lack of guidance for product discovery</p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji4/check.svg" alt="" /><p>Discounted price are labeled, &ldquo;total saved&rdquo; specified, nudges users towards items on sale without being intrusive.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 Intrusive promotion</p></div></div></div>
         </div>
       </div>
     </section>
-
-    <section id="design-decisions" class="case-section case-section--built case-section--decision">
-      <div class="case-section__heading-group">
-        <p class="case-section__eyebrow">Design decisions</p>
-        <h2 class="case-section__title">Adding an item to the shopping cart</h2>
+    <section id="dd-checkout" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Clicking &ldquo;Check out&rdquo;</p>
       </div>
-
-      <div class="case-decision__compare">
-        <div class="case-decision__col case-decision__col--current">
-          <div class="case-decision__image-group">
-            <img src="../assets/images/work/muji/current1.jpg" alt="Current design: adding an item" />
-            <p class="case-decision__caption">Current Design</p>
-          </div>
-          <div class="case-decision__points">
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-              <div class="case-decision__point-text">
-                <p>Static notification at the top of the screen without a button to open the cart directly.</p>
-              </div>
-            </div>
-          </div>
+      <div class="dx-ba">
+        <div class="dx-col" style="justify-content:flex-start">
+          <span class="dx-tag">before</span>
+          <div class="dx-cmp"><div class="dx-cmp__stack"><img src="../assets/images/work/muji4/d2a.png" alt="" style="height:99.99px" loading="lazy" /><img src="../assets/images/work/muji4/d2b.png" alt="" style="height:134px" loading="lazy" /></div><div class="dx-cmp__small"><img src="../assets/images/work/muji4/d2c.png" alt="" loading="lazy" /></div></div>
+          <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji4/exclaim.svg" alt="" /><p>Intrusive pop-up after clicking &ldquo;Check out&rdquo;</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 Intrusive promotion</p></div></div><div class="dx-row"><img src="../assets/images/work/muji4/exclaim.svg" alt="" /><p>Two occurrences of the &ldquo;Check out&rdquo; button</p></div></div>
         </div>
-
-        <div class="case-decision__col case-decision__col--redesign">
-          <div class="case-decision__image-group">
-            <img src="../assets/images/work/muji/redesign1.jpg" alt="Redesign: adding an item" />
-            <p class="case-decision__caption">Redesign</p>
-          </div>
-          <div class="case-decision__points">
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-              <div class="case-decision__point-text">
-                <p>Cart drawer slides in automatically after an item is added to cart, improving usability and providing space for upsell.</p>
-                <div class="case-decision__tag-row">
-                  <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p class="case-decision__tag">02 Lack of guidance for product discovery</p>
-                </div>
-              </div>
-            </div>
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-              <div class="case-decision__point-text">
-                <p>Discounted items have their sale price in red and original price beside, along with the &ldquo;total saved&rdquo; number, nudges users towards items on sale without being intrusive.</p>
-                <div class="case-decision__tag-row">
-                  <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p class="case-decision__tag">01 Intrusive promotion</p>
-                </div>
-              </div>
-            </div>
+        <div class="dx-col dx-col--after" style="justify-content:flex-start">
+          <span class="dx-tag">after</span>
+          <div class="dx-wide dx-wide--ratio" style="aspect-ratio:525/334"><img src="../assets/images/work/muji4/d2-after.png" alt="" loading="lazy" /></div>
+          <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji4/check.svg" alt="" /><p>Pop-up replaced by non-intrusive progress bar and product recommendations.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 Intrusive promotion</p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji4/check.svg" alt="" /><p>Recommend products from browsing history - personalized guidance in product discovery.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>02 Lack of guidance for product discovery</p></div></div></div>
+        </div>
+      </div>
+    </section>
+    <section id="dd-shipping" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">design decisions</p>
+        <p class="dx-title">Shipping page</p>
+      </div>
+      <div class="dx-ba">
+        <div class="dx-col" style="justify-content:flex-start">
+          <span class="dx-tag">before</span>
+          <div class="dx-wide" style="width:384px;height:218px"><img src="../assets/images/work/muji4/d3-before.png" alt="" loading="lazy" /></div>
+          <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji4/exclaim.svg" alt="" /><p>The checkout page uses Shopify&rsquo;s design, which is inconsistent with other pages</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>04 Missing the in-store atmosphere</p></div></div></div>
+        </div>
+        <div class="dx-col dx-col--after" style="justify-content:flex-start">
+          <span class="dx-tag">after</span>
+          <div class="dx-wide" style="width:409px;height:218px"><img src="../assets/images/work/muji4/d3-after.png" alt="" loading="lazy" /></div>
+          <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji4/check.svg" alt="" /><p>Visual style consistent consistent with MUJI&rsquo;s design system.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>04 Missing the in-store atmosphere</p></div></div></div>
+        </div>
+      </div>
+    </section>
+    <section id="my-checkout" class="dx-sec">
+      <div class="dx-head">
+        <p class="dx-eyebrow">Final Designs</p>
+        <p class="dx-title">My checkout flow redesign</p>
+      </div>
+      <div class="dx-gallery" data-gal>
+        <div class="dx-gallery__stage"><img src="../assets/images/work/muji4/final-1.png" alt="" loading="lazy" /><img src="../assets/images/work/muji4/d2-after.png" alt="" loading="lazy" /><img src="../assets/images/work/muji4/d3-after.png" alt="" loading="lazy" /></div>
+        <div class="dx-gallery__bar">
+          <p data-cap>01 Adding an item to your cart</p>
+          <div class="dx-gallery__ctl">
+            <div class="dx-slider__dots"><button type="button" aria-label="Slide 1"><i></i></button><button type="button" aria-label="Slide 2"><i></i></button><button type="button" aria-label="Slide 3"><i></i></button></div>
+            <div class="dx-slider__arrows"><button type="button" data-prev aria-label="Previous"><img src="../assets/images/work/damai4/chev-next.svg" alt="" /></button><button type="button" data-next aria-label="Next"><img src="../assets/images/work/damai4/chev-next.svg" alt="" /></button></div>
           </div>
         </div>
       </div>
     </section>
-
-    <section class="case-section case-section--built case-section--decision">
-      <div class="case-section__heading-group">
-        <p class="case-section__eyebrow">Design decisions</p>
-        <h2 class="case-section__title">Reviewing the shopping cart</h2>
+    <div class="dx-end">
+      <div class="dx-end__left">
+        <a class="dx-end__hi" href="mailto:raina.nyy@gmail.com"><span>Say hi to me at</span><span><em>raina.nyy@gmail.com</em><img src="../assets/images/work/damai4/arrow-up-right.svg" alt="" /></span></a>
+        <button class="dx-end__top" type="button" onclick="window.__caseTop ? __caseTop() : window.scrollTo({top:0,behavior:'smooth'})"><span>Back to top</span><img src="../assets/images/work/damai4/arrow-up.svg" alt="" /></button>
       </div>
-
-      <div class="case-decision__compare">
-        <div class="case-decision__col case-decision__col--current">
-          <div class="case-decision__image-group case-decision__image-group--tall">
-            <div class="case-decision__collage">
-              <img class="case-decision__collage-base" src="../assets/images/work/muji/current2-1.jpg" alt="Current design: shopping cart page" />
-              <img class="case-decision__collage-popup" src="../assets/images/work/muji/current2-2.jpg" alt="Current design: checkout popup" />
-            </div>
-            <p class="case-decision__caption">Current Design</p>
-          </div>
-          <div class="case-decision__points">
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-              <div class="case-decision__point-text">
-                <p>Intrusive pop-up after clicking &ldquo;Check out&rdquo;</p>
-                <div class="case-decision__tag-row">
-                  <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p class="case-decision__tag">01 Intrusive promotion</p>
-                </div>
-              </div>
-            </div>
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap case-decision__line-wrap--fixed"><span class="case-decision__line case-decision__line--bad"></span></span>
-              <div class="case-decision__point-text">
-                <p>Two occurrences of the &ldquo;Check out&rdquo; button</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="case-decision__col case-decision__col--redesign">
-          <div class="case-decision__image-group case-decision__image-group--tall">
-            <img src="../assets/images/work/muji/redesign2.jpg" alt="Redesign: reviewing the shopping cart" />
-            <p class="case-decision__caption">Redesign</p>
-          </div>
-          <div class="case-decision__points">
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-              <div class="case-decision__point-text">
-                <p>Pop-up replaced with a free shipping progress bar and product recommendations &mdash; both less intrusive ways of upselling.</p>
-                <div class="case-decision__tag-row">
-                  <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p class="case-decision__tag">01 Intrusive promotion</p>
-                </div>
-              </div>
-            </div>
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-              <div class="case-decision__point-text">
-                <p>Product recommendations are based on browsing history. This allows for personalized guidance in product discovery and can be applied to both signed-in and guest users.</p>
-                <div class="case-decision__tag-row">
-                  <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p class="case-decision__tag">02 Lack of guidance for product discovery</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="dx-end__cols">
+        <div class="dx-end__col"><p>Pages</p><a href="work.html" data-case-color="exit">Work</a><a href="about.html" data-case-color="exit">About</a><a href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume</a></div>
+        <div class="dx-end__col"><p>Projects</p><a href="muji.html" data-case-color="#8B0013">MUJI USA</a><a href="damai.html" data-case-color="#6665FE">Damai</a><a href="wapoo.html" data-case-color="#45DBE9">Wapoo AI</a></div>
+        <div class="dx-end__col"><p>Contact</p><a href="mailto:raina.nyy@gmail.com">Email</a><a href="https://www.linkedin.com/in/rainani" target="_blank" rel="noopener">LinkedIn</a></div>
       </div>
-    </section>
-
-    <section class="case-section case-section--built case-section--decision">
-      <div class="case-section__heading-group">
-        <p class="case-section__eyebrow">Design decisions</p>
-        <h2 class="case-section__title">Filling in shipping and payment information</h2>
-      </div>
-
-      <div class="case-decision__compare">
-        <div class="case-decision__col case-decision__col--current">
-          <div class="case-decision__image-group">
-            <img src="../assets/images/work/muji/current3.jpg" alt="Current design: shipping and payment information" />
-            <p class="case-decision__caption">Current Design</p>
-          </div>
-          <div class="case-decision__points">
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--bad"></span></span>
-              <div class="case-decision__point-text">
-                <p>The checkout page currently uses Shopify&rsquo;s default layout, which breaks the consistency with the MUJI brand.</p>
-                <div class="case-decision__tag-row">
-                  <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p class="case-decision__tag">Missing the in-store atmosphere</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="case-decision__col case-decision__col--redesign">
-          <div class="case-decision__image-group">
-            <img src="../assets/images/work/muji/redesign3.jpg" alt="Redesign: shipping and payment information" />
-            <p class="case-decision__caption">Redesign</p>
-          </div>
-          <div class="case-decision__points">
-            <div class="case-decision__point">
-              <span class="case-decision__line-wrap"><span class="case-decision__line case-decision__line--good"></span></span>
-              <div class="case-decision__point-text">
-                <p>I redesigned the interface in MUJI&rsquo;s design system to keep brand identity and visual style consistent.</p>
-                <div class="case-decision__tag-row">
-                  <svg class="case-decision__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p class="case-decision__tag">Missing the in-store atmosphere</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="final-designs" class="case-final">
-      <div class="case-final__heading-group">
-        <p class="case-final__eyebrow">Final designs</p>
-        <h2 class="case-final__title">Home Page</h2>
-      </div>
-
-      <div class="case-final__summary">
-        <p>We shifted the homepage from a promotional upsell page to a lifestyle showcase, guiding product discovery more naturally through categories instead of pop-ups.</p>
-        <span class="case-final__divider"></span>
-        <p>We made the visual style cleaner, calmer, and less promotional, and chose more intimate photography over polished studio shots, both to bring back the feel of MUJI&rsquo;s physical stores.</p>
-        <span class="case-final__divider"></span>
-        <p>We added brand storytelling around MUJI&rsquo;s craftsmanship, since our research showed Gen Z needs to connect with a brand&rsquo;s story before engaging with its products.</p>
-      </div>
-
-      <div class="case-final__compare">
-        <div class="case-final__current">
-          <img src="../assets/images/work/muji/homepage-current.webp" alt="Current design: MUJI homepage" />
-          <p class="case-final__caption">Current Design</p>
-        </div>
-        <div class="case-final__redesign">
-          <div class="case-final__shot case-final__shot--hero">
-            <img src="../assets/images/work/muji/desktop2.webp" alt="Redesign: hero section and product categories" />
-            <p class="case-final__caption">Redesign - Hero section and product categories</p>
-          </div>
-          <div class="case-final__shot case-final__shot--photos">
-            <img src="../assets/images/work/muji/desktop3.webp" alt="Redesign: product photos" />
-            <p class="case-final__caption">Redesign - Product photos</p>
-          </div>
-          <div class="case-final__shot case-final__shot--stories">
-            <img src="../assets/images/work/muji/desktop4.webp" alt="Redesign: brand stories" />
-            <p class="case-final__caption">Redesign - Brand stories</p>
-          </div>
-          <div class="case-final__shot case-final__shot--materials">
-            <img src="../assets/images/work/muji/desktop5.webp" alt="Redesign: material showcase" />
-            <p class="case-final__caption">Redesign - Material showcase</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="case-final">
-      <div class="case-final__intro">
-        <div class="case-final__heading-group">
-          <p class="case-final__eyebrow">Final designs</p>
-          <h2 class="case-final__title">Navigation Bar</h2>
-        </div>
-        <p class="case-final__body">Competitor research showed that a cleaner, simpler catalog structure works better &mdash; so we cut down the number of subcategories. We also added thumbnail images to each category, since a visual encourages exploration more than plain text.</p>
-      </div>
-      <div class="case-final__compare case-final__compare--nav">
-        <div class="case-final__nav-col case-final__nav-col--current">
-          <img src="../assets/images/work/muji/nav-current.webp" alt="Current design: navigation bar" />
-          <p class="case-final__caption">Current Design</p>
-        </div>
-        <div class="case-final__nav-col case-final__nav-col--redesign">
-          <img src="../assets/images/work/muji/nav-redesign.webp" alt="Redesign: navigation bar" />
-          <p class="case-final__caption">Redesign</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="case-final">
-      <div class="case-final__intro">
-        <div class="case-final__heading-group">
-          <p class="case-final__eyebrow">Final designs</p>
-          <h2 class="case-final__title">Category Page</h2>
-        </div>
-        <p class="case-final__body">We made filters collapsible to reduce clutter, and added a header image to each category page for a more immersive browsing experience.</p>
-      </div>
-      <div class="case-final__compare">
-        <div class="case-final__cat-current">
-          <img src="../assets/images/work/muji/category-current.webp" alt="Current design: category page" />
-          <p class="case-final__caption">Current Design</p>
-        </div>
-        <div class="case-final__cat-redesign">
-          <div class="case-final__cat-shot">
-            <img src="../assets/images/work/muji/category-redesign1.webp" alt="Redesign: filters collapsed" />
-            <p class="case-final__caption">Redesign - Filters collapsed</p>
-          </div>
-          <div class="case-final__cat-shot">
-            <img src="../assets/images/work/muji/category-redesign2.webp" alt="Redesign: filters expanded" />
-            <p class="case-final__caption">Redesign - Filters expanded</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="case-final">
-      <div class="case-final__intro">
-        <div class="case-final__heading-group">
-          <p class="case-final__eyebrow">Final designs</p>
-          <h2 class="case-final__title">Item Page</h2>
-        </div>
-        <p class="case-final__body">We simplified the item page by moving supplemental information to a section at the bottom, reducing clutter up top, and cut down on icons and text that were distracting.</p>
-      </div>
-      <div class="case-final__compare">
-        <div class="case-final__item-current">
-          <div class="case-final__item-shot case-final__item-shot--info">
-            <img src="../assets/images/work/muji/item-current1.webp" alt="Current design: product information" />
-            <p class="case-final__caption">Current Design - Product Information</p>
-          </div>
-          <div class="case-final__item-shot case-final__item-shot--details">
-            <img src="../assets/images/work/muji/item-current2.webp" alt="Current design: product details" />
-            <p class="case-final__caption">Current Design - Product Details</p>
-          </div>
-        </div>
-        <div class="case-final__cat-redesign">
-          <div class="case-final__cat-shot case-final__cat-shot--keyinfo">
-            <img src="../assets/images/work/muji/item-redesign1.webp" alt="Redesign: key product information" />
-            <p class="case-final__caption">Redesign - Key Product Information</p>
-          </div>
-          <div class="case-final__cat-shot case-final__cat-shot--supplementary">
-            <img src="../assets/images/work/muji/item-redesign2.webp" alt="Redesign: supplementary content" />
-            <p class="case-final__caption">Redesign - Supplementary Content</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="case-final">
-      <div class="case-final__intro">
-        <div class="case-final__heading-group">
-          <p class="case-final__eyebrow">Final designs</p>
-          <h2 class="case-final__title">Checkout Flow</h2>
-        </div>
-        <p class="case-final__body">We replaced intrusive upselling with more natural, guided discovery, and revamped the checkout UI to stay visually consistent with MUJI&rsquo;s style.</p>
-      </div>
-      <div class="case-final__compare">
-        <div class="case-final__item-current">
-          <div class="case-final__item-shot case-final__item-shot--popup">
-            <img src="../assets/images/work/muji/checkout-current1.webp" alt="Current design: pop-up at check out" />
-            <p class="case-final__caption">Current Design - Pop-up at check out</p>
-          </div>
-          <div class="case-final__item-shot case-final__item-shot--address">
-            <img src="../assets/images/work/muji/checkout-current2.webp" alt="Current design: address and payment forms" />
-            <p class="case-final__caption">Current Design - Address and payment forms</p>
-          </div>
-        </div>
-        <div class="case-final__cat-redesign">
-          <div class="case-final__cat-shot case-final__cat-shot--cartdrawer">
-            <img src="../assets/images/work/muji/checkout-redesign1.webp" alt="Redesign: cart drawer" />
-            <p class="case-final__caption">Redesign - Cart drawer</p>
-          </div>
-          <div class="case-final__cat-shot case-final__cat-shot--shoppingcart">
-            <img src="../assets/images/work/muji/checkout-redesign2.webp" alt="Redesign: shopping cart" />
-            <p class="case-final__caption">Redesign - Shopping cart</p>
-          </div>
-          <div class="case-final__cat-shot case-final__cat-shot--address">
-            <img src="../assets/images/work/muji/checkout-redesign3.webp" alt="Redesign: address and payment forms" />
-            <p class="case-final__caption">Redesign - Address and payment forms</p>
-          </div>
-        </div>
-      </div>
-    </section>
     </div>
-    <footer class="site-footer">
-      <div class="site-footer__left">
-        <a class="site-footer__hi" href="mailto:raina.nyy@gmail.com">
-          <span>Say hi to me at</span>
-          <span class="site-footer__hi-email">
-            <em>raina.nyy@gmail.com</em>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          <span class="site-footer__hi-fill" aria-hidden="true">
-            <em>raina.nyy@gmail.com</em>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M16.9505 7.05102V16.9505H7.05105M16.9505 16.9505L7.05105 7.05102" stroke="#5F5F5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          </span>
-        </a>
-        <button class="site-footer__top" type="button" onclick="window.smoothScrollTo ? smoothScrollTo(0) : window.scrollTo({top:0,behavior:'smooth'})">
-          <span>Back to top</span>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M15.8333 10L9.99994 4.16669L4.16661 10M9.99994 4.16669V15.8334" stroke="#5F5F5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      <div class="site-footer__cols">
-        <div class="site-footer__col">
-          <p class="site-footer__head">Pages</p>
-          <a href="work.html" data-case-color="exit">Work</a>
-          <a href="about.html" data-case-color="exit">About</a>
-          <a href="../assets/Raina-Ni-Resume.pdf?v=2" target="_blank" rel="noopener">Resume</a>
-        </div>
-        <div class="site-footer__col">
-          <p class="site-footer__head">Projects</p>
-          <a href="muji.html" data-case-color="#8B0013">MUJI USA</a>
-          <a href="damai.html" data-case-color="#6665FE">Damai</a>
-          <a href="wapoo.html" data-case-color="#45DBE9">Wapoo AI</a>
-        </div>
-        <div class="site-footer__col">
-          <p class="site-footer__head">Contact</p>
-          <a href="mailto:raina.nyy@gmail.com">Email</a>
-          <a href="https://www.linkedin.com/in/rainani" target="_blank" rel="noopener">LinkedIn</a>
-        </div>
-      </div>
-    </footer>
+    </div>
   </div>
 
+  <script>
+    // Final designs: three screens that fade into each other; the active dot fills up, then the next one comes; arrows and dots switch by hand.
+    (function () {
+      var root = document.querySelector("[data-gal]");
+      if (!root) return;
+      var imgs = root.querySelectorAll(".dx-gallery__stage img"), dots = root.querySelectorAll(".dx-slider__dots button"), cap = root.querySelector("[data-cap]");
+      var caps = ["01 Adding an item to your cart", "02 Clicking \u201cCheck out\u201d", "03 Shipping page"], cur = -1, timer = 0, MS = 6000;
+      root.style.setProperty("--dx-slide-ms", MS + "ms");
+      function show(i) {
+        i = (i + imgs.length) % imgs.length;
+        if (i === cur) return;
+        cur = i;
+        imgs.forEach(function (m, k) { m.classList.toggle("is-on", k === i); });
+        dots.forEach(function (d) { d.classList.remove("is-on"); });
+        void root.offsetWidth;
+        dots[i].classList.add("is-on");
+        cap.style.opacity = 0; setTimeout(function () { cap.textContent = caps[i]; cap.style.opacity = 1; }, 200);
+      }
+      root.querySelector("[data-next]").addEventListener("click", function () { show(cur + 1); });
+      root.querySelector("[data-prev]").addEventListener("click", function () { show(cur - 1); });
+      dots.forEach(function (d, k) { d.addEventListener("click", function () { show(k); }); });
+      show(0);
+    })();
+  </script>
   <script src="../js/main.js?v=45"></script>
+  <script src="../js/damai-open-exp.js?v=38"></script>
+  <script src="../js/case-exp-extras.js?v=68"></script>
   <script>
     // Background shapes: same behaviour as the Work page. The 1440x900 canvas is centred and cropped as the window narrows, so the
     // shapes near its left/right edges (the orange circle on the right and the pink square on the left) would slide out of view
@@ -781,7 +381,118 @@
     })();
   </script>
   <script>
-    // Narrow layout (css/muji-narrow.css): the footer sits inside the glass tab, under the last section. In the wide layout it stays
+    // First screen = Figma "Damai 3.0": the glass tab is 1040 x 600, centred in the window, pinned (position: sticky, inside .case-pin) while the first GROW px
+    // of scrolling grow it to the whole window. --g (0 to 1) widens and lengthens it, fills it with white, squares its corners and widens its content
+    // to the page's 1170px column; --stick (its pinned top offset) goes from (window height - 600) / 2 to 0, so sides, top and bottom reach the window's
+    // edges together. Then the page scrolls on (class is-open lifts the tab's fixed height, which changes nothing on screen).
+    (function () {
+      var holdY = null, GROW = 360, canvas = document.querySelector('.page-canvas--damai'), raf = 0, start = 0;
+      window.__caseGrow = GROW;
+      var wide = window.matchMedia('(min-width: 651px)');
+      var cw = 0, vh = 0, h0 = 600, top0 = 0, i0 = 0, i1 = 0; // window width / height, the tab's height and distance from the top at the start, its content's width at the start / end
+      function measure() {
+        cw = canvas.clientWidth; vh = window.innerHeight;
+        var pad1 = Math.min(40, Math.max(24, (cw - 136 - 1170) / 2)), base = cw <= 1024 ? cw - 48 : Math.min(1250, cw - 136);
+        i0 = Math.min(1040, cw - 48) - 80; i1 = base - 2 * pad1;
+        // 600px tall, unless the first screen's content needs more (a narrow window wraps the title): measured with the tab in its starting shape
+        var tab = canvas.querySelector('.glass-card--case'), prev = canvas.style.getPropertyValue('--g');
+        canvas.style.setProperty('--g', '0'); canvas.style.setProperty('--hd', Math.min(1, i0 / 960));
+        var hero = canvas.querySelector('.case-hero');
+        h0 = wide.matches ? Math.max(600, Math.ceil(hero.offsetTop + hero.offsetHeight + 40)) : 600; // layout sizes: unaffected by the scale below
+        canvas.style.setProperty('--s0', Math.min(1, Math.max(0.6, (vh - 300) / 600)).toFixed(4)); // 300px = 150 above the tab + 32 below it + the arrow, label and 45px under them
+        canvas.style.setProperty('--g', prev || '0');
+        canvas.style.setProperty('--h0', h0 + 'px');
+        top0 = 150; // Figma: the tab's top is 150px from the window's top (the navigation is at 80px)
+        canvas.style.setProperty('--top0', top0.toFixed(1));
+        canvas.style.setProperty('--spacer', Math.max(0, GROW - top0).toFixed(1)); // room under the tab to stay pinned: the scrolling it takes, minus its distance from the top
+        canvas.style.setProperty('--rise', (top0 * 0.75).toFixed(1)); // the content sits this much lower inside the tab once it is open: it rises a quarter of what the top edge does
+      }
+      function ease(p) { return p * p * (3 - 2 * p); }
+      function update() {
+        raf = 0;
+        if (!wide.matches) { canvas.style.setProperty('--hd', Math.min(1, (cw - 48) / 960).toFixed(4)); return; }
+        var g = ease(Math.min(1, Math.max(0, ((holdY === null ? window.scrollY : holdY) - start) / GROW)));
+        canvas.style.setProperty('--g', g.toFixed(4));
+        canvas.style.setProperty('--stick', (top0 * (1 - g)).toFixed(2));
+        canvas.style.setProperty('--hd', Math.min(1, (i0 + (i1 - i0) * g) / 960).toFixed(4)); // the illustration board (960 wide) shrinks if its panel is narrower
+        canvas.classList.toggle('is-open', g >= 1);
+        document.documentElement.classList.toggle('dx-white', g >= 1); // (the scroll bar only shows once the tab is white)
+      }
+      // Smooth scrolling (the "Lenis" feel of award sites): the mouse wheel moves a TARGET position and the page glides to it, closing 9% of the
+      // remaining distance every 1/60s (so it starts fast and lands slowly, and a flick carries on a little). Every frame sets the scroll position
+      // and the grow progress together, so the two never disagree. Touch, keys and the scrollbar keep the browser's own scrolling.
+      var cur = window.scrollY, target = cur, dir = 1, frame = 0, last = 0, settle = 0, touching = false;
+      function max() { return document.documentElement.scrollHeight - window.innerHeight; }
+      function run() { if (!frame) { last = performance.now(); frame = requestAnimationFrame(tick); } }
+      function tick(now) {
+        var k = 1 - Math.pow(1 - 0.09, Math.min(50, now - last) / 16.667); // the same glide at any frame rate
+        last = now;
+        cur += (target - cur) * k;
+        if (Math.abs(target - cur) < 0.3) cur = target;
+        window.scrollTo({ top: cur, behavior: 'instant' });
+        update();
+        frame = cur === target ? 0 : requestAnimationFrame(tick);
+      }
+      // Resistance: once scrolling stops partway through the pinned part, the target moves to one end of it and the page glides there: the way
+      // it was heading unless the user got less than a quarter of the way (so a nudge down rolls back, a nudge up from the end returns to the end).
+      function snap() {
+        var p = (target - start) / GROW;
+        if (!wide.matches || touching || p <= 0 || p >= 1) return;
+        target = start + GROW * (dir > 0 ? (p > 0.25 ? 1 : 0) : (p < 0.75 ? 0 : 1));
+        run();
+      }
+      window.addEventListener('wheel', function (e) {
+        if (!wide.matches || e.ctrlKey || e.defaultPrevented) return; // ctrl + wheel is the browser's zoom
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // a sideways swipe (the Final designs strip) is left to the browser
+        e.preventDefault();
+        var d = e.deltaY * (e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? window.innerHeight : 1);
+        if (d) dir = d > 0 ? 1 : -1;
+        target = Math.min(max(), Math.max(0, target + d));
+        clearTimeout(settle);
+        settle = setTimeout(snap, 160);
+        run();
+      }, { passive: false });
+      window.addEventListener('scroll', function () {
+        if (!raf && !frame) raf = requestAnimationFrame(update);
+        var y = window.scrollY;
+        if (Math.abs(y - cur) < 1.5) return; // our own glide
+        if (y !== cur) dir = y > cur ? 1 : -1; // the browser scrolled (touch, keys, scrollbar, a link): follow it
+        cur = target = y;
+        clearTimeout(settle);
+        settle = setTimeout(snap, 160);
+      }, { passive: true });
+      window.addEventListener('touchstart', function () { touching = true; clearTimeout(settle); }, { passive: true });
+      window.addEventListener('touchend', function () { touching = false; settle = setTimeout(snap, 160); }, { passive: true });
+      window.addEventListener('resize', function () { measure(); update(); });
+      measure();
+      update();
+      // Reload: the page comes back at the scroll position it was left at (kept in sessionStorage), and the tab is already as white as that position says.
+      // The browser's own restoring is unreliable here (the page is still short while the pictures load, so it stops early, and the first screen is built from
+      // scroll position 0), so it is done by hand: the position is applied to the tab at once (holdY), then the page scrolls there as soon as it is tall enough.
+      (function () {
+        var KEY = 'xScroll:' + location.pathname, nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0], saved = null, saveRaf = 0;
+        try { if (nav && (nav.type === 'reload' || nav.type === 'back_forward')) { var v = sessionStorage.getItem(KEY); if (v !== null && +v > 0) { saved = +v; if (nav.type === 'back_forward') window.__xRestored = saved; } } } catch (e) {} // (the browser's Back / Forward also come back at the position they were left at, and the page's content then comes in, see js/case-exp-extras.js)
+        function save() { saveRaf = 0; try { sessionStorage.setItem(KEY, String(Math.round(window.scrollY))); } catch (e) {} }
+        window.addEventListener('scroll', function () { if (!saveRaf && holdY === null) saveRaf = requestAnimationFrame(save); }, { passive: true });
+        window.addEventListener('pagehide', function () { if (holdY === null) save(); });
+        if (saved === null) return;
+        try { history.scrollRestoration = 'manual'; } catch (e) {}
+        holdY = saved; update();
+        var tries = 0;
+        function release() { holdY = null; cur = target = window.scrollY; update(); }
+        function step() {
+          if (holdY === null) return;
+          if (saved <= max() + 1) { window.scrollTo({ top: saved, behavior: 'instant' }); release(); return; }
+          if (++tries > 400) { release(); return; } // ~7 seconds: give up (the page never got tall enough)
+          requestAnimationFrame(step);
+        }
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (t) { window.addEventListener(t, function () { if (holdY !== null) release(); }, { passive: true, once: true }); });
+        step();
+      })();
+    })();
+  </script>
+  <script>
+    // Narrow layout (css/damai-narrow.css): the footer sits inside the glass tab, under the last section. In the wide layout it stays
     // its own glass tab below the page, so it moves between the two when the window crosses the breakpoint.
     (function () {
       var footer = document.querySelector(".site-footer"), tab = document.querySelector(".glass-card--case");
@@ -796,24 +507,95 @@
     })();
   </script>
   <script>
-    // Narrow layout (css/muji-narrow.css): scale the whole hero photo row down together once the tab is narrower than the 602px design.
+    // The back arrow plays the opening backwards (the browser's own Back button cannot be held back by a page, so for that the Work page plays it on arrival: js/damai-open-exp.js). A hidden copy of the Work page (pages/work.html?closing=1, see js/damai-open-exp.js) is
+    // kept ready for it; when the arrow is clicked, the page first goes back to its first screen (if it was scrolled), the copy builds this first screen from what is on screen now and
+    // plays the animations over it, and when it is done the Work page opens. Narrow windows and reduced motion get the plain link.
     (function () {
-      var frame = document.querySelector(".case-hero__collage-frame");
-      if (!frame) return;
-      function fit() {
-        var fw = frame.clientWidth;
-        // Narrow board: three overlapping photos. The two in the back peek out 64px from behind the front one at 602px wide and
-        // come out further as the frame gets wider (up to 150px at 774px), then the board scales down as one piece if it must.
-        var hp = Math.min(150, Math.max(64, (fw - 474) / 2)), bw = 474 + 2 * hp;
-        frame.style.setProperty("--hp", hp + "px");
-        frame.style.setProperty("--bw", bw + "px");
-        frame.style.setProperty("--hs", Math.min(1, fw / bw));
-        frame.style.setProperty("--hw", Math.min(1, (fw - 74) / 1096)); // wide board: 1096px wide, 37px padding each side
+      var back = document.querySelector('.case-topbar__back');
+      if (!back) return;
+      var narrow = window.matchMedia('(max-width: 650px)'), reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var frame = null, busy = false, dropTimer = 0;
+      function prepare() {
+        clearTimeout(dropTimer);
+        if (frame || narrow.matches) return;
+        frame = document.createElement('iframe');
+        frame.src = 'work.html?closing=1&case=' + encodeURIComponent(location.pathname.split('/').pop());
+        frame.setAttribute('aria-hidden', 'true');
+        frame.tabIndex = -1;
+        frame.style.cssText = 'position:fixed;left:-100000px;top:0;border:0;visibility:hidden;opacity:0;pointer-events:none;z-index:2147483000;background:transparent;width:' + innerWidth + 'px;height:' + innerHeight + 'px';
+        document.body.appendChild(frame);
       }
-      fit();
-      if (window.ResizeObserver) new ResizeObserver(fit).observe(frame);
-      window.addEventListener("resize", fit);
+      function drop() { // the pointer left the arrow without clicking it: do not keep a whole second page running
+        dropTimer = setTimeout(function () { if (!busy && frame) { frame.parentNode.removeChild(frame); frame = null; } }, 5000);
+      }
+      // plays the closing animation, then calls done()
+      function close(done) {
+        if (busy) return;
+        busy = true; window.__caseClosing = true;
+        if (window.__xLock) window.__xLock(9000); // (no clicks, scrolling or keys while the page closes)
+        prepare();
+        var t0 = Date.now(), scrolled = false, scrolling = false, arrivedAt = 0;
+        // Back to the first screen first (the tab shrinks from the white page back to its first size): an even, unhurried movement (not the browser's quick native one), a little longer
+        // the further down the page is, and then a short moment of rest before the closing animation takes over, so the two do not run into each other.
+        function scrollUp() {
+          var y0 = window.scrollY, dur = 800 + Math.min(700, Math.max(0, y0 - 360) * 0.25), s0 = performance.now();
+          scrolling = true;
+          (function step(now) {
+            var t = Math.min(1, (now - s0) / dur), e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            window.scrollTo({ top: y0 * (1 - e), behavior: 'instant' });
+            if (t < 1) requestAnimationFrame(step); else { scrolling = false; arrivedAt = Date.now(); }
+          })(s0);
+        }
+        (function go() {
+          var w = frame && frame.contentWindow;
+          if (scrolling) { /* wait for the scroll */ }
+          else if (window.scrollY >= 2) { // back to the first screen first
+            if (!scrolled) { scrolled = true; scrollUp(); }
+          } else if (w && w.__xReady && Date.now() - t0 > 250 && (!scrolled || Date.now() - arrivedAt > 150)) {
+            try {
+              w.__xPrepareClosing();
+              requestAnimationFrame(function () {
+                frame.style.left = '0';
+                frame.style.opacity = '1';
+                frame.style.visibility = 'visible';
+                // (it takes no clicks: the Work page's own links in it would otherwise take a second click on "Work" and open the page at once, without the animation)
+                requestAnimationFrame(function () { w.__xStartClosing(done); });
+              });
+            } catch (err) { done(); }
+            return;
+          }
+          if (Date.now() - t0 > 8000) done();
+          else setTimeout(go, 60);
+        })();
+      }
+      ['pointerenter', 'focus'].forEach(function (n) { back.addEventListener(n, prepare); });
+      back.addEventListener('touchstart', prepare, { passive: true });
+      ['pointerleave', 'blur'].forEach(function (n) { back.addEventListener(n, drop); });
+      window.addEventListener('pageshow', function (e) { if (e.persisted && frame) { frame.parentNode.removeChild(frame); frame = null; busy = false; window.__caseClosing = false; } });
+      // (on the document, in the capture phase, so that a click on ANY back arrow of the page is taken here, never by the site's pink page transition: whichever copy of the arrow is
+      // under the pointer while the tab is changing, the closing animation is the only way out)
+      document.addEventListener('click', function (e) {
+        var arrow = e.target.closest && e.target.closest('.case-topbar__back');
+        // "Work" in the navigation bar does the same from the first screen (the middle state): the opening played backwards.
+        if (!arrow) arrow = e.target.closest && e.target.closest('.page-nav a[href="work.html"]');
+        if (!arrow) return;
+        if (window.__caseGoing) { e.preventDefault(); e.stopPropagation(); return; } // the tabs are turning: not now
+        // From the white page (the tab mostly grown) neither plays the opening backwards: the site's own transition (the shapes, js/case-transition.js) takes the click
+        if (window.scrollY >= (window.__caseGrow || 360) * 0.5) return;
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.stopPropagation(); // the site's own pink page transition (js/case-transition.js) must not take this click
+        if (narrow.matches || reduce.matches) return;
+        e.preventDefault();
+        close(function () { window.location.href = arrow.href || back.href; });
+      }, true);
     })();
   </script>
+  <script>
+    // arriving with the browser's Forward button: the Work page's cards are put over this page and the opening animation plays (js/damai-open-exp.js)
+    if (window.__damaiArrive) window.__damaiArrive();
+    // no back/forward cache for this page, so that arriving here is always a fresh load that can be prepared before its first paint
+    window.addEventListener('unload', function () {});
+  </script>
+  <span id="page-parsed" hidden></span>
 </body>
 </html>

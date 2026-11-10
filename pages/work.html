@@ -22,7 +22,7 @@
       (function tick() { s(); if (++n < 60) requestAnimationFrame(tick); })();
     })();
   </script>
-  <script src="../js/case-transition.js?v=27"></script>
+  <script src="../js/case-transition.js?v=28"></script>
   <script>
     // Works out which page-to-page transition this arrival is, from where we came from. Re-run at pagereveal because a
     // page restored from the back/forward cache doesn't re-run this script: the browser's Back button would otherwise
@@ -135,6 +135,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css?v=312" />
+  <link rel="stylesheet" href="../css/damai-exp-cover.css?v=12" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
        transition-skip problem Home->Work/About had, since this page's own
@@ -447,7 +448,7 @@
     <!-- Cards + scroll indicator: positioned by the layout script below (two-up carousel above 648px, vertical list at 648px and below). -->
     <div class="w4-stage">
         <div class="w4__tabs">
-        <a class="w4-tab w4-tab--muji" href="muji.html" data-case-color="#8B0013" style="left:100px;top:200px;">
+        <a class="w4-tab w4-tab--muji" href="muji.html" data-case-color="#8B0013" data-open-case style="left:100px;top:200px;">
           <span class="w4-tab__glass"></span>
           <div class="traffic-lights">
             <span class="traffic-light traffic-light--red"></span>
@@ -471,7 +472,7 @@
           </div>
         </a>
 
-        <a class="w4-tab w4-tab--damai" href="damai.html" data-case-color="#6665FE" style="left:736px;top:200px;">
+        <a class="w4-tab w4-tab--damai" href="damai.html" data-case-color="#6665FE" data-open-case style="left:736px;top:200px;">
           <span class="w4-tab__glass"></span>
           <div class="traffic-lights">
             <span class="traffic-light traffic-light--red"></span>
@@ -496,7 +497,7 @@
           </div>
         </a>
 
-        <a class="w4-tab w4-tab--wapoo" href="wapoo.html" data-case-color="#45DBE9" style="left:1371px;top:225px;">
+        <a class="w4-tab w4-tab--wapoo" href="wapoo.html" data-case-color="#45DBE9" data-open-case style="left:1371px;top:225px;">
           <span class="w4-tab__glass"></span>
           <div class="traffic-lights">
             <span class="traffic-light traffic-light--red"></span>
@@ -563,7 +564,15 @@
       };
       var tabs = {};
       Object.keys(S).forEach(function (k) { tabs[k] = document.querySelector(".w4-tab--" + k); });
+      // The carousel starts where the case study you come back from sits: Wapoo (on the right) with Damai on the left, MUJI with Damai on its right, and for Damai the position it was
+      // opened from (the hidden copy that a case study keeps for its back arrow says which case with ?case=, see the case pages; otherwise the last case page visited says it)
       var p = 0, snapTimer = null, raf = null;
+      try {
+        var cm = location.search.match(/[?&]case=([\w-]+)/), lastCase = (cm && cm[1]) || (/(damai|wapoo|muji)\.html/.test(document.referrer) ? sessionStorage.getItem("xLastCase") : "") || "";
+        if (/^wapoo/.test(lastCase)) p = 1;
+        else if (/^damai/.test(lastCase)) p = parseFloat(sessionStorage.getItem("xWorkP")) === 1 ? 1 : 0;
+        Array.prototype.forEach.call(document.querySelectorAll(".w4-tab"), function (t) { t.addEventListener("click", function () { try { sessionStorage.setItem("xWorkP", String(p > 0.5 ? 1 : 0)); } catch (e) {} }, true); });
+      } catch (e) {}
       function lerp(a, b, t) { return a + (b - a) * t; }
 
       // Responsive layout (design: 600x500 cards, 36px apart, two big cards = 1236px wide). The side margin is 24px,
@@ -711,5 +720,6 @@
   </script>
   <script src="../js/main.js?v=45"></script>
   <span id="page-parsed" hidden></span>
+  <script src="../js/damai-open-exp.js?v=38"></script>
 </body>
 </html>
