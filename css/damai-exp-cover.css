@@ -226,3 +226,7 @@
 .page-canvas--damai .dm-peek.dx-as-tab { padding: 40px; }
 .page-canvas--damai .dm-peek.dx-as-tab .traffic-lights { gap: 8px; }
 .page-canvas--damai .dm-peek.dx-as-tab .traffic-light { width: 16px; height: 16px; }
+/* While the tabs turn (edge tab clicked), everything in the tab below the first screen is switched off: it is out of sight (the tab is clipped to the first screen) but, once it has been read,
+   it holds ~100 loaded pictures and running animations (hint pulses, galleries) that the browser would otherwise keep redrawing on every frame of the tab's movement. */
+.glass-card--case.dx-leaving > :not(.dm-topbar):not(.case-hero) { visibility: hidden; }
+.glass-card--case.dx-leaving > :not(.dm-topbar):not(.case-hero) * { animation-play-state: paused !important; transition: none !important; }

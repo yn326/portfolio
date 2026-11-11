@@ -391,3 +391,28 @@
 /* MUJI personas: keep the picture-beside-text format down to 450px (the centred, picture-on-top format only below that) */
 @media (min-width: 450px) and (max-width: 650px) { #personas .dx-group { flex-direction: row; text-align: start; } #personas .dx-group__text { align-items: normal; } }
 @media (max-width: 449px) { #personas .dx-group__text { gap: 8px; } }
+
+/* MUJI concept ideation. --u is one design pixel: the six pictures scale down together once they no longer fit inside the frame's 40px padding.
+   Narrower: only pictures 2, 3 (first row) and 4, 6 (second row), full size again, then scaling; narrower still: only 2, 4, 6, one per row, then scaling. */
+#concept-ideation { container-type: inline-size; }
+#concept-ideation .dx-concept { --u: min(1px, calc((100cqw - 128px) / 847)); gap: 24px; }
+#concept-ideation .dx-concept__row { flex-wrap: nowrap; gap: 24px; }
+#concept-ideation .dx-crop { width: calc(var(--w) * var(--u)); height: calc(var(--h) * var(--u)); }
+@container (max-width: 699.98px) {
+  #concept-ideation .dx-concept { --u: min(1px, calc((100cqw - 104px) / 566)); }
+  #concept-ideation .dx-concept__row { justify-content: center; }
+  #concept-ideation .dx-concept__row:first-child > .dx-crop:nth-child(1), #concept-ideation .dx-concept__row:last-child > .dx-crop:nth-child(2) { display: none; }
+}
+@container (max-width: 449.98px) {
+  #concept-ideation .dx-concept { --u: min(1px, calc((100cqw - 80px) / 284)); gap: 24px; }
+  #concept-ideation .dx-concept__row { flex-direction: column; align-items: center; gap: 24px; }
+  #concept-ideation .dx-concept__row:first-child > .dx-crop:nth-child(3) { display: none; }
+}
+@media (max-width: 399px) { #concept-ideation .dx-concept { padding: 24px; --u: min(1px, calc((100cqw - 48px) / 284)); } }
+/* MUJI "Clicking Check out" before: the two overlapping pictures scale down together once the column is narrower than them */
+.dx-cmp { width: min(412px, 100%); height: auto; aspect-ratio: 412 / 279.12; }
+.dx-cmp__stack { width: 67.087%; }
+.dx-cmp__stack img { width: 100%; height: auto !important; }
+.dx-cmp__small { left: 51.927%; bottom: 0; width: 48.102%; height: 59.95%; }
+/* MUJI checkout gallery: the caption and the arrows + progress go on two rows when they no longer fit on one */
+.dx-gallery__bar { flex-wrap: wrap; }

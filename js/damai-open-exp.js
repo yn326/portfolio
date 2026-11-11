@@ -44,7 +44,8 @@
       w: innerWidth, h: innerHeight,
       T: box(tab), W1: tab.offsetWidth, H1: tab.offsetHeight, s1: T.width / tab.offsetWidth,
       pad: cs.paddingTop + ' ' + cs.paddingRight + ' ' + cs.paddingBottom + ' ' + cs.paddingLeft, gap: cs.rowGap,
-      hd: q('.page-canvas--damai').style.getPropertyValue('--hd') || '1', descFs: q('.page-canvas--damai').style.getPropertyValue('--desc-fs') || '', canvasClass: q('.page-canvas--damai').className.split(/\s+/).filter(function (c) { return c && c !== 'page-canvas' && c !== 'page-canvas--case'; }).join(' '), // the page's own classes, which the copied pieces need to be styled heroMin: fw.getComputedStyle(q('.case-hero')).minHeight,
+      hd: q('.page-canvas--damai').style.getPropertyValue('--hd') || '1', descFs: q('.page-canvas--damai').style.getPropertyValue('--desc-fs') || '', canvasClass: q('.page-canvas--damai').className.split(/\s+/).filter(function (c) { return c && c !== 'page-canvas' && c !== 'page-canvas--case'; }).join(' '), // the page's own classes, which the copied pieces need to be styled
+      heroMin: fw.getComputedStyle(q('.case-hero')).minHeight,
       topbar: document.importNode(q('.dm-topbar'), true), hero: document.importNode(q('.case-hero'), true),
       bg: document.importNode(q('.case-bg'), true), scroll: document.importNode(q('.dm-scroll'), true), scrollLeft: q('.dm-scroll').getBoundingClientRect().left,
       gutter: Math.max(0, innerWidth - fd.documentElement.clientWidth), // the Damai page's scrollbar space, if it has one
@@ -205,11 +206,12 @@
     // the new content: clones of the Damai page's own top bar and hero, laid out the way the tab lays them out
     var content = document.createElement('div');
     content.className = d.canvasClass || 'page-canvas--damai';
-    content.style.cssText = 'position:absolute;z-index:2;left:0;top:0;box-sizing:border-box;display:flex;flex-direction:column;width:' + W1 + 'px;padding:' + d.pad + ';gap:' + d.gap;
+    content.style.cssText = 'position:absolute;z-index:2;left:0;top:0;box-sizing:border-box;display:flex;flex-direction:column;width:' + W1 + 'px;height:' + H1 + 'px;padding:' + d.pad + ';gap:' + d.gap; // (the tab's own height too: the hero fills what is left of it, and its text sits at the bottom)
     content.style.setProperty('--hd', d.hd);
     if (d.descFs) content.style.setProperty('--desc-fs', d.descFs); // (the description's font size that keeps it on one line, see js/case-exp-extras.js section 9)
     var topbar = d.topbar.cloneNode(true), hero = d.hero.cloneNode(true);
     hero.style.minHeight = d.heroMin;
+    var illusC = hero.querySelector('.dm-illus'); if (illusC) illusC.style.marginBlock = 'auto'; // (the cover panel centred between the address bar and the text, as css/damai-exp-scale.css does on the case study itself: the Work page does not load that file)
     // (the cover panel sits in the middle of the room between the address bar and the text, and the text at the bottom: that is in the css, css/damai-exp-scale.css)
     content.appendChild(topbar);
     content.appendChild(hero);

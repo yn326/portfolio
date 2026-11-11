@@ -259,7 +259,10 @@
           var tcx = tabR.left + tabR.width / 2, ocx = oppR.left + oppR.width / 2;
           tab.classList.add("dx-leaving");
           tab.animate([{ transform: "scale(" + s0 + ")" }, { transform: "scale(" + sE + ")" }], { duration: MS, easing: CURVE, fill: "forwards" });
-          tab.animate([{ translate: "0 0" }, { translate: (ocx - tcx) + "px " + (oppR.top - tabR.top) + "px" }], { duration: MS, easing: CURVE, fill: "forwards" });
+          // (the shrunk tab's inner edge lands exactly on the edge slot's inner edge: when the middle tab is narrower than the design's (a narrower or shorter window) it is not the edge tab's
+          // proportions any more, and centred on the slot it would end up wholly outside the window, to pop in only when the page is swapped)
+          var endW = W * sE, endCx = (ocx < tcx) ? (oppR.left + oppR.width - endW / 2) : (oppR.left + endW / 2);
+          tab.animate([{ translate: "0 0" }, { translate: (endCx - tcx) + "px " + (oppR.top - tabR.top) + "px" }], { duration: MS, easing: CURVE, fill: "forwards" });
           // the clicked tab grows into the middle. It is made exactly like the middle tab: the tab's own (unscaled) size, scaled about its top centre in the same way, so that at the end its
           // rim, blur, shadows and lights are rendered at exactly the scale the next page's real tab has (otherwise they change a little when the page swaps). It starts scaled down to
           // the edge tab's size and grows to the tab's scale; scaling a picture up from a smaller version makes it soft, so it is never drawn small and enlarged.
@@ -318,7 +321,7 @@
               try {
                 var wm = wrap.querySelector(".dm-hero-text__main"), wd = wm && wm.querySelector(".case-hero__desc");
                 if (wd) {
-                  wrap.style.removeProperty("--desc-fs");
+                  wrap.style.setProperty("--desc-fs", "24px"); // (set, not removed: the copy sits inside this page, whose own fitted size it would otherwise inherit)
                   var wr = document.createRange(); wr.selectNodeContents(wd);
                   var wn = wr.getBoundingClientRect().width, wa = wm.getBoundingClientRect().width;
                   if (wn > wa && wn > 0) wrap.style.setProperty("--desc-fs", (Math.floor((24 * wa / wn) * 10) / 10) + "px");
@@ -420,7 +423,7 @@
 // ---- 9. in the middle state the description under the title stays on ONE line: when the room beside Year / Role is not enough for it at 24px, its font gets smaller (as small as needed). It grows
 //         back to 24px as the tab turns white (css/damai-exp-cover.css: --desc-fs and --g). ----
 (function () {
-  var canvas = document.querySelector(".page-canvas--damai"), row = document.querySelector(".dm-hero-text");
+  var canvas = document.querySelector(".page-canvas--damai"), row = document.querySelector(".glass-card--case .dm-hero-text"); // (this page's own: arriving through an edge tab, a copy of the OLD page's first screen sits in an edge tab for a moment, earlier in the page)
   if (!canvas || !row) return;
   var main = row.querySelector(".dm-hero-text__main"), desc = main && main.querySelector(".case-hero__desc");
   if (!desc) return;
