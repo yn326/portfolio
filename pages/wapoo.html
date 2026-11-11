@@ -76,7 +76,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css?v=313" />
-  <link rel="stylesheet" href="../css/damai-exp-sections.css?v=72" />
+  <link rel="stylesheet" href="../css/damai-exp-sections.css?v=76" />
   <link rel="stylesheet" href="../css/damai-exp-cover.css?v=36" />
   <link rel="stylesheet" href="../css/damai-exp-scale.css?v=11" />
   <style>
@@ -522,8 +522,16 @@
         text[i] = t; tw[i] = width(t);
         chips[i].querySelector("em").textContent = t;
         chips[i].style.setProperty("--tw", tw[i].toFixed(2) + "px");
-        row.style.setProperty("--d" + (i + 1), (tw[i] + 10).toFixed(2) + "px");
+        // the open pill never makes the row wider than the section: its growth is capped at the room the row has left, and the part of the note that does not fit goes out under
+        // a soft edge next to the number (the end of the note stays in view)
+        var shown = chips.filter(function (c) { return getComputedStyle(c).display !== "none"; }).length;
+        var room = Math.max(0, row.clientWidth - (shown * 32 + Math.max(0, shown - 1) * 24));
+        var need = tw[i] + 10, d = Math.min(need, room);
+        row.style.setProperty("--d" + (i + 1), d.toFixed(2) + "px");
+        chips[i].style.setProperty("--cut", (need - d).toFixed(2) + "px");
+        chips[i].classList.toggle("is-cut", need - d > 0.5);
       }
+      window.addEventListener("resize", function () { for (var i = 0; i < chips.length; i++) if (text[i]) setText(i, text[i]); });
       // open button i on this text (closing it first if it shows another one); false if something newer took over
       async function showText(i, t, speed) {
         var op = ++ops[i];

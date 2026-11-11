@@ -188,6 +188,9 @@
 @container (max-width: 647.98px) {
   .dx-shots--mid1 { gap: clamp(24px, calc(100cqw - 448px), 40px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
   .dx-shots--mid1 > .dx-shot:nth-child(2) { display: none; }
+  /* Redesign 1: three become two at the same point, the third picture goes, and with it the third "hover on me" number */
+  .dx-shots--k3 { gap: clamp(24px, calc(100cqw - 448px), 40px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
+  .dx-shots--k3 > .dx-shot:nth-child(3), .dx-shots--k3 + .dx-chips--live > .dx-chip--live:nth-child(3) { display: none; }
 }
 @container (max-width: 855.98px) {
   .dx-shots--mid2 { gap: clamp(24px, calc(100cqw - 448px), 40px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
@@ -195,7 +198,7 @@
 }
 
 /* "Hover on me" is for a mouse: not shown on a touchscreen */
-@media (hover: none), (pointer: coarse) { .dx-chips--live { display: none; } }
+@media (hover: none), (pointer: coarse) { .dx-chips.dx-chips--live { display: none !important; } }
 
 /* Part 1 ("Wapoo's visual style needed a redirection."): the two pictures stay on ONE row at every width and scale down */
 :is(#part-1, #context) { container-type: inline-size; }
@@ -436,3 +439,10 @@
 .dx-cmp__stack img { height: auto; }
 /* MUJI checkout gallery: 24px padding below 700px */
 @media (max-width: 699px) { .dx-gallery { padding: 24px; } }
+/* MUJI final design video: 24px corners at 650px and below */
+@media (max-width: 650px) { #final-designs > .dx-wide--ratio { border-radius: 24px !important; } }
+/* A note too long for the room (narrow window, with a mouse): the pill stops at the section's edge, the note slides left as it is revealed so that its end stays in view, and its beginning
+   goes out under a soft edge in the pill's colour next to the number (--cut: how much of the note does not fit, set by the page's script) */
+.dx-chip--live.is-cut .dx-chip__pill em { transform: translateX(calc(var(--cut, 0px) * var(--p) * -1)); }
+.dx-chip--live.is-cut .dx-chip__pill b { position: relative; z-index: 2; background: var(--dx-ac); border-radius: 99px 0 0 99px; }
+.dx-chip--live.is-cut .dx-chip__pill::before { content: ""; position: absolute; left: 31px; top: 0; z-index: 1; width: 28px; height: 100%; background: linear-gradient(90deg, var(--dx-ac) 15%, transparent); opacity: var(--p); pointer-events: none; }
