@@ -432,3 +432,7 @@
 @media (max-width: 860px) { .dx-cards > .dx-card { flex: none; } }
 /* Damai concept ideation: the wireframes' frame has 24px padding below 700px */
 @media (max-width: 699px) { #concept-ideation .dx-panel:has(> .dx-shot--wide) { padding: 24px; } }
+/* (the two stacked pictures have their real proportions from the start, width/height in the page: with no height before loading, a phone's lazy loading never fetched them) */
+.dx-cmp__stack img { height: auto; }
+/* MUJI checkout gallery: 24px padding below 700px */
+@media (max-width: 699px) { .dx-gallery { padding: 24px; } }

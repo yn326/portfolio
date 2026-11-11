@@ -69,13 +69,14 @@
     var ticking = false;
     // main.js calls this for every scroll position (before it does anything to the bar): inside the range below the bar is mine, outside it is main.js's again. (It used to be a second scroll
     // listener that set the bar to shown while main.js set it to hidden in the same frame: the bar flickered, most of all when the page was reloaded part-way down.)
+    var beenDown = false;
     window.__caseNavHold = function (y) {
       // Below 1000px there is no middle state: the page is opened (from the Work page, with the shape transition) already at the top of the white page, and the bar is not shown there: it is
       // away for the first stretch of the page and comes back, like on the other pages, when the reader scrolls up from further down (main.js)
-      if (G() === 0 && y <= STAY + 80) {
-        nav.style.opacity = "0";
-        nav.style.pointerEvents = "none";
-        return true;
+      // ... but only on arrival: once the reader has been further down, coming back to the top (scrolling up, or "Back to top") shows the bar there, as it does above 1000px
+      if (G() === 0 && !beenDown) {
+        if (y <= STAY + 80) { nav.style.opacity = "0"; nav.style.pointerEvents = "none"; return true; }
+        beenDown = true;
       }
       if (y < G() - 1 || y > G() + STAY + 80) return false;
       var o = y <= G() + STAY ? 1 : 1 - (y - G() - STAY) / 80;
