@@ -325,9 +325,13 @@
 .dx-gallery__bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; }
 .dx-gallery__bar p { margin: 0; font-weight: 400; font-size: 22px; line-height: normal; transition: opacity 0.25s ease; }
 .dx-gallery__ctl { display: flex; align-items: center; gap: 16px; }
-@media (max-width: 860px) {
+/* user research: below 870px the picture shrinks with the window (still beside its text); below 700px it goes under the text */
+@media (max-width: 869px) { .dx-research__shot { width: 48.8vw; height: auto; aspect-ratio: 424.56 / 241.45; } }
+@media (max-width: 699px) {
   .dx-research { flex-direction: column; }
-  .dx-research__shot { width: 100%; height: auto; aspect-ratio: 424.56 / 241.45; }
+  .dx-research__shot { width: 100%; }
+}
+@media (max-width: 860px) {
   .dx-concept__row { flex-wrap: wrap; justify-content: center; }
   .dx-logos { gap: 24px; }
 }
@@ -375,3 +379,15 @@
 /* sections slide up and fade in the first time they scroll into view (class added by js/case-exp-extras.js, so with scripts off everything simply shows) */
 .dx-sec.reveal-ready, .dx-end.reveal-ready { opacity: 0; transform: translateY(56px); transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 0.8, 0.26, 1); }
 .dx-sec.reveal-ready.is-revealed, .dx-end.reveal-ready.is-revealed { opacity: 1; transform: none; }
+
+/* MUJI context pictures (one row above 860px, wrapping below as before): once the two 400px pictures no longer fit with 40px gap and padding, both drop to 24px, then the pictures scale down together */
+.dx-sec:has(> .dx-panel--ctx) { container-type: inline-size; }
+.dx-panel--ctx { gap: 40px; }
+@media (min-width: 861px) { .dx-panel--ctx { flex-wrap: nowrap; } .dx-panel--ctx > .dx-wide { flex: 0 1 400px; min-width: 0; } }
+/* stacked on two rows: padding and gap drop to 24px once a 400px picture no longer fits with 40px padding */
+@container (max-width: 479.98px) { .dx-panel--ctx { gap: 24px; padding: 24px; } }
+/* MUJI competitor analysis: the three insight cards go one per row below 850px */
+@media (max-width: 849px) { #competitor-analysis .dx-pains { grid-template-columns: minmax(0, 1fr) !important; } }
+/* MUJI personas: keep the picture-beside-text format down to 450px (the centred, picture-on-top format only below that) */
+@media (min-width: 450px) and (max-width: 650px) { #personas .dx-group { flex-direction: row; text-align: start; } #personas .dx-group__text { align-items: normal; } }
+@media (max-width: 449px) { #personas .dx-group__text { gap: 8px; } }
