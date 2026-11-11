@@ -6,7 +6,7 @@
 /* ---- Top bar: lights at the tab's edges, back button + address bar centred, 16px apart ---- */
 .page-canvas--damai .dm-topbar { position: relative; justify-content: center; align-items: flex-start; gap: 16px; height: 46px; margin-bottom: -8px; } /* 46px bar, 32px to the panel (the tab's 40px gap minus 8) */
 .page-canvas--damai .dm-topbar .case-topbar__url { flex: 0 1 500px; min-width: 0; height: 46px; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
-.page-canvas--damai .dm-topbar__lights { position: absolute; left: 0; top: 15px; } /* the site's own .traffic-lights (css/style.css: three 16px glass dots, 8px apart); 40px from the tab's top, the bar starts at 25px */
+.page-canvas--damai .dm-topbar__lights { position: absolute; left: 0; top: 15px; opacity: calc(1 - var(--g, 0)); } /* they fade away as the tab turns white (--g 0 -> 1; from the start below 1000px, where the page opens white) */ /* the site's own .traffic-lights (css/style.css: three 16px glass dots, 8px apart); 40px from the tab's top, the bar starts at 25px */
 
 /* ---- Illustration panel ---- */
 .page-canvas--damai .dm-illus {
@@ -66,12 +66,24 @@
 .page-canvas--damai .dm-hero-text { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px; align-self: stretch; color: #5f5f5f; font-family: "Figtree", sans-serif; }
 .page-canvas--damai .dm-hero-text__main { display: flex; flex: 1 1 380px; min-width: 0; flex-direction: column; gap: 8px; }
 .page-canvas--damai .dm-hero-text .case-hero__title { font-size: 30px; font-weight: 300; line-height: normal; }
-.page-canvas--damai .dm-hero-text .case-hero__desc { max-width: none; font-size: 24px; font-weight: 300; line-height: normal; }
+/* one line in the middle state: --desc-fs (set by js/case-exp-extras.js, section 9) is the font size that fits; it goes back to 24px as the tab grows (--g), and the white page may wrap it */
+.page-canvas--damai .dm-hero-text .case-hero__desc { max-width: none; font-size: calc(var(--desc-fs, 24px) + (24px - var(--desc-fs, 24px)) * var(--g, 0)); font-weight: 300; line-height: normal; white-space: nowrap; }
+.page-canvas--damai.is-open .dm-hero-text .case-hero__desc { white-space: normal; }
 .page-canvas--damai .dm-hero-text__meta { display: flex; flex: none; align-items: center; gap: 40px; font-size: 18px; line-height: normal; }
 .page-canvas--damai .dm-hero-text__meta > div { display: flex; flex-direction: column; gap: 8px; }
 .page-canvas--damai .dm-hero-text__meta span { display: block; line-height: 22px; }
 .page-canvas--damai .dm-hero-text__meta > div:nth-child(1) { min-width: 113px; }
 .page-canvas--damai .dm-hero-text__meta > div:nth-child(2) { min-width: 107px; }
+/* Year and Role are 24px apart (not 40px) as soon as the middle tab starts to get narrower than its full 1040px: the tab is min(1040px, window - 144px) wide (--w0 in damai-exp-scale.css), so
+   that is a window narrower than 1184px */
+@media (max-width: 1183px) { .page-canvas--damai .dm-hero-text__meta { gap: 24px; } }
+/* Under 950px wide the title + description are above Year and Role (24px apart), not beside them */
+@media (max-width: 949px) {
+  .page-canvas--damai .dm-hero-text { flex-direction: column; flex-wrap: nowrap; gap: 24px; }
+  .page-canvas--damai .dm-hero-text__main { flex: none; align-self: stretch; }
+  /* a thin line between the title + description and Year + Role, as wide as the content (24px above it, 24px below it) */
+  .page-canvas--damai .dm-hero-text__main::after { content: ""; display: block; width: 100%; height: 1px; margin-top: 16px; background: rgba(95, 95, 95, 0.25); } /* (+ the 8px gap of the block = 24px) */
+}
 .page-canvas--damai .dm-hero-text__meta .label { font-weight: 400; }
 .page-canvas--damai .dm-hero-text__meta .value { font-weight: 300; }
 
@@ -79,7 +91,7 @@
 .page-canvas--damai .dm-scroll {
   position: fixed;
   left: 50%;
-  top: min(788px, calc(100vh - 112px));
+  top: var(--arrow-top, min(788px, calc(100vh - 112px))); /* (the script sets --arrow-top: 38px under the tab, less in a short window) */
   z-index: 5;
   display: flex;
   flex-direction: column;
@@ -95,7 +107,9 @@
   line-height: normal;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  opacity: calc(1 - var(--g, 0) * 4);
+  /* leaves downwards with a fade as the page is scrolled, like the navigation leaves upwards (set by the page's scroll script) */
+  opacity: var(--scroll-op, 1);
+  transform: translateY(var(--scroll-shift, 0px));
 }
 /* the arrow is a plain 30px chevron (Figma "lucide/chevron-down", stroke 2.5px, no circle behind it); it floats down and back up (10px) */
 @keyframes dm-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } } /* down from its resting place (Y 788), never closer to the tab */
@@ -113,7 +127,7 @@
    three glass lights, nothing else; the Work page's cards lose their pictures and text on the way here (css/ and the script in pages/work-exp.html) ---- */
 .page-canvas--damai .dm-peek {
   position: fixed;
-  top: 50%;
+  top: var(--tab-cy, 50%); /* (centred on the middle tab, which is not on the window's centre once the gaps are tightened) */
   width: 780px;
   height: 450px;
   margin-top: -225px;
@@ -134,8 +148,19 @@
   background: conic-gradient(from 0deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.9) 15.3%, rgba(255,255,255,0) 16.4%, rgba(255,255,255,.9) 17.5%,
     rgba(255,255,255,.9) 65.3%, rgba(255,255,255,0) 66.4%, rgba(255,255,255,.9) 67.5%, rgba(255,255,255,.9) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-.page-canvas--damai .dm-peek--muji, .page-canvas--damai .dm-peek--left { left: calc(50% - 1446px); } /* (780 wide: its right edge is where the 540 wide one's was, 69px into the window) */
-.page-canvas--damai .dm-peek--wapoo, .page-canvas--damai .dm-peek--right { left: calc(50% + 661px); }
+/* The edge tabs always show a bit of themselves. At wide windows 69px (left) / 74px (right) of each, with 131 / 126px between them and the middle tab, as in Figma (1440px wide). As the window
+   narrows, FIRST what shows of each edge tab gets smaller (down to 32px, the gap staying as in Figma), THEN the gap gets smaller (down to 40px), and last the middle tab itself gets narrower
+   (--w0 in damai-exp-scale.css keeps 72px beside it). (--peek-m: the room beside the middle tab; --peek-v / --peek-vr: what shows of the left / right edge tab.) */
+.page-canvas--damai { --peek-m: calc((100% - min(1040px, 100% - 144px)) / 2); --peek-v: clamp(32px, calc(var(--peek-m) - 131px), 69px); --peek-vr: clamp(32px, calc(var(--peek-m) - 126px), 74px); }
+/* How far an edge tab slides out when it is hovered: 22px, but only 8px once what shows of it has got down to its 32px minimum (the factor makes the change happen right at 32px). Worked out in
+   vw: a percentage inside a transform would mean the tab's own width. */
+.page-canvas--damai {
+  --peek-mv: calc((100vw - min(1040px, 100vw - 144px)) / 2);
+  --peek-pop-l: clamp(8px, calc((clamp(32px, calc(var(--peek-mv) - 131px), 69px) - 32px) * 100), 22px);
+  --peek-pop-r: clamp(8px, calc((clamp(32px, calc(var(--peek-mv) - 126px), 74px) - 32px) * 100), 22px);
+}
+.page-canvas--damai .dm-peek--muji, .page-canvas--damai .dm-peek--left { left: calc(var(--peek-v) - 780px); } /* (780 wide: its right edge is --peek-v into the window) */
+.page-canvas--damai .dm-peek--wapoo, .page-canvas--damai .dm-peek--right { left: calc(100% - var(--peek-vr)); }
 .page-canvas--damai .dm-peek .traffic-lights { gap: 6px; } /* the middle tab's lights at the edge tab's 0.75 scale: 12px dots, 6px apart, 30px from the corner */
 .page-canvas--damai .dm-peek .traffic-light { width: 12px; height: 12px; }
 
@@ -154,18 +179,8 @@
 .wp-pill__lines b:nth-child(1) { width: 48px; }
 .wp-pill__lines b:nth-child(2) { width: 32px; }
 
-/* ---- Narrow (650px and below): no peeks, no lights, no "Scroll"; the panel scales down with the tab (--hd) ---- */
-@media (max-width: 650px) {
-  .page-canvas--damai .dm-peek,
-  .page-canvas--damai .dm-scroll,
-  .page-canvas--damai .dm-topbar__lights { display: none; }
-  .page-canvas--damai .dm-topbar { margin-bottom: 0; }
-  .page-canvas--damai .dm-topbar .case-topbar__url { flex: 1 1 0; }
-  .page-canvas--damai .dm-illus { border-radius: 24px; }
-  .page-canvas--damai .dm-hero-text { flex-direction: column; gap: 24px; }
-  .page-canvas--damai .dm-hero-text .case-hero__title { font-size: 30px; }
-  .page-canvas--damai .dm-hero-text__meta { gap: 32px; }
-}
+/* ---- No middle state below 1000px: no edge tabs and no "Scroll" (the page opens already white, see the script of the case pages) ---- */
+@media (max-width: 999px) { .page-canvas--damai .dm-peek, .page-canvas--damai .dm-scroll { display: none; } }
 
 /* ---- MUJI's first screen ("Muji 3.0", Figma node 1663:11117): the same tab, with its own illustration: two tilted (-10deg) rows of product cards and a "cart" button with a cursor ---- */
 .page-canvas--muji .dm-illus--muji { background: linear-gradient(to right, rgba(251, 171, 123, 0.15), rgba(249, 137, 115, 0.15)); }
@@ -199,9 +214,8 @@
 
 /* the edge tabs that lead to the other case studies (see js/case-exp-extras.js): clickable, and they slide out a little toward the window on hover */
 .page-canvas--damai .dm-peek.is-link { pointer-events: auto; cursor: pointer; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
-.page-canvas--damai .dm-peek--left.is-link:hover, .page-canvas--damai .dm-peek--muji.is-link:hover { transform: translateX(22px); }
-.page-canvas--damai .dm-peek--right.is-link:hover, .page-canvas--damai .dm-peek--wapoo.is-link:hover { transform: translateX(-22px); }
-@media (max-width: 650px) { .page-canvas--damai .dm-peek.is-link { pointer-events: none; } }
+.page-canvas--damai .dm-peek--left.is-link:hover, .page-canvas--damai .dm-peek--muji.is-link:hover { transform: translateX(var(--peek-pop-l)); }
+.page-canvas--damai .dm-peek--right.is-link:hover, .page-canvas--damai .dm-peek--wapoo.is-link:hover { transform: translateX(calc(var(--peek-pop-r) * -1)); }
 
 /* while the middle tab turns into an edge tab (js/case-exp-extras.js) it is above the clicked tab that grows into the middle */
 .page-canvas--damai .glass-card--case.dx-leaving { z-index: 6; }

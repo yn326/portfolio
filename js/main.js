@@ -328,6 +328,7 @@ function initPageNavReveal() {
     const y = Math.max(window.scrollY, 0);
     // a page can take the bar over for a range of positions (the case studies show it at the top of the white page, see js/case-exp-extras.js): then it is left alone here, not set twice per frame
     if (window.__caseNavHold && window.__caseNavHold(y)) { lastY = y; return; }
+    const FOLLOW_NOW = FOLLOW - (parseFloat(document.documentElement.style.getPropertyValue("--nav-up")) || 0); // (the bar's natural top is 80px less --nav-up, set by the case studies and the Work page in a short window)
     const dy = y - lastY;
     if (dy > DIRECTION_PX) revealed = false;
     else if (dy < -DIRECTION_PX) revealed = true;
@@ -340,7 +341,7 @@ function initPageNavReveal() {
       // scroll it rides along with the page instead (top = 80 - scrollY), so it
       // glides down into its normal spot and never sits on the glass tab.
       opacity = 1;
-      shift = -Math.min(y, FOLLOW);
+      shift = -Math.min(y, FOLLOW_NOW);
     } else if (y < FADE_DISTANCE) {
       // Scrolling down from the top: ride away with the page (shift = -y, i.e. exactly
       // where the old in-page nav would be) plus the extra drift, while fading. The glass
@@ -350,15 +351,15 @@ function initPageNavReveal() {
       shift = -y - progress * RETREAT_PX;
     } else {
       opacity = 0;
-      shift = -(FOLLOW + RETREAT_PX);
+      shift = -(FOLLOW_NOW + RETREAT_PX);
     }
     nav.style.opacity = String(opacity);
     nav.style.transform = `translate(-50%, ${shift.toFixed(2)}px)`;
     nav.style.pointerEvents = opacity < 0.01 ? "none" : "";
     // No transform easing while the nav tracks the scroll position (it would lag behind it).
-    const following = revealed ? y <= FOLLOW + DIRECTION_PX : y < FADE_DISTANCE;
+    const following = revealed ? y <= FOLLOW_NOW + DIRECTION_PX : y < FADE_DISTANCE;
     nav.style.transition = following ? "opacity 0.3s ease" : "";
-    capsule.classList.toggle("is-on", revealed && y > FOLLOW);
+    capsule.classList.toggle("is-on", revealed && y > FOLLOW_NOW);
   }
   function onScroll() {
     if (ticking) return;

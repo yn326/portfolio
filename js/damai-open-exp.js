@@ -13,7 +13,7 @@
   var EASE = 'cubic-bezier(0.76, 0, 0.24, 1)', MS = 1000;
   var FILE = location.pathname.split('/').pop(); // this page, e.g. damai.html
   var closing = /[?&]closing=1/.test(location.search);
-  var narrow = window.matchMedia('(max-width: 650px)'), reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var narrow = window.matchMedia('(max-width: 999px)'), reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   var armed = null; // a held copy of the Work page's cards, for when a case study page comes back from the back/forward cache
   // While an animation plays, the page takes no clicks, no scrolling and no keys (a transparent sheet over everything, up to `ms` ms): whatever is clicked meanwhile does nothing, so nothing
   // can be started in the middle of another. Returns the function that takes the sheet away at once (it also goes by itself after `ms`, and when a page comes back from the back/forward cache).
@@ -44,7 +44,7 @@
       w: innerWidth, h: innerHeight,
       T: box(tab), W1: tab.offsetWidth, H1: tab.offsetHeight, s1: T.width / tab.offsetWidth,
       pad: cs.paddingTop + ' ' + cs.paddingRight + ' ' + cs.paddingBottom + ' ' + cs.paddingLeft, gap: cs.rowGap,
-      hd: q('.page-canvas--damai').style.getPropertyValue('--hd') || '1', canvasClass: q('.page-canvas--damai').className.split(/\s+/).filter(function (c) { return c && c !== 'page-canvas' && c !== 'page-canvas--case'; }).join(' '), // the page's own classes, which the copied pieces need to be styled heroMin: fw.getComputedStyle(q('.case-hero')).minHeight,
+      hd: q('.page-canvas--damai').style.getPropertyValue('--hd') || '1', descFs: q('.page-canvas--damai').style.getPropertyValue('--desc-fs') || '', canvasClass: q('.page-canvas--damai').className.split(/\s+/).filter(function (c) { return c && c !== 'page-canvas' && c !== 'page-canvas--case'; }).join(' '), // the page's own classes, which the copied pieces need to be styled heroMin: fw.getComputedStyle(q('.case-hero')).minHeight,
       topbar: document.importNode(q('.dm-topbar'), true), hero: document.importNode(q('.case-hero'), true),
       bg: document.importNode(q('.case-bg'), true), scroll: document.importNode(q('.dm-scroll'), true), scrollLeft: q('.dm-scroll').getBoundingClientRect().left,
       gutter: Math.max(0, innerWidth - fd.documentElement.clientWidth), // the Damai page's scrollbar space, if it has one
@@ -207,9 +207,10 @@
     content.className = d.canvasClass || 'page-canvas--damai';
     content.style.cssText = 'position:absolute;z-index:2;left:0;top:0;box-sizing:border-box;display:flex;flex-direction:column;width:' + W1 + 'px;padding:' + d.pad + ';gap:' + d.gap;
     content.style.setProperty('--hd', d.hd);
+    if (d.descFs) content.style.setProperty('--desc-fs', d.descFs); // (the description's font size that keeps it on one line, see js/case-exp-extras.js section 9)
     var topbar = d.topbar.cloneNode(true), hero = d.hero.cloneNode(true);
     hero.style.minHeight = d.heroMin;
-    hero.querySelector('.dm-hero-text').style.marginTop = 'auto';
+    // (the cover panel sits in the middle of the room between the address bar and the text, and the text at the bottom: that is in the css, css/damai-exp-scale.css)
     content.appendChild(topbar);
     content.appendChild(hero);
     ov.appendChild(content);
@@ -545,8 +546,10 @@
 
     card.addEventListener('click', function (e) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.stopPropagation(); // the site's own pink page transition (js/case-transition.js) listens on the document and must not take this click
-      if (narrow.matches || reduce.matches) { log('plain link: ' + (narrow.matches ? 'window is 650px wide or narrower' : 'reduced motion is on')); return; } // a plain link
+      // Below 1000px (no middle state there) or with reduced motion the card does not open into the case study: the click is left to the site's own transition (the shapes, js/case-transition.js),
+      // which is a listener on the document. Otherwise that transition must not take the click.
+      if (narrow.matches || reduce.matches) { log('shape transition / plain link: ' + (narrow.matches ? 'window is under 1000px wide' : 'reduced motion is on')); return; }
+      e.stopPropagation();
       e.preventDefault();
       if (busy) return;
       busy = true; cancelled = false; unlock = window.__xLock(4500);

@@ -4145,7 +4145,7 @@ section.case-final.reveal-ready.is-revealed {
 .page-nav {
   view-transition-name: page-nav;
   position: absolute;
-  top: 80px;
+  top: calc(80px - var(--nav-up, 0px)); /* --nav-up: set by the case studies and the Work page in a window shorter than 900px (the nav moves up, see js/main.js) */
   left: 50%;
   transform: translateX(-50%);
   display: inline-flex;

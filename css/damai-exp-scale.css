@@ -23,7 +23,7 @@ html, body { overflow-anchor: none; }
   /* First screen (Figma "Damai 3.0"): a 1040 x 600 tab centred in the window (24px from the edges at the least, with 40px of padding, so its content is 960 wide).
      --g (0 to 1, set by the script in damai-exp.html) grows it to the whole window, and its content to the page's usual 1170px column: --w is the tab's width,
      --i the width of the content, and the padding is half of what is left over (percentages in padding refer to the parent's width, like the width). */
-  --w0: min(1040px, calc(100% - 48px));
+  --w0: min(1040px, calc(100% - 144px)); /* 72px of room each side below ~1184px: 32px for the edge tabs' slivers, 40px between them and this tab */
   --i0: calc(var(--w0) - 80px);
   --base-w: min(1250px, calc(100% - 2 * var(--spy-margin)));
   --base-pad: clamp(24px, calc((100% - 2 * var(--spy-margin) - 1170px) / 2), 40px);
@@ -50,9 +50,22 @@ html, body { overflow-anchor: none; }
 .page-canvas--damai.is-open .glass-card--case { height: auto; overflow: visible; }
 /* the first screen fills the tab exactly (143px above the panel, 40px below the text): if the content is shorter than that (a narrower window, a shorter title), the title stays 40px from the bottom */
 .page-canvas--damai .case-hero { min-height: calc(var(--h0, 600px) - 143px); }
-.page-canvas--damai .dm-hero-text { margin-top: auto; }
+/* The cover panel sits in the middle of the room between the address bar and the text (equal gaps above and below it): when the panel is made smaller with the window, the room it leaves is
+   shared by both gaps, instead of all of it opening up between the panel and the text. The text stays at the bottom. */
+.page-canvas--damai .dm-illus { margin-block: auto; }
+.page-canvas--damai .dm-hero-text { margin-top: 0; }
+/* Below 1000px there is no middle state, the first screen is not a fixed-height tab: the header (address bar, cover panel, text) keeps its gaps (32px between each part) and simply gets less
+   tall as the cover panel scales down with the window. */
+@media (max-width: 999px) {
+  .page-canvas--damai .case-hero { min-height: 0; }
+  .page-canvas--damai .dm-illus { margin-block: 0; }
+}
 @media (max-width: 1024px) {
   .page-canvas--damai .glass-card--case { --base-w: calc(100% - 48px); }
+}
+/* 750px and below: 24px of margin each side of the content (the white page's content is the window less 24px each side) */
+@media (max-width: 750px) {
+  .page-canvas--damai .glass-card--case { --base-w: 100%; }
 }
 /* Scrollspy: in the middle of the strip between the tab and the window edge (the current section's bar is 20px wide), never closer than 10px to either edge. */
 .page-canvas--damai .scrollspy { opacity: clamp(0, calc((var(--g, 0) - 0.8) * 5), 1); right: max(calc(var(--spy-margin) / 2 - 18px), calc((100% - 1250px) / 4 - 18px)); } /* -18px: 10px (half the 20px bar) + 8px padding of each bar's row */

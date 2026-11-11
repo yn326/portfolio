@@ -3,8 +3,11 @@
 // 2. "Back to top" goes to the top of the case study (the tab already all white), not back to the first screen.
 // 3. The Home / Work / About / Resume bar is shown at the top of the case study once the tab has turned white (it leaves again as the page scrolls on, and comes back when scrolling up, as before).
 (function () {
-  try { sessionStorage.setItem("xLastCase", location.pathname.split("/").pop()); } catch (e) {} // (the Work page starts its carousel where this case study sits, see work.html)
-  function G() { return window.__caseGrow || 360; } // how far the page scrolls while the tab grows to white (set by the page)
+  // The Work page starts its carousel where the last case study that was SHOWN sits (see work.html). A page that is only prerendered in the background (hovering an edge tab asks for that) runs its
+  // scripts too, so it must not write this before it is really shown, or it would move the Work page's cards to the wrong case study.
+  function noteCase() { try { sessionStorage.setItem("xLastCase", location.pathname.split("/").pop()); } catch (e) {} }
+  if (document.prerendering) document.addEventListener("prerenderingchange", noteCase, { once: true }); else noteCase();
+  function G() { return typeof window.__caseGrow === "number" ? window.__caseGrow : 360; } // how far the page scrolls while the tab grows to white (set by the page)
   var R = 40, SW = 4, DASH = 18, NS = "http://www.w3.org/2000/svg";
 
   // ---- 1. dashes ----
@@ -67,14 +70,22 @@
     // main.js calls this for every scroll position (before it does anything to the bar): inside the range below the bar is mine, outside it is main.js's again. (It used to be a second scroll
     // listener that set the bar to shown while main.js set it to hidden in the same frame: the bar flickered, most of all when the page was reloaded part-way down.)
     window.__caseNavHold = function (y) {
+      // Below 1000px there is no middle state: the page is opened (from the Work page, with the shape transition) already at the top of the white page, and the bar is not shown there: it is
+      // away for the first stretch of the page and comes back, like on the other pages, when the reader scrolls up from further down (main.js)
+      if (G() === 0 && y <= STAY + 80) {
+        nav.style.opacity = "0";
+        nav.style.pointerEvents = "none";
+        return true;
+      }
       if (y < G() - 1 || y > G() + STAY + 80) return false;
       var o = y <= G() + STAY ? 1 : 1 - (y - G() - STAY) / 80;
       nav.style.opacity = String(o);
-      nav.style.transform = "translate(-50%, -56px)"; // pinned 24px from the top of the window
+      nav.style.transform = "translate(-50%, " + (-(56 - (parseFloat(document.documentElement.style.getPropertyValue("--nav-up")) || 0))) + "px)"; // pinned 24px from the top of the window
       nav.style.pointerEvents = o < 0.01 ? "none" : "";
       nav.style.transition = "opacity 0.3s ease";
       return true;
     };
+    if (G() === 0 && window.scrollY <= STAY + 80) { nav.style.transition = "none"; window.__caseNavHold(window.scrollY); } // (hidden from the very first drawing)
   }
   // ---- 4. sections slide up a little and fade in as they first scroll into view (the same effect as main.js gives the other case studies) ----
   (function () {
@@ -101,7 +112,7 @@
     var canvas = document.querySelector(".page-canvas--damai");
     var tab = document.querySelector(".glass-card--case");
     var going = false;
-    function visible() { return canvas && parseFloat(getComputedStyle(canvas).getPropertyValue("--g") || "0") < 0.5 && window.matchMedia("(min-width: 651px)").matches; }
+    function visible() { return canvas && parseFloat(getComputedStyle(canvas).getPropertyValue("--g") || "0") < 0.5 && window.matchMedia("(min-width: 1000px)").matches; }
     function sideOf(p) { var r = p.getBoundingClientRect(); return r.left + r.width / 2 < window.innerWidth / 2 ? "left" : "right"; } // by where it is (Damai calls its tabs --muji / --wapoo, the others --left / --right)
 
     // The first screen's content comes in and goes out with the same pieces and curves as when a case study is opened from (or closed to) the Work page, one piece after another:
@@ -303,6 +314,16 @@
               wrap.innerHTML = tb.outerHTML + hr.outerHTML;
               var wh = wrap.querySelector(".case-hero"); if (wh) wh.style.minHeight = snap.heroMin;
               p.appendChild(wrap);
+              // the next page's description fits its own line (what was copied from this page is this page's font size)
+              try {
+                var wm = wrap.querySelector(".dm-hero-text__main"), wd = wm && wm.querySelector(".case-hero__desc");
+                if (wd) {
+                  wrap.style.removeProperty("--desc-fs");
+                  var wr = document.createRange(); wr.selectNodeContents(wd);
+                  var wn = wr.getBoundingClientRect().width, wa = wm.getBoundingClientRect().width;
+                  if (wn > wa && wn > 0) wrap.style.setProperty("--desc-fs", (Math.floor((24 * wa / wn) * 10) / 10) + "px");
+                }
+              } catch (e) {}
               entered = true;
               contentIn(wrap, snap.W);
               setTimeout(go, ENT_LEN + 80);
@@ -377,7 +398,7 @@
   var tab = document.querySelector(".glass-card--case");
   if (reduce || !tab || !tab.animate) return;
   function entry(dir) { // dir: -1 = came with Back (from the left), 1 = came with Forward (from the right)
-    if (window.scrollY > 2 || window.__xRestored > 2 || !window.matchMedia("(min-width: 651px)").matches) return;
+    if (window.scrollY > 2 || window.__xRestored > 2 || !window.matchMedia("(min-width: 1000px)").matches) return;
     if (window.__xLock) window.__xLock(950);
     var els = [tab].concat(Array.prototype.slice.call(document.querySelectorAll(".dm-peek")));
     els.forEach(function (el, i) {
@@ -395,3 +416,29 @@
   });
   window.addEventListener("pageshow", function (e) { if (e.persisted) entry(left === "forward" ? -1 : 1); });
 })();
+
+// ---- 9. in the middle state the description under the title stays on ONE line: when the room beside Year / Role is not enough for it at 24px, its font gets smaller (as small as needed). It grows
+//         back to 24px as the tab turns white (css/damai-exp-cover.css: --desc-fs and --g). ----
+(function () {
+  var canvas = document.querySelector(".page-canvas--damai"), row = document.querySelector(".dm-hero-text");
+  if (!canvas || !row) return;
+  var main = row.querySelector(".dm-hero-text__main"), desc = main && main.querySelector(".case-hero__desc");
+  if (!desc) return;
+  var mid = window.matchMedia("(min-width: 1000px)");
+  function fit() {
+    if (!mid.matches) { canvas.style.removeProperty("--desc-fs"); return; }
+    var prev = canvas.style.getPropertyValue("--g");
+    canvas.style.setProperty("--g", "0"); // measured on the first screen, at the normal 24px
+    canvas.style.removeProperty("--desc-fs");
+    var avail = main.getBoundingClientRect().width, r = document.createRange();
+    r.selectNodeContents(desc);
+    var natural = r.getBoundingClientRect().width, fs = natural > avail && natural > 0 ? Math.floor((24 * avail / natural) * 10) / 10 : 24;
+    canvas.style.setProperty("--g", prev || "0");
+    if (fs < 24) canvas.style.setProperty("--desc-fs", fs + "px");
+  }
+  fit();
+  window.addEventListener("resize", fit);
+  window.addEventListener("load", fit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+})();
+

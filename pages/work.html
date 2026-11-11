@@ -134,7 +134,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=312" />
+  <link rel="stylesheet" href="../css/style.css?v=313" />
   <link rel="stylesheet" href="../css/damai-exp-cover.css?v=12" />
   <!-- See the matching block in index.html for why this exists: navigating
        directly between Work and About has the same cold-image-cache /
@@ -606,6 +606,8 @@
         de.classList.toggle("w4-list", list);
         mode = list ? "list" : "row";
         var vw = de.clientWidth, vh = de.clientHeight;
+        // the navigation bar sits as high as on the case studies in a window shorter than 900px (so it does not jump when a card opens into a case study): see __xFS in pages/damai.html
+        de.style.setProperty("--nav-up", (list ? 0 : 56 * Math.min(1, Math.max(0, (900 - vh) / 143))).toFixed(2) + "px");
         var c = Math.max(vw / 1440, vh / 900);
         placeShapes(vw, vh);
         if (list) ts = Math.min(1, (vw - 48) / 600);
@@ -718,8 +720,8 @@
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout); // text metrics change once Figtree arrives
     })();
   </script>
-  <script src="../js/main.js?v=46"></script>
+  <script src="../js/main.js?v=47"></script>
   <span id="page-parsed" hidden></span>
-  <script src="../js/damai-open-exp.js?v=38"></script>
+  <script src="../js/damai-open-exp.js?v=41"></script>
 </body>
 </html>

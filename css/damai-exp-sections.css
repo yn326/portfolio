@@ -8,7 +8,7 @@
 /* the content column is 960px (the old pages use a 1170px one) */
 .page-canvas--damai.page-canvas--dm4 .glass-card--case { --i1: min(960px, calc(var(--base-w) - 2 * var(--base-pad))); padding-bottom: 80px; font-family: "Figtree", sans-serif; }
 
-.dx-sec { display: flex; flex-direction: column; gap: 24px; width: 100%; margin-top: 80px; color: #5f5f5f; }
+.dx-sec { display: flex; flex-direction: column; gap: 24px; width: 100%; margin-top: 40px; color: #5f5f5f; } /* the tab already puts 40px between its parts: 40 + 40 = 80px between two sections, at every width */
 .dx-sec > * { margin: 0; }
 .dx-head { display: flex; flex-direction: column; gap: 8px; line-height: normal; }
 .dx-head p, .dx-head h2 { margin: 0; }
@@ -108,7 +108,7 @@
 .dx-verdict p { margin: 0; }
 
 /* the end of the page: inside the tab, under a thin rule */
-.dx-end { box-sizing: border-box; display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; width: 100%; margin-top: 80px; padding-top: 40px; border-top: 1px solid rgba(95, 95, 95, 0.25); color: #5f5f5f; line-height: normal; }
+.dx-end { box-sizing: border-box; display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; width: 100%; margin-top: 40px; padding-top: 40px; border-top: 1px solid rgba(95, 95, 95, 0.25); color: #5f5f5f; line-height: normal; }
 .dx-end__left { display: flex; align-self: stretch; flex-direction: column; justify-content: space-between; gap: 32px; }
 .dx-end__hi { display: flex; align-items: center; gap: 8px; font-size: 24px; color: inherit; text-decoration: none; }
 .dx-end__hi em { font-style: italic; }
@@ -130,7 +130,7 @@
 .dx-end__col a:hover, .dx-end__col a:focus-visible { opacity: 1; }
 
 @media (max-width: 860px) {
-  .dx-two, .dx-ba, .dx-cards { flex-direction: column; }
+  .dx-two, .dx-cards { flex-direction: column; }
   .dx-pains { grid-template-columns: minmax(0, 1fr); }
   .dx-panel { gap: 32px; flex-wrap: wrap; }
   .dx-slider { flex-direction: column-reverse; gap: 32px; }
@@ -138,8 +138,23 @@
   .dx-end { flex-direction: column; }
   .dx-end__cols { gap: 32px; flex-wrap: wrap; }
 }
+@media (max-width: 699px) { .dx-ba { flex-direction: column; } }
+@media (max-width: 479px) { .dx-end__hi { flex-direction: column; align-items: flex-start; gap: 4px; } }
+/* the two white frames stay on one row until the window is narrower than 700px, then one under the other (each as tall as its content, not squeezed to nothing) */
+@media (max-width: 699px) {
+  .dx-tint__row { flex-direction: column; }
+  .dx-tint__row > .dx-app { flex: none; }
+}
+/* 550px to 699px (the white frames are one under the other and wide): the picture on the left, 250px tall; on the right the logo + name above the description, the two together centred against
+   the picture */
+@media (min-width: 550px) and (max-width: 699px) {
+  .dx-tint__row > .dx-app { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: 1fr auto auto 1fr; column-gap: 24px; row-gap: 0; align-items: start; justify-items: start; }
+  .dx-tint__row > .dx-app > .dx-comp { grid-column: 1; grid-row: 1 / 5; width: auto; max-width: none; height: 250px; aspect-ratio: 250 / 303; }
+  .dx-tint__row > .dx-app > .dx-app__head { grid-column: 2; grid-row: 2; }
+  .dx-tint__row > .dx-app > p { grid-column: 2; grid-row: 3; margin-top: 16px; }
+  .dx-tint__row > .dx-app .dx-app__head p { white-space: normal; }
+}
 @media (max-width: 650px) {
-  .dx-sec { margin-top: 56px; }
   .dx-callout { padding: 20px; font-size: 18px; }
   .dx-group { flex-direction: column; text-align: center; }
   .dx-group__text { align-items: center; }
@@ -148,6 +163,50 @@
 
 /* ---- Wapoo-only parts ---- */
 .dx-shots { display: flex; align-items: center; justify-content: center; gap: 40px; box-sizing: border-box; width: 100%; padding: 40px; border-radius: 40px; background: var(--dx-lt); }
+/* "Who is Wapoo?": as the room gets smaller, FIRST the gaps between the pictures shrink (40 -> 24px), THEN the blue frame's padding (40 -> 24px), THEN a picture goes (4 -> 3 -> 2, each time the gaps and
+   padding are roomy again), and with two left they scale down together with the frame. Sizes follow the section's width (cqw): pictures are 184px wide. */
+.dx-sec:has(> .dx-shots) { container-type: inline-size; }
+.dx-shots--who { flex-wrap: nowrap; gap: clamp(24px, calc((100cqw - 816px) / 3), 40px); padding: clamp(24px, calc((100cqw - 808px) / 2), 40px); }
+@container (max-width: 855.98px) {
+  .dx-shots--who { gap: clamp(24px, calc((100cqw - 632px) / 2), 40px); padding: clamp(24px, calc((100cqw - 600px) / 2), 40px); }
+  .dx-shots--who > .dx-shot:nth-child(4) { display: none; }
+}
+@container (max-width: 647.98px) {
+  .dx-shots--who { gap: clamp(24px, calc(100cqw - 448px), 40px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
+  .dx-shots--who > .dx-shot:nth-child(3) { display: none; }
+}
+@container (max-width: 439.98px) {
+  .dx-shots--who { gap: 5.4545cqw; padding: 5.4545cqw; border-radius: 9.0909cqw; }
+  .dx-shots--who > .dx-shot { width: 41.8182cqw; height: 90.9091cqw; border-radius: 2.7273cqw; }
+}
+
+/* The redesign rows: gaps 40 -> 24 first, then the frame's padding 40 -> 24, then the pictures scale down (never removed in Redesign 1 and 3). Redesign 2 drops its middle picture, Redesign 4 its two
+   middle ones, as soon as the row would not fit with 24px gaps and padding; after that the same, with two pictures. */
+.dx-shots--k3 > .dx-shot, .dx-shots--k2 > .dx-shot, .dx-shots--mid1 > .dx-shot, .dx-shots--mid2 > .dx-shot { flex: 0 1 184px; min-width: 0; height: auto; aspect-ratio: 184 / 400; }
+.dx-shots--k3, .dx-shots--k2, .dx-shots--mid1, .dx-shots--mid2 { flex-wrap: nowrap; }
+.dx-shots--k3, .dx-shots--mid1 { gap: clamp(24px, calc((100cqw - 632px) / 2), 40px); padding: clamp(24px, calc((100cqw - 600px) / 2), 40px); }
+.dx-shots--k2 { gap: clamp(24px, calc(100cqw - 448px), 40px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
+.dx-shots--mid2 { gap: clamp(24px, calc((100cqw - 816px) / 3), 40px); padding: clamp(24px, calc((100cqw - 808px) / 2), 40px); }
+@container (max-width: 647.98px) {
+  .dx-shots--mid1 { gap: clamp(24px, calc(100cqw - 448px), 40px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
+  .dx-shots--mid1 > .dx-shot:nth-child(2) { display: none; }
+}
+@container (max-width: 855.98px) {
+  .dx-shots--mid2 { gap: clamp(24px, calc(100cqw - 448px), 40px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
+  .dx-shots--mid2 > .dx-shot:nth-child(2), .dx-shots--mid2 > .dx-shot:nth-child(3) { display: none; }
+}
+
+/* "Hover on me" is for a mouse: not shown on a touchscreen */
+@media (hover: none), (pointer: coarse) { .dx-chips--live { display: none; } }
+
+/* Part 1 ("Wapoo's visual style needed a redirection."): the two pictures stay on ONE row at every width and scale down */
+#part-1 { container-type: inline-size; }
+/* gap 80 -> 24 first, then the frame's padding 40 -> 24, then the pictures scale down together */
+#part-1 .dx-panel { flex-wrap: nowrap; gap: clamp(24px, calc(100cqw - 448px), 80px); padding: clamp(24px, calc((100cqw - 392px) / 2), 40px); }
+@media (max-width: 499px) { #part-1 .dx-cap { display: none; } }
+#part-1 .dx-panel figure { flex: 0 1 184px; min-width: 0; }
+#part-1 .dx-panel .dx-shot { width: 100%; height: auto; aspect-ratio: 184 / 400; }
+#part-1 .dx-cap { white-space: normal; text-align: center; }
 .dx-jump { display: flex; gap: 24px; width: 100%; margin-top: 80px; }
 .dx-jump a { box-sizing: border-box; display: flex; flex: 1 1 0; min-width: 0; align-items: center; gap: 24px; padding: 24px; border-radius: 40px; background: var(--dx-lt); color: #5f5f5f; text-decoration: none; }
 .dx-jump__n { flex: none; font-weight: 400; font-size: 36px; line-height: normal; color: var(--dx-ac); }
@@ -158,13 +217,13 @@
 .dx-jump a:hover .dx-jump__t img { transform: translateY(3px); }
 .dx-tint { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 24px; width: 100%; padding: 24px; border-radius: 40px; }
 .dx-tint > p { margin: 0; font-weight: 300; font-size: 18px; line-height: normal; }
-.dx-tint__row { display: flex; gap: 24px; width: 100%; align-items: flex-start; }
+.dx-tint__row { display: flex; gap: 24px; width: 100%; align-items: stretch; } /* the two white frames on one row are always the same height: the shorter one fills */
 .dx-app { box-sizing: border-box; display: flex; flex: 1 1 0; min-width: 0; flex-direction: column; align-items: center; gap: 24px; padding: 24px; border-radius: 40px; background: #fff; overflow: hidden; }
 .dx-app__head { display: flex; align-items: center; gap: 8px; width: 100%; }
 .dx-app__head img { display: block; flex: none; width: 40px; height: 40px; border-radius: 12px; object-fit: cover; }
 .dx-app__head p { margin: 0; font-weight: 400; font-size: 20px; line-height: 1.4; white-space: nowrap; }
 .dx-app > p { margin: 0; width: 100%; font-weight: 300; font-size: 18px; line-height: normal; }
-.dx-comp { position: relative; flex: none; box-sizing: border-box; width: 250px; height: 303px; overflow: hidden; border: 1px solid rgba(95, 95, 95, 0.1); border-radius: 12px; }
+.dx-comp { position: relative; flex: none; box-sizing: border-box; width: 100%; max-width: 250px; height: auto; aspect-ratio: 250 / 303; overflow: hidden; border: 1px solid rgba(95, 95, 95, 0.1); border-radius: 12px; }
 .dx-comp img { position: absolute; left: 0; width: 100%; height: 179.53%; max-width: none; }
 /* redesigns: three or four screens, numbered chips under them (hover a chip to pick out its screen) */
 .dx-chips { display: flex; gap: 24px; align-items: flex-start; }
@@ -186,7 +245,12 @@
 .dx-board .dx-bs img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .dx-board .dx-bl { margin: 0; text-align: center; transform: translateX(-50%); }
 .dx-board .dx-bn { display: flex; align-items: center; justify-content: center; width: 21.796px; height: 21.796px; border-radius: 50%; background: var(--dx-ac); color: #fff; font-weight: 700; font-size: 16px; }
-.dx-panel--board { overflow-x: auto; }
+.dx-panel--board { overflow: hidden; padding: calc(40px * var(--bz, 1)); border-radius: calc(40px * var(--bz, 1)); }
+.dx-panel--board .dx-board { zoom: var(--bz, 1); }
+/* the frame is taken out below a 900px window */
+@media (max-width: 899px) { .dx-panel--board { display: none; } }
+/* Onboarding Flow: once the two iterations are on separate rows, the left picture of each goes */
+@media (max-width: 849px) { #country-select .dx-pair > .dx-shot:first-child { display: none; } }
 /* final designs: a strip of screens, scrolled by the arrows */
 .dx-strip { position: relative; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; width: 100%; padding: 40px; border-radius: 40px; background: var(--dx-ac); overflow: hidden; color: #fff; }
 .dx-strip__view { margin: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; cursor: grab; overscroll-behavior-x: contain; }
@@ -215,10 +279,12 @@
 .dx-shot--vg img { width: 100%; height: 100%; object-fit: cover; }
 .dx-shot--cover img { width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 860px) {
-  .dx-jump, .dx-tint__row, .dx-steps { flex-direction: column; }
-  .dx-shots { flex-wrap: wrap; gap: 24px; }
+  .dx-jump, .dx-steps { flex-direction: column; }
 }
 .dx-pair { display: flex; gap: 8px; align-items: flex-start; justify-content: center; }
+/* two pictures side by side shrink together to fit a narrow window (keeping their proportions) */
+.dx-pair { max-width: 100%; }
+.dx-pair > .dx-shot:not(.dx-shot--short):not(.dx-shot--vg) { flex: 0 1 184px; min-width: 0; height: auto; aspect-ratio: 184 / 400; }
 .dx-col .dx-notes { margin-top: 0; }
 
 /* ---- MUJI-only parts ---- */
@@ -244,6 +310,8 @@
 .dx-wide--ratio video { position: static; }
 .dx-wide img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
 .dx-wide--ratio { width: 100%; height: auto; }
+/* the fixed-size ones shrink with the column on a narrow window, keeping their proportions (their aspect-ratio is in the markup) */
+.dx-wide:not(.dx-wide--ratio) { max-width: 100%; height: auto !important; }
 .dx-wide--ratio img { position: static; height: 100%; }
 .dx-cmp { position: relative; flex: none; width: 412px; height: 279.12px; filter: drop-shadow(0 0 7.5px var(--dx-glow)); }
 .dx-cmp__stack { position: absolute; left: 0; top: 0; width: 276.4px; overflow: hidden; border: 0.84px solid rgba(95, 95, 95, 0.1); border-radius: 10px; box-sizing: border-box; }

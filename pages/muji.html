@@ -40,8 +40,18 @@
     // but that runs after the first paint: set them here so the page is painted at its real size straight away (otherwise it appears too big and then shrinks).
     (function () {
       var r = document.documentElement, cw = r.clientWidth || window.innerWidth, vh = window.innerHeight;
-      r.style.setProperty('--s0', Math.min(1, Math.max(0.6, (vh - 300) / 600)).toFixed(4));
-      r.style.setProperty('--hd', Math.min(1, (cw <= 650 ? cw - 48 : Math.min(1040, cw - 48) - 80) / 960).toFixed(4));
+      // First screen's vertical layout (Figma at 900px tall: nav 80px from the top, tab 150-750px, arrow 788px, label to 847px). In a shorter window the gaps are tightened FIRST (nav up to 24px
+      // from the top, nav-to-tab 48 -> 20px, tab-to-arrow 38 -> 16px, bottom margin 53 -> 16px: 143px in all, used up at 757px tall) and the tab is only made smaller after that.
+      window.__xFS = function (vh, h0) {
+        var f = Math.min(1, Math.max(0, (900 - vh) / 143)), fixed = 300 - 143 * f, top0 = 150 - 84 * f, s0 = Math.min(1, Math.max(0.6, (vh - fixed) / h0));
+        return { s0: s0, nu: 56 * f, top0: top0, arrow: top0 + h0 * s0 + (38 - 22 * f), cy: top0 + h0 * s0 / 2 };
+      };
+      var L = window.__xFS(vh, 600);
+      if (L) {
+        r.style.setProperty('--s0', L.s0.toFixed(4)); r.style.setProperty('--nav-up', L.nu.toFixed(2) + 'px'); r.style.setProperty('--top0', L.top0.toFixed(1));
+        r.style.setProperty('--arrow-top', L.arrow.toFixed(1) + 'px'); r.style.setProperty('--tab-cy', L.cy.toFixed(1) + 'px');
+      } else r.style.setProperty('--s0', Math.min(1, Math.max(0.6, (vh - 300) / 600)).toFixed(4));
+      r.style.setProperty('--hd', Math.min(1, (cw <= 750 ? cw - 48 : cw < 1000 ? cw - 96 : Math.min(1040, cw - 144) - 80) / 960).toFixed(4));
     })();
   </script>
   <title>MUJI USA – Raina Ni</title>
@@ -65,11 +75,10 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=312" />
-  <link rel="stylesheet" href="../css/damai-exp-sections.css?v=30" />
-  <link rel="stylesheet" href="../css/damai-exp-cover.css?v=16" />
-  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=2" media="(min-width: 651px)" />
-  <link rel="stylesheet" href="../css/damai-exp-narrow.css?v=1" media="(max-width: 650px)" />
+  <link rel="stylesheet" href="../css/style.css?v=313" />
+  <link rel="stylesheet" href="../css/damai-exp-sections.css?v=50" />
+  <link rel="stylesheet" href="../css/damai-exp-cover.css?v=35" />
+  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=11" />
   <style>
     /* No browser page transition into or out of this experiment page (the opening and closing animations are done by pages/work.html and js/damai-open-exp.js). Without this,
        leaving this page runs a cross-document view transition whose snapshot of this page-tall glass tab keeps its blur live over the Work page: a heavy blur that lingers.
@@ -183,7 +192,7 @@
         <p class="dx-title">MUJI&rsquo;s site needs to be redesigned for younger audiences.</p>
         <p class="dx-body">As MUJI&rsquo;s e-commerce grows, younger shoppers need an easier way to explore its huge product catalog. Our team redesigns that experience to feel simple and intuitive, without losing MUJI&rsquo;s minimalist identity.</p>
       </div>
-      <div class="dx-panel" style="gap:40px"><div class="dx-wide" style="width:400px;height:227px"><img src="../assets/images/work/muji/ctx-1.png" alt="" loading="lazy" /></div><div class="dx-wide" style="width:400px;height:227px"><img src="../assets/images/work/muji/ctx-2.png" alt="" loading="lazy" /></div></div>
+      <div class="dx-panel" style="gap:40px"><div class="dx-wide" style="aspect-ratio:400/227;width:400px;height:227px"><img src="../assets/images/work/muji/ctx-1.png" alt="" loading="lazy" /></div><div class="dx-wide" style="aspect-ratio:400/227;width:400px;height:227px"><img src="../assets/images/work/muji/ctx-2.png" alt="" loading="lazy" /></div></div>
       <div class="dx-callout"><p>How might we help MUJI communicate their product offerings to a broader, younger audience through their digital e-commerce platform?</p></div>
     </section>
     <section id="final-designs" class="dx-sec">
@@ -253,12 +262,12 @@
       <div class="dx-ba">
         <div class="dx-col" style="justify-content:flex-start">
           <span class="dx-tag">before</span>
-          <div class="dx-wide" style="width:384px;height:218px"><img src="../assets/images/work/muji/d1-before.png" alt="" loading="lazy" /></div>
+          <div class="dx-wide" style="aspect-ratio:384/218;width:384px;height:218px"><img src="../assets/images/work/muji/d1-before.png" alt="" loading="lazy" /></div>
           <div class="dx-notes"><div class="dx-row"><img src="../assets/images/work/muji/exclaim.svg" alt="" /><p>Static notification at the top of the screen without a button to open the cart directly.</p></div></div>
         </div>
         <div class="dx-col dx-col--after" style="justify-content:flex-start">
           <span class="dx-tag">after</span>
-          <div class="dx-wide" style="width:409px;height:218px"><img src="../assets/images/work/muji/final-1.png" alt="" loading="lazy" /></div>
+          <div class="dx-wide" style="aspect-ratio:409/218;width:409px;height:218px"><img src="../assets/images/work/muji/final-1.png" alt="" loading="lazy" /></div>
           <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji/check.svg" alt="" /><p>Cart drawer slides in automatically after adding to cart, providing space for upsell.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>02 Lack of guidance for product discovery</p></div></div><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji/check.svg" alt="" /><p>Discounted price are labeled, &ldquo;total saved&rdquo; specified, nudges users towards items on sale without being intrusive.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>01 Intrusive promotion</p></div></div></div>
         </div>
       </div>
@@ -289,12 +298,12 @@
       <div class="dx-ba">
         <div class="dx-col" style="justify-content:flex-start">
           <span class="dx-tag">before</span>
-          <div class="dx-wide" style="width:384px;height:218px"><img src="../assets/images/work/muji/d3-before.png" alt="" loading="lazy" /></div>
+          <div class="dx-wide" style="aspect-ratio:384/218;width:384px;height:218px"><img src="../assets/images/work/muji/d3-before.png" alt="" loading="lazy" /></div>
           <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji/exclaim.svg" alt="" /><p>The checkout page uses Shopify&rsquo;s design, which is inconsistent with other pages</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>04 Missing the in-store atmosphere</p></div></div></div>
         </div>
         <div class="dx-col dx-col--after" style="justify-content:flex-start">
           <span class="dx-tag">after</span>
-          <div class="dx-wide" style="width:409px;height:218px"><img src="../assets/images/work/muji/d3-after.png" alt="" loading="lazy" /></div>
+          <div class="dx-wide" style="aspect-ratio:409/218;width:409px;height:218px"><img src="../assets/images/work/muji/d3-after.png" alt="" loading="lazy" /></div>
           <div class="dx-notes"><div class="dx-note-group"><div class="dx-row"><img src="../assets/images/work/muji/check.svg" alt="" /><p>Visual style consistent consistent with MUJI&rsquo;s design system.</p></div><div class="dx-row dx-row--ref"><i class="dx-ph"></i><p>04 Missing the in-store atmosphere</p></div></div></div>
         </div>
       </div>
@@ -353,9 +362,9 @@
       show(0);
     })();
   </script>
-  <script src="../js/main.js?v=46"></script>
-  <script src="../js/damai-open-exp.js?v=38"></script>
-  <script src="../js/case-exp-extras.js?v=73"></script>
+  <script src="../js/main.js?v=47"></script>
+  <script src="../js/damai-open-exp.js?v=41"></script>
+  <script src="../js/case-exp-extras.js?v=81"></script>
   <script>
     // Background shapes: same behaviour as the Work page. The 1440x900 canvas is centred and cropped as the window narrows, so the
     // shapes near its left/right edges (the orange circle on the right and the pink square on the left) would slide out of view
@@ -387,32 +396,45 @@
     // edges together. Then the page scrolls on (class is-open lifts the tab's fixed height, which changes nothing on screen).
     (function () {
       var holdY = null, GROW = 360, canvas = document.querySelector('.page-canvas--damai'), raf = 0, start = 0;
-      window.__caseGrow = GROW;
-      var wide = window.matchMedia('(min-width: 651px)');
+      var wide = window.matchMedia('(min-width: 0px)'); // (always: there is one layout at every width now, no separate phone layout)
+      // The "middle state" (the tab small in the middle with the edge tabs and "Scroll", growing to white as the page is scrolled) only exists in a window 1000px wide or more. Below that the page
+      // opens already at the top of the white state (g = 1, nothing pinned, the browser's own scrolling), and the Work page opens it with the shape transition.
+      var mid = window.matchMedia('(min-width: 1000px)');
+      window.__caseGrow = mid.matches ? GROW : 0;
+      window.__caseMid = function () { return mid.matches && window.scrollY < GROW * 0.5; }; // true while the middle state is showing (the closing animation exists only then)
       var cw = 0, vh = 0, h0 = 600, top0 = 0, i0 = 0, i1 = 0; // window width / height, the tab's height and distance from the top at the start, its content's width at the start / end
       function measure() {
         cw = canvas.clientWidth; vh = window.innerHeight;
-        var pad1 = Math.min(40, Math.max(24, (cw - 136 - 1170) / 2)), base = cw <= 1024 ? cw - 48 : Math.min(1250, cw - 136);
-        i0 = Math.min(1040, cw - 48) - 80; i1 = base - 2 * pad1;
+        var pad1 = Math.min(40, Math.max(24, (cw - 136 - 1170) / 2)), base = cw <= 750 ? cw : cw <= 1024 ? cw - 48 : Math.min(1250, cw - 136);
+        i0 = Math.min(1040, cw - 144) - 80; i1 = base - 2 * pad1;
         // 600px tall, unless the first screen's content needs more (a narrow window wraps the title): measured with the tab in its starting shape
         var tab = canvas.querySelector('.glass-card--case'), prev = canvas.style.getPropertyValue('--g');
         canvas.style.setProperty('--g', '0'); canvas.style.setProperty('--hd', Math.min(1, i0 / 960));
         var hero = canvas.querySelector('.case-hero');
         h0 = wide.matches ? Math.max(600, Math.ceil(hero.offsetTop + hero.offsetHeight + 40)) : 600; // layout sizes: unaffected by the scale below
-        canvas.style.setProperty('--s0', Math.min(1, Math.max(0.6, (vh - 300) / 600)).toFixed(4)); // 300px = 150 above the tab + 32 below it + the arrow, label and 45px under them
+        window.__caseGrow = mid.matches ? GROW : 0;
+        var LL = mid.matches ? window.__xFS(vh, h0) : null; // the vertical layout of the first screen (see the head of the page)
+        canvas.style.setProperty('--s0', (LL ? LL.s0 : Math.min(1, Math.max(0.6, (vh - 300) / 600))).toFixed(4));
         canvas.style.setProperty('--g', prev || '0');
         canvas.style.setProperty('--h0', h0 + 'px');
-        top0 = 150; // Figma: the tab's top is 150px from the window's top (the navigation is at 80px)
+        top0 = LL ? LL.top0 : (wide.matches && !mid.matches ? 0 : 150); // (no middle state below 1000px: the tab starts at the top) Figma: the tab's top is 150px from the window's top (the navigation is at 80px); closer to the top in a window shorter than 900px
+        var LF = wide.matches && !mid.matches ? window.__xFS(vh, 600) : null; // no middle state: the white page still sits as high as it does at the same window height with one (content offset, nav)
+        if (LF) document.documentElement.style.setProperty('--nav-up', LF.nu.toFixed(2) + 'px');
+        if (LL) { var rs = document.documentElement.style; rs.setProperty('--nav-up', LL.nu.toFixed(2) + 'px'); rs.setProperty('--arrow-top', LL.arrow.toFixed(1) + 'px'); rs.setProperty('--tab-cy', LL.cy.toFixed(1) + 'px'); }
         canvas.style.setProperty('--top0', top0.toFixed(1));
-        canvas.style.setProperty('--spacer', Math.max(0, GROW - top0).toFixed(1)); // room under the tab to stay pinned: the scrolling it takes, minus its distance from the top
-        canvas.style.setProperty('--rise', (top0 * 0.75).toFixed(1)); // the content sits this much lower inside the tab once it is open: it rises a quarter of what the top edge does
+        canvas.style.setProperty('--spacer', (mid.matches ? Math.max(0, GROW - top0) : 0).toFixed(1)); // room under the tab to stay pinned: the scrolling it takes, minus its distance from the top
+        canvas.style.setProperty('--rise', ((LF ? LF.top0 : top0) * 0.75).toFixed(1)); // the content sits this much lower inside the tab once it is open: it rises a quarter of what the top edge does
       }
       function ease(p) { return p * p * (3 - 2 * p); }
       function update() {
         raf = 0;
         if (!wide.matches) { canvas.style.setProperty('--hd', Math.min(1, (cw - 48) / 960).toFixed(4)); return; }
-        var g = ease(Math.min(1, Math.max(0, ((holdY === null ? window.scrollY : holdY) - start) / GROW)));
+        var g = mid.matches ? ease(Math.min(1, Math.max(0, ((holdY === null ? window.scrollY : holdY) - start) / GROW))) : 1; // below 1000px: white from the start
         canvas.style.setProperty('--g', g.toFixed(4));
+        // the arrow and "Scroll" leave downwards, the mirror of the navigation leaving upwards (main.js: it rides away with the page and drifts 28px more, fading over the first 120px of scrolling)
+        var so = Math.max(0, holdY === null ? window.scrollY : holdY), sp = Math.min(1, so / 120);
+        canvas.style.setProperty('--scroll-shift', (Math.min(so, 120) + sp * 28).toFixed(2) + 'px');
+        canvas.style.setProperty('--scroll-op', (1 - sp).toFixed(3));
         canvas.style.setProperty('--stick', (top0 * (1 - g)).toFixed(2));
         canvas.style.setProperty('--hd', Math.min(1, (i0 + (i1 - i0) * g) / 960).toFixed(4)); // the illustration board (960 wide) shrinks if its panel is narrower
         canvas.classList.toggle('is-open', g >= 1);
@@ -437,12 +459,12 @@
       // it was heading unless the user got less than a quarter of the way (so a nudge down rolls back, a nudge up from the end returns to the end).
       function snap() {
         var p = (target - start) / GROW;
-        if (!wide.matches || touching || p <= 0 || p >= 1) return;
+        if (!mid.matches || touching || p <= 0 || p >= 1) return;
         target = start + GROW * (dir > 0 ? (p > 0.25 ? 1 : 0) : (p < 0.75 ? 0 : 1));
         run();
       }
       window.addEventListener('wheel', function (e) {
-        if (!wide.matches || e.ctrlKey || e.defaultPrevented) return; // ctrl + wheel is the browser's zoom
+        if (!mid.matches || e.ctrlKey || e.defaultPrevented) return; // ctrl + wheel is the browser's zoom
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // a sideways swipe (the Final designs strip) is left to the browser
         e.preventDefault();
         var d = e.deltaY * (e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? window.innerHeight : 1);
@@ -492,28 +514,13 @@
     })();
   </script>
   <script>
-    // Narrow layout (css/damai-narrow.css): the footer sits inside the glass tab, under the last section. In the wide layout it stays
-    // its own glass tab below the page, so it moves between the two when the window crosses the breakpoint.
-    (function () {
-      var footer = document.querySelector(".site-footer"), tab = document.querySelector(".glass-card--case");
-      if (!footer || !tab) return;
-      var home = footer.parentNode, after = footer.nextSibling, narrow = window.matchMedia("(max-width: 650px)");
-      function place() {
-        if (narrow.matches) { if (footer.parentNode !== tab) tab.appendChild(footer); }
-        else if (footer.parentNode !== home) home.insertBefore(footer, after);
-      }
-      place();
-      if (narrow.addEventListener) narrow.addEventListener("change", place); else narrow.addListener(place);
-    })();
-  </script>
-  <script>
     // The back arrow plays the opening backwards (the browser's own Back button cannot be held back by a page, so for that the Work page plays it on arrival: js/damai-open-exp.js). A hidden copy of the Work page (pages/work.html?closing=1, see js/damai-open-exp.js) is
     // kept ready for it; when the arrow is clicked, the page first goes back to its first screen (if it was scrolled), the copy builds this first screen from what is on screen now and
     // plays the animations over it, and when it is done the Work page opens. Narrow windows and reduced motion get the plain link.
     (function () {
       var back = document.querySelector('.case-topbar__back');
       if (!back) return;
-      var narrow = window.matchMedia('(max-width: 650px)'), reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var narrow = window.matchMedia('(max-width: 999px)'), reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
       var frame = null, busy = false, dropTimer = 0;
       function prepare() {
         clearTimeout(dropTimer);
@@ -569,6 +576,14 @@
         })();
       }
       ['pointerenter', 'focus'].forEach(function (n) { back.addEventListener(n, prepare); });
+      // The navigation bar's "Work" plays the same closing animation, so the hidden copy of the Work page is made ready as soon as the pointer is on the bar (not only for the arrow): built at
+      // the click instead, the animation started ~380ms later and its first frames stuttered while the copy loaded.
+      var navBar = document.querySelector('.page-nav');
+      if (navBar) {
+        ['pointerenter', 'focusin'].forEach(function (n) { navBar.addEventListener(n, prepare); });
+        navBar.addEventListener('touchstart', prepare, { passive: true });
+        ['pointerleave', 'focusout'].forEach(function (n) { navBar.addEventListener(n, drop); });
+      }
       back.addEventListener('touchstart', prepare, { passive: true });
       ['pointerleave', 'blur'].forEach(function (n) { back.addEventListener(n, drop); });
       window.addEventListener('pageshow', function (e) { if (e.persisted && frame) { frame.parentNode.removeChild(frame); frame = null; busy = false; window.__caseClosing = false; } });
@@ -580,13 +595,14 @@
         if (!arrow) arrow = e.target.closest && e.target.closest('.page-nav a[href="work.html"]');
         if (!arrow) return;
         if (window.__caseGoing) { e.preventDefault(); e.stopPropagation(); return; } // the tabs are turning: not now
-        // From the white page (the tab mostly grown) neither plays the opening backwards: the site's own transition (the shapes, js/case-transition.js) takes the click
-        if (window.scrollY >= (window.__caseGrow || 360) * 0.5) return;
+        // Outside the middle state (the tab mostly grown, or a window under 1000px where there is no middle state) the opening is not played backwards: the site's own transition (the shapes,
+        // js/case-transition.js) takes the click
+        if (!(window.__caseMid && window.__caseMid())) return;
         if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         e.stopPropagation(); // the site's own pink page transition (js/case-transition.js) must not take this click
         if (narrow.matches || reduce.matches) return;
         e.preventDefault();
-        close(function () { window.location.href = arrow.href || back.href; });
+        close(function () { try { sessionStorage.setItem('xLastCase', location.pathname.split('/').pop()); } catch (e2) {} window.location.href = arrow.href || back.href; }); // (said again as the page is left: the Work page shows the cards of THIS case study)
       }, true);
     })();
   </script>
