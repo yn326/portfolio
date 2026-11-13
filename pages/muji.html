@@ -40,11 +40,15 @@
     // but that runs after the first paint: set them here so the page is painted at its real size straight away (otherwise it appears too big and then shrinks).
     (function () {
       var r = document.documentElement, cw = r.clientWidth || window.innerWidth, vh = window.innerHeight;
-      // First screen's vertical layout (Figma at 900px tall: nav 80px from the top, tab 150-750px, arrow 788px, label to 847px). In a shorter window the gaps are tightened FIRST (nav up to 24px
-      // from the top, nav-to-tab 48 -> 20px, tab-to-arrow 38 -> 16px, bottom margin 53 -> 16px: 143px in all, used up at 757px tall) and the tab is only made smaller after that.
+      // First screen's vertical layout (Figma at 900px tall: nav 80px from the top, tab 150-750px, arrow 788px, label to 847px).
       window.__xFS = function (vh, h0) {
-        var f = Math.min(1, Math.max(0, (900 - vh) / 143)), fixed = 300 - 143 * f, top0 = 150 - 84 * f, s0 = Math.min(1, Math.max(0.6, (vh - fixed) / h0));
-        return { s0: s0, nu: 56 * f, top0: top0, arrow: top0 + h0 * s0 + (38 - 22 * f), cy: top0 + h0 * s0 / 2 };
+        // A window shorter than the design's (900px tall for a 600px tab): EVERYTHING gets smaller together, in proportion (k = the window's height over the design's): the tab, the
+        // navigation's distance from the top, the gaps above and below the tab. The tab stops at 60% of its size; in a window shorter still only the gaps go on shrinking (kg).
+        var k = Math.min(1, vh / (300 + h0)), s0 = Math.max(0.6, k), kg = s0 > k ? Math.max(0.15, (vh - h0 * s0) / 300) : k, base = 150 * kg, nu = 80 - Math.max(24, 80 * kg);
+        // A window taller than 900px (a big monitor): the tab and the arrow under it move down by half of the extra height, so the extra room is shared above and below them instead of
+        // all of it being left under "Scroll". (The navigation stays 80px from the top, as on every other page. base: the tab's top without that, which the white page's offset still uses.)
+        var top0 = base + Math.max(0, (vh - 900) / 2);
+        return { s0: s0, nu: nu, top0: top0, base: base, arrow: top0 + h0 * s0 + 38 * kg, cy: top0 + h0 * s0 / 2 };
       };
       var L = window.__xFS(vh, 600);
       if (L) {
@@ -75,10 +79,10 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=313" />
+  <link rel="stylesheet" href="../css/style.css?v=314" />
   <link rel="stylesheet" href="../css/damai-exp-sections.css?v=76" />
-  <link rel="stylesheet" href="../css/damai-exp-cover.css?v=36" />
-  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=11" />
+  <link rel="stylesheet" href="../css/damai-exp-cover.css?v=38" />
+  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=14" />
   <style>
     /* No browser page transition into or out of this experiment page (the opening and closing animations are done by pages/work.html and js/damai-open-exp.js). Without this,
        leaving this page runs a cross-document view transition whose snapshot of this page-tall glass tab keeps its blur live over the Work page: a heavy blur that lingers.
@@ -363,7 +367,7 @@
     })();
   </script>
   <script src="../js/main.js?v=47"></script>
-  <script src="../js/damai-open-exp.js?v=44"></script>
+  <script src="../js/damai-open-exp.js?v=46"></script>
   <script src="../js/case-exp-extras.js?v=85"></script>
   <script>
     // Background shapes: same behaviour as the Work page. The 1440x900 canvas is centred and cropped as the window narrows, so the
@@ -423,7 +427,7 @@
         if (LL) { var rs = document.documentElement.style; rs.setProperty('--nav-up', LL.nu.toFixed(2) + 'px'); rs.setProperty('--arrow-top', LL.arrow.toFixed(1) + 'px'); rs.setProperty('--tab-cy', LL.cy.toFixed(1) + 'px'); }
         canvas.style.setProperty('--top0', top0.toFixed(1));
         canvas.style.setProperty('--spacer', (mid.matches ? Math.max(0, GROW - top0) : 0).toFixed(1)); // room under the tab to stay pinned: the scrolling it takes, minus its distance from the top
-        canvas.style.setProperty('--rise', ((LF ? LF.top0 : top0) * 0.75).toFixed(1)); // the content sits this much lower inside the tab once it is open: it rises a quarter of what the top edge does
+        canvas.style.setProperty('--rise', ((LF ? LF.base : LL ? LL.base : top0) * 0.75).toFixed(1)); // the content sits this much lower inside the tab once it is open: it rises a quarter of what the top edge does
       }
       function ease(p) { return p * p * (3 - 2 * p); }
       function update() {

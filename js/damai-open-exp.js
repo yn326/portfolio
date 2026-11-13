@@ -47,7 +47,7 @@
       hd: q('.page-canvas--damai').style.getPropertyValue('--hd') || '1', descFs: q('.page-canvas--damai').style.getPropertyValue('--desc-fs') || '', canvasClass: q('.page-canvas--damai').className.split(/\s+/).filter(function (c) { return c && c !== 'page-canvas' && c !== 'page-canvas--case'; }).join(' '), // the page's own classes, which the copied pieces need to be styled
       heroMin: fw.getComputedStyle(q('.case-hero')).minHeight,
       topbar: document.importNode(q('.dm-topbar'), true), hero: document.importNode(q('.case-hero'), true),
-      bg: document.importNode(q('.case-bg'), true), scroll: document.importNode(q('.dm-scroll'), true), scrollLeft: q('.dm-scroll').getBoundingClientRect().left,
+      bg: document.importNode(q('.case-bg'), true), scroll: document.importNode(q('.dm-scroll'), true), scrollLeft: q('.dm-scroll').getBoundingClientRect().left, scrollTop: q('.dm-scroll').getBoundingClientRect().top,
       gutter: Math.max(0, innerWidth - fd.documentElement.clientWidth), // the Damai page's scrollbar space, if it has one
       lights: box(q('.dm-topbar__lights')), title: runOf(q('.case-hero__title')), desc: runOf(q('.case-hero__desc')), peeks: {}
     };
@@ -295,6 +295,7 @@
         var holder = document.createElement('div');
         holder.className = 'page-canvas--damai page-canvas--wapoo';
         holder.innerHTML = d.peekHTML[key];
+        holder.style.setProperty('--s0', String(d.s1)); holder.style.setProperty('--tab-cy', (d.T.top + d.T.height / 2) + 'px'); // (the edge tab's size and height in the window follow the middle tab's, which only the case study's own script knows)
         M.appendChild(holder);
         extraEls.push(holder);
         // it slides in from beyond its own edge of the window (and out again, closing) with a fade, as the edge tabs do when a case study is swapped for another
@@ -363,6 +364,7 @@
     scroller.className = d.canvasClass || 'page-canvas--damai';
     var sc = d.scroll.cloneNode(true);
     sc.style.left = d.scrollLeft + 'px'; // exactly where the Damai page puts it
+    if (d.scrollTop != null) sc.style.top = d.scrollTop + 'px'; // (its height in the window too: the case study sets it by script for the window's height, which this page's css does not know)
     sc.style.marginLeft = '0';
     scroller.appendChild(sc);
     M.appendChild(scroller);

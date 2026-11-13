@@ -128,12 +128,13 @@
 .page-canvas--damai .dm-peek {
   position: fixed;
   top: var(--tab-cy, 50%); /* (centred on the middle tab, which is not on the window's centre once the gaps are tightened) */
-  width: 780px;
-  height: 450px;
-  margin-top: -225px;
+  /* (the edge tabs are the middle tab at 3/4 of its size, and get smaller with it in a short window: --s0, the middle tab's scale) */
+  width: calc(780px * var(--s0, 1));
+  height: calc(450px * var(--s0, 1));
+  margin-top: calc(-225px * var(--s0, 1));
   box-sizing: border-box;
-  padding: 30px;
-  border-radius: 30px;
+  padding: calc(30px * var(--s0, 1));
+  border-radius: calc(30px * var(--s0, 1));
   background: rgba(255, 255, 255, 0.15);
   -webkit-backdrop-filter: blur(8px) saturate(130%);
   backdrop-filter: blur(8px) saturate(130%);
@@ -151,7 +152,9 @@
 /* The edge tabs always show a bit of themselves. At wide windows 69px (left) / 74px (right) of each, with 131 / 126px between them and the middle tab, as in Figma (1440px wide). As the window
    narrows, FIRST what shows of each edge tab gets smaller (down to 32px, the gap staying as in Figma), THEN the gap gets smaller (down to 40px), and last the middle tab itself gets narrower
    (--w0 in damai-exp-scale.css keeps 72px beside it). (--peek-m: the room beside the middle tab; --peek-v / --peek-vr: what shows of the left / right edge tab.) */
-.page-canvas--damai { --peek-m: calc((100% - min(1040px, 100% - 144px)) / 2); --peek-v: clamp(32px, calc(var(--peek-m) - 131px), 69px); --peek-vr: clamp(32px, calc(var(--peek-m) - 126px), 74px); }
+.page-canvas--damai { --peek-m: calc((100% - min(1040px, 100% - 144px)) / 2); --peek-v: clamp(32px, calc(var(--peek-m) - 131px), max(69px, calc(var(--peek-m) * 0.345))); --peek-vr: clamp(32px, calc(var(--peek-m) - 126px), max(74px, calc(var(--peek-m) * 0.37))); }
+/* (wider than the 1440px design the edge tabs no longer stop at 69 / 74px: they show the same SHARE of the room beside the middle tab as in the design, 34.5% on the left and 37% on the right,
+   so on a very wide screen they come in as far as they do, in proportion, at 1440px) */
 /* How far an edge tab slides out when it is hovered: 22px, but only 8px once what shows of it has got down to its 32px minimum (the factor makes the change happen right at 32px). Worked out in
    vw: a percentage inside a transform would mean the tab's own width. */
 .page-canvas--damai {
@@ -159,10 +162,10 @@
   --peek-pop-l: clamp(8px, calc((clamp(32px, calc(var(--peek-mv) - 131px), 69px) - 32px) * 100), 22px);
   --peek-pop-r: clamp(8px, calc((clamp(32px, calc(var(--peek-mv) - 126px), 74px) - 32px) * 100), 22px);
 }
-.page-canvas--damai .dm-peek--muji, .page-canvas--damai .dm-peek--left { left: calc(var(--peek-v) - 780px); } /* (780 wide: its right edge is --peek-v into the window) */
+.page-canvas--damai .dm-peek--muji, .page-canvas--damai .dm-peek--left { left: calc(var(--peek-v) - 780px * var(--s0, 1)); } /* (780 wide: its right edge is --peek-v into the window) */
 .page-canvas--damai .dm-peek--wapoo, .page-canvas--damai .dm-peek--right { left: calc(100% - var(--peek-vr)); }
-.page-canvas--damai .dm-peek .traffic-lights { gap: 6px; } /* the middle tab's lights at the edge tab's 0.75 scale: 12px dots, 6px apart, 30px from the corner */
-.page-canvas--damai .dm-peek .traffic-light { width: 12px; height: 12px; }
+.page-canvas--damai .dm-peek .traffic-lights { gap: calc(6px * var(--s0, 1)); } /* the middle tab's lights at the edge tab's 0.75 scale: 12px dots, 6px apart, 30px from the corner */
+.page-canvas--damai .dm-peek .traffic-light { width: calc(12px * var(--s0, 1)); height: calc(12px * var(--s0, 1)); }
 
 /* ---- Wapoo's first screen ("Wapoo 3.0", Figma node 1569:7132): the same tab as Damai's, with its own illustration: three short-video phone screens and two white pills on a dotted ground ---- */
 .page-canvas--wapoo .dm-illus--wapoo { background: linear-gradient(to right, rgba(200, 149, 241, calc(0.15 + 0.35 * var(--g, 0))), rgba(166, 216, 249, calc(0.15 + 0.35 * var(--g, 0)))); }

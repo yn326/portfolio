@@ -898,6 +898,7 @@ button { font-family: inherit; cursor: pointer; }
 /* ---- Homepage stage ---- */
 .home-stage {
   min-height: 100vh;
+  min-height: 100dvh; /* (the part of the window that is really visible: on an iPad / phone, 100vh also counts the room under the browser's bars, which made the page scroll a little) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1497,6 +1498,7 @@ img.work-project__media-img--shadow {
   width: 800px;
   max-width: calc(100% - 48px);
   height: calc(100vh - 80px);
+  height: calc(100dvh - 80px);
   padding: 80px;
   flex-direction: column;
   align-items: flex-start;
@@ -4049,6 +4051,7 @@ section.case-final.reveal-ready.is-revealed {
 .page-canvas {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
 }
 /* Case-study accent color, cascades down to every element that reads

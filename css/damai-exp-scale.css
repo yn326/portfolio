@@ -68,7 +68,7 @@ html, body { overflow-anchor: none; }
   .page-canvas--damai .glass-card--case { --base-w: 100%; }
 }
 /* Scrollspy: in the middle of the strip between the tab and the window edge (the current section's bar is 20px wide), never closer than 10px to either edge. */
-.page-canvas--damai .scrollspy { opacity: clamp(0, calc((var(--g, 0) - 0.8) * 5), 1); right: max(calc(var(--spy-margin) / 2 - 18px), calc((100% - 1250px) / 4 - 18px)); } /* -18px: 10px (half the 20px bar) + 8px padding of each bar's row */
+.page-canvas--damai .scrollspy { opacity: clamp(0, calc((var(--g, 0) - 0.8) * 5), 1); right: calc(var(--spy-margin) / 2 - 18px); } /* -18px: 10px (half the 20px bar) + 8px padding of each bar's row */
 /* Footer: its own tab under the page, 34px below the tab, 80px of page below it, as wide as the tab. */
 .page-canvas--damai .site-footer {
   position: relative;
@@ -151,3 +151,8 @@ html, body { overflow-anchor: none; }
 
 /* the page's scroll bar stays out of sight while the tab grows (the gutter is still reserved, so nothing shifts when it appears) */
 html:not(.dx-white) { scrollbar-color: transparent transparent; }
+/* A very tall window (a big monitor): the first screen plus its spacer is shorter than the window, so there was nothing to scroll and the tab could never open. While the tab is not open
+   yet the pinned part is always at least the window's height plus the 360px of scrolling the opening takes. */
+@media (min-width: 1000px) { .page-canvas--damai:not(.is-open) .case-pin { min-height: calc(100vh + 360px); } }
+/* the scrollspy is 32px from the window's right edge from 1400px wide (16px below that) */
+@media (min-width: 1400px) { .page-canvas--damai .scrollspy { right: 32px; } }
