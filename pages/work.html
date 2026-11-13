@@ -10,6 +10,10 @@
        (it only writes when the size actually changed). */
     (function () {
       var d = document.documentElement, last = "";
+      // The navigation bar's height in the window (80px from the top at 900px tall or more, less in proportion in a shorter window, never under 24px; 80px up to 850px wide, where the
+      // Work page is a list), and where the Work page's cards start (their top edge: centred in the window, at least 24px under the 22px-tall bar). Every page uses the same sums.
+      window.__navUp = function (w, h) { return w <= 850 ? 0 : 80 - Math.max(24, 80 * (h >= 540 ? Math.min(1, h / 900) : Math.max(0.15, (h - 360) / 300))); };
+      window.__workTop = function (w, h) { var ts = Math.min(w >= 1440 ? w / 1440 : (w >= 1284 ? 1 : (w - 48) / 1236), h / 800, 1.2); return Math.max((h - 900 * ts) / 2 + 200 * ts, 80 - window.__navUp(w, h) + 46); };
       window.__vh = function (fallback) { // the window's height for layout. On a touchscreen: the height with the browser's bars showing (100svh), which does not change while they slide in and out
         try { if (!window.matchMedia("(hover: none), (pointer: coarse)").matches) return fallback;
           var p = document.createElement("div"); p.style.cssText = "position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none";
@@ -584,8 +588,8 @@
       // the same as the home page's glass tab.
       //   >= 1440px   cards scale up with the screen, as before
       //   1284-1439   cards stay full size, centered (>= 24px side margins)
-      //   649-1283    two-up carousel scaled down so the margins stay 24px: scale = (width - 48) / 1236
-      //   <= 648      carousel off: a vertical list, 36px between cards, first card at y = 200, scaling down with
+      //   851-1283    two-up carousel scaled down so the margins stay 24px: scale = (width - 48) / 1236
+      //   <= 850      carousel off: a vertical list, 36px between cards, first card at y = 142, scaling down with
       //               24px side margins: scale = min(1, (width - 48) / 600); the page scrolls natively
       var ORDER = ["muji", "damai", "wapoo"];
       var stage = document.querySelector(".w4-stage"), strip = document.querySelector(".w4__tabs");
@@ -603,20 +607,24 @@
         shapeE9.style.left = (720 + Math.min(600, SHAPE_K * half) - 102) + "px";      // 204px circle, design center x 1320
         shapeR6.style.left = (720 - Math.min(590.5, SHAPE_K * half) - 128.743) + "px"; // 257.486px square, design center x 129.5
       }
+      var LIST_TOP = 142; // one card per row: the first card's top (the same as the About page's tab there)
       function layout() {
         var de = document.documentElement;
         // Pick the mode from the full window width, then measure: the list mode adds a page scrollbar (15px with classic
         // scrollbars), so the usable width has to be read after the class is on, or the side margins come out uneven.
-        var list = window.innerWidth <= 648;
+        var list = window.innerWidth <= 850; // (one card per row up to 850px: a tablet held upright, a narrow window)
         de.classList.toggle("w4-list", list);
         mode = list ? "list" : "row";
         var vw = de.clientWidth, vh = window.__vh ? window.__vh(de.clientHeight) : de.clientHeight;
         // the navigation bar sits as high as on the case studies in a window shorter than 900px (so it does not jump when a card opens into a case study): see __xFS in pages/damai.html
-        de.style.setProperty("--nav-up", (list ? 0 : 80 - Math.max(24, 80 * (vh >= 540 ? Math.min(1, vh / 900) : Math.max(0.15, (vh - 360) / 300)))).toFixed(2) + "px");
+        var navUp = list ? 0 : window.__navUp(vw, vh);
+        de.style.setProperty("--nav-up", navUp.toFixed(2) + "px");
         var c = Math.max(vw / 1440, vh / 900);
         placeShapes(vw, vh);
         if (list) ts = Math.min(1, (vw - 48) / 600);
-        else ts = vw >= 1440 ? c : (vw >= 1284 ? 1 : (vw - 48) / 1236);
+        // The cards' size follows BOTH the window's width and its height: the smallest of what the width allows (as before), the window's height over 800 (the design is 900 tall, cards 500 of it: with 800 the cards are a little bigger and the gaps around them smaller; so a short, wide
+        // window, a phone on its side, does not get cards that run into the navigation) and a hard cap of 1.2 (720 x 600px cards, however big the screen).
+        else ts = Math.min(vw >= 1440 ? vw / 1440 : (vw >= 1284 ? 1 : (vw - 48) / 1236), vh / 800, 1.2);
         // Description text floor (see .w4-tab__text p): publish the scale, then grow every card by however much the
         // wrapped text needs beyond the 58px footer (same extra for all three so they stay the same height).
         stage.style.setProperty("--ts", ts);
@@ -634,10 +642,10 @@
         cardH = 500 + extra;
         if (list) {
           listLeft = (vw - 600 * ts) / 2;
-          stage.style.height = (200 + 3 * cardH * ts + 2 * 36 + 80) + "px";
+          stage.style.height = (LIST_TOP + 3 * cardH * ts + 2 * 36 + 80) + "px";
           strip.style.transform = "none";
         } else {
-          var x0 = vw / 2 - 618 * ts, y0 = (vh - 900 * ts) / 2 + 200 * ts;
+          var x0 = vw / 2 - 618 * ts, y0 = window.__workTop(vw, vh); // (never closer than 24px to the navigation, which is 22px tall)
           stage.style.height = vh + "px";
           strip.style.transformOrigin = "0 0";
           strip.style.transform = "translate(" + (x0 - 100 * ts) + "px, " + (y0 - 200 * ts) + "px) scale(" + ts + ")";
@@ -653,7 +661,7 @@
         ORDER.forEach(function (k, i) {
           var a = S[k][0], b = S[k][1], el = tabs[k];
           if (mode === "list") {
-            el.style.transform = "translate3d(" + (listLeft - a.x) + "px, " + (200 + i * (cardH * ts + 36) - a.y) + "px, 0) scale(" + ts + ")";
+            el.style.transform = "translate3d(" + (listLeft - a.x) + "px, " + (LIST_TOP + i * (cardH * ts + 36) - a.y) + "px, 0) scale(" + ts + ")";
             return;
           }
           // left/top stay at the first state (set in the markup); the slide is a compositor-friendly transform, so no
