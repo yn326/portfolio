@@ -156,3 +156,5 @@ html:not(.dx-white) { scrollbar-color: transparent transparent; }
 @media (min-width: 1000px) { .page-canvas--damai:not(.is-open) .case-pin { min-height: calc(100vh + 360px); } }
 /* the scrollspy is 32px from the window's right edge from 1400px wide (16px below that) */
 @media (min-width: 1400px) { .page-canvas--damai .scrollspy { right: 32px; } }
+/* a touchscreen's opening drag (the page does not scroll): the tab's top edge rises by --vy px, as it does while pinned in a scroll (set by the page's script) */
+@media (min-width: 1000px) { .page-canvas--damai .glass-card--case { translate: 0 calc(var(--vy, 0) * -1px); } }

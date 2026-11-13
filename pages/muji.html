@@ -83,7 +83,7 @@
   <link rel="stylesheet" href="../css/style.css?v=314" />
   <link rel="stylesheet" href="../css/damai-exp-sections.css?v=76" />
   <link rel="stylesheet" href="../css/damai-exp-cover.css?v=38" />
-  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=14" />
+  <link rel="stylesheet" href="../css/damai-exp-scale.css?v=15" />
   <style>
     /* No browser page transition into or out of this experiment page (the opening and closing animations are done by pages/work.html and js/damai-open-exp.js). Without this,
        leaving this page runs a cross-document view transition whose snapshot of this page-tall glass tab keeps its blur live over the Work page: a heavy blur that lingers.
@@ -367,7 +367,7 @@
       show(0);
     })();
   </script>
-  <script src="../js/main.js?v=47"></script>
+  <script src="../js/main.js?v=48"></script>
   <script src="../js/damai-open-exp.js?v=46"></script>
   <script src="../js/case-exp-extras.js?v=85"></script>
   <script>
@@ -482,6 +482,7 @@
       }, { passive: false });
       window.addEventListener('scroll', function () {
         if (!raf && !frame) raf = requestAnimationFrame(update);
+        if (virt) return; // (a touchscreen's opening drag: nothing is scrolling)
         var y = window.scrollY;
         if (Math.abs(y - cur) < 1.5) return; // our own glide
         // On a touchscreen the browser reports scroll positions late and rounded, so the glide's own steps looked like the reader scrolling: the glide was dropped and started again,
@@ -499,6 +500,65 @@
       // not laid out again for that, or it would jump about during the scroll. It is laid out again when the width changes, as when the device is turned.)
       var touchDevice = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches, lastW = window.innerWidth;
       window.addEventListener('resize', function () { if (touchDevice && window.innerWidth === lastW) return; lastW = window.innerWidth; measure(); update(); });
+
+      // ---- Touchscreens: opening the tab is NOT a page scroll. A scroll makes a phone's / tablet's browser slide its own bars away, which reads as "this page scrolls" before the case study
+      // has even opened. So from the first screen a drag is taken here (the page stays where it is) and drives the opening directly: the same progress, the same resistance / snap when
+      // the finger lifts. Only when the tab is fully open is the page put at the top of the white page, and from there on scrolling is the browser's own. (Closing again, by scrolling
+      // back up from the white page, is a normal scroll.) ----
+      var virt = false, vY = 0, vBase = 0, vStartY = 0, vLastY = 0, vDir = 1, vFrame = 0, vMoved = false, follow = null, navEl = document.querySelector('.page-nav');
+      function vApply() {
+        holdY = start + Math.min(vY, GROW); window.__caseVY = holdY;
+        update();
+        canvas.style.setProperty('--vy', (top0 * (parseFloat(canvas.style.getPropertyValue('--g')) || 0)).toFixed(2)); // the tab's top edge rises as it would while pinned in a scroll
+        if (navEl) navEl.style.translate = '0 ' + (-(holdY - start)).toFixed(1) + 'px';                                    // the navigation leaves with the "page"
+        window.dispatchEvent(new Event('scroll')); // (main.js fades the navigation by the position it is given: window.__caseVY)
+      }
+      function vEnd(open) {
+        cancelAnimationFrame(vFrame); vFrame = 0;
+        if (open) { holdY = start + GROW; update(); } // (the tab is open: the page is tall now)
+        virt = false; holdY = null; window.__caseVY = null;
+        canvas.style.removeProperty('--vy'); if (navEl) navEl.style.translate = '';
+        if (open) window.scrollTo({ top: start + GROW, behavior: 'instant' });
+        cur = target = window.scrollY;
+        update();
+        window.dispatchEvent(new Event('scroll'));
+      }
+      window.addEventListener('touchstart', function (e) {
+        follow = null;
+        if (!touchDevice || !mid.matches || e.touches.length !== 1) return;
+        var y = e.touches[0].clientY;
+        if (virt) { cancelAnimationFrame(vFrame); vFrame = 0; vBase = vY; vStartY = vLastY = y; vMoved = true; return; } // caught in the middle of its glide
+        if (window.scrollY > 0.5 || canvas.classList.contains('is-open') || window.__caseGoing || window.__caseClosing) return;
+        virt = true; vY = 0; vBase = 0; vStartY = vLastY = y; vMoved = false;
+      }, { passive: true });
+      document.addEventListener('touchmove', function (e) {
+        if (!e.touches.length) return;
+        var y = e.touches[0].clientY;
+        if (follow) { if (e.cancelable) e.preventDefault(); window.scrollTo({ top: Math.max(0, follow.top + (follow.y - y)), behavior: 'instant' }); return; } // the same drag carries on down the white page
+        if (!virt) return;
+        if (!vMoved && y >= vStartY) { if (y > vStartY + 6) virt = false; return; } // a pull downwards on the first screen is left to the browser
+        vMoved = true;
+        if (e.cancelable) e.preventDefault();
+        if (y !== vLastY) vDir = y < vLastY ? 1 : -1;
+        vLastY = y;
+        vY = Math.max(0, vBase + (vStartY - y));
+        if (vY >= GROW) { vEnd(true); follow = { top: window.scrollY, y: y }; } else vApply();
+      }, { passive: false });
+      function vRelease() {
+        follow = null;
+        if (!virt) return;
+        if (!vMoved || vY <= 0) { vEnd(false); return; }
+        var p = vY / GROW, to = (vDir > 0 ? p > 0.25 : p >= 0.75) ? GROW : 0, last = performance.now();
+        (function step(now) {
+          var k = 1 - Math.pow(1 - 0.09, Math.min(50, now - last) / 16.667); last = now;
+          vY += (to - vY) * k;
+          if (Math.abs(to - vY) < 0.5) { vY = to; if (to) vEnd(true); else { vApply(); vEnd(false); } return; }
+          vApply();
+          vFrame = requestAnimationFrame(step);
+        })(last);
+      }
+      window.addEventListener('touchend', vRelease, { passive: true });
+      window.addEventListener('touchcancel', vRelease, { passive: true });
       measure();
       update();
       // Reload: the page comes back at the scroll position it was left at (kept in sessionStorage), and the tab is already as white as that position says.

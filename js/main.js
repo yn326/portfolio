@@ -325,7 +325,7 @@ function initPageNavReveal() {
 
   function update() {
     ticking = false;
-    const y = Math.max(window.scrollY, 0);
+    const y = Math.max(window.__caseVY != null ? window.__caseVY : window.scrollY, 0); // (__caseVY: a case study's opening drag on a touchscreen, which stands in for the scroll position)
     // a page can take the bar over for a range of positions (the case studies show it at the top of the white page, see js/case-exp-extras.js): then it is left alone here, not set twice per frame
     if (window.__caseNavHold && window.__caseNavHold(y)) { lastY = y; return; }
     const FOLLOW_NOW = FOLLOW - (parseFloat(document.documentElement.style.getPropertyValue("--nav-up")) || 0); // (the bar's natural top is 80px less --nav-up, set by the case studies and the Work page in a short window)
