@@ -10,8 +10,13 @@
        (it only writes when the size actually changed). */
     (function () {
       var d = document.documentElement, last = "";
+      window.__vh = function (fallback) { // the window's height for layout. On a touchscreen: the height with the browser's bars showing (100svh), which does not change while they slide in and out
+        try { if (!window.matchMedia("(hover: none), (pointer: coarse)").matches) return fallback;
+          var p = document.createElement("div"); p.style.cssText = "position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none";
+          document.documentElement.appendChild(p); var h = p.offsetHeight; p.parentNode.removeChild(p); return h || fallback; } catch (e) { return fallback; }
+      };
       function s() {
-        var w = d.clientWidth, h = d.clientHeight, key = w + "x" + h;
+        var w = d.clientWidth, h = window.__vh(d.clientHeight), key = w + "x" + h;
         if (key === last) return;
         if (last && last.split("x")[0] === String(w) && window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches) return; // (a touchscreen's browser bars sliding in and out change the height during a scroll: the background is not rescaled for that)
         last = key;
@@ -40,7 +45,7 @@
     // The first screen's scale and illustration size depend on the window (css/damai-exp-scale.css, css/damai-exp-cover.css). The script at the end of the page measures them,
     // but that runs after the first paint: set them here so the page is painted at its real size straight away (otherwise it appears too big and then shrinks).
     (function () {
-      var r = document.documentElement, cw = r.clientWidth || window.innerWidth, vh = window.innerHeight;
+      var r = document.documentElement, cw = r.clientWidth || window.innerWidth, vh = window.__vh ? window.__vh(window.innerHeight) : window.innerHeight;
       // First screen's vertical layout (Figma at 900px tall: nav 80px from the top, tab 150-750px, arrow 788px, label to 847px).
       window.__xFS = function (vh, h0) {
         // A window shorter than the design's (900px tall for a 600px tab): EVERYTHING gets smaller together, in proportion (k = the window's height over the design's): the tab, the
@@ -80,7 +85,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@400;500;600;700&family=Playball&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css?v=314" />
+  <link rel="stylesheet" href="../css/style.css?v=315" />
   <link rel="stylesheet" href="../css/damai-exp-sections.css?v=76" />
   <link rel="stylesheet" href="../css/damai-exp-cover.css?v=38" />
   <link rel="stylesheet" href="../css/damai-exp-scale.css?v=15" />
@@ -511,7 +516,7 @@
       var e9 = document.querySelector(".case-bg__shape--e9"), r6 = document.querySelector(".case-bg__shape--r6");
       if (!e9 || !r6) return;
       function place() {
-        var vw = d.clientWidth, vh = d.clientHeight, key = vw + "x" + vh;
+        var vw = d.clientWidth, vh = window.__vh ? window.__vh(d.clientHeight) : d.clientHeight, key = vw + "x" + vh;
         if (key === last) return;
         if (last && last.split("x")[0] === String(vw) && window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
         last = key;
@@ -541,7 +546,7 @@
       window.__caseMid = function () { return mid.matches && window.scrollY < GROW * 0.5; }; // true while the middle state is showing (the closing animation exists only then)
       var cw = 0, vh = 0, h0 = 600, top0 = 0, i0 = 0, i1 = 0; // window width / height, the tab's height and distance from the top at the start, its content's width at the start / end
       function measure() {
-        cw = canvas.clientWidth; vh = window.innerHeight;
+        cw = canvas.clientWidth; vh = window.__vh ? window.__vh(window.innerHeight) : window.innerHeight;
         var pad1 = Math.min(40, Math.max(24, (cw - 136 - 1170) / 2)), base = cw <= 750 ? cw : cw <= 1024 ? cw - 48 : Math.min(1250, cw - 136);
         i0 = Math.min(1040, cw - 144) - 80; i1 = base - 2 * pad1;
         // 600px tall, unless the first screen's content needs more (a narrow window wraps the title): measured with the tab in its starting shape

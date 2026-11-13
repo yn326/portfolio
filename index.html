@@ -10,8 +10,13 @@
        (it only writes when the size actually changed). */
     (function () {
       var d = document.documentElement, last = "";
+      window.__vh = function (fallback) { // the window's height for layout. On a touchscreen: the height with the browser's bars showing (100svh), which does not change while they slide in and out
+        try { if (!window.matchMedia("(hover: none), (pointer: coarse)").matches) return fallback;
+          var p = document.createElement("div"); p.style.cssText = "position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none";
+          document.documentElement.appendChild(p); var h = p.offsetHeight; p.parentNode.removeChild(p); return h || fallback; } catch (e) { return fallback; }
+      };
       function s() {
-        var w = d.clientWidth, h = d.clientHeight, key = w + "x" + h;
+        var w = d.clientWidth, h = window.__vh(d.clientHeight), key = w + "x" + h;
         if (key === last) return;
         last = key;
         d.style.setProperty("--cover-scale", Math.max(w / 1440, h / 900));
@@ -180,7 +185,7 @@
          invisible. -->
     <style>.home-bg__shape { animation: none !important; transform: none !important; opacity: 1 !important; }</style>
   </noscript>
-  <link rel="stylesheet" href="css/style.css?v=314" />
+  <link rel="stylesheet" href="css/style.css?v=315" />
   <!-- Deliberately NO <script type="speculationrules"> (prefetch/prerender) on any page. It used to warm up the
        heavy Work/About pages, but when Chrome has preloaded the next page the cross-page view transition waits on
        it, gives up after a fixed 2 seconds and is skipped: every skipped transition in testing showed the new page
