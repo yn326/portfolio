@@ -13,6 +13,7 @@
       function s() {
         var w = d.clientWidth, h = d.clientHeight, key = w + "x" + h;
         if (key === last) return;
+        if (last && last.split("x")[0] === String(w) && window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches) return; // (a touchscreen's browser bars sliding in and out change the height during a scroll: the background is not rescaled for that)
         last = key;
         d.style.setProperty("--cover-scale", Math.max(w / 1440, h / 900));
       }
@@ -381,6 +382,7 @@
       function place() {
         var vw = d.clientWidth, vh = d.clientHeight, key = vw + "x" + vh;
         if (key === last) return;
+        if (last && last.split("x")[0] === String(vw) && window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
         last = key;
         var half = vw / (2 * Math.max(vw / 1440, vh / 900)); // visible half-width, in canvas px
         e9.style.left = (720 + Math.min(600, SHAPE_K * half) - 102) + "px";      // 204px circle, design centre x 1320
@@ -482,14 +484,21 @@
         if (!raf && !frame) raf = requestAnimationFrame(update);
         var y = window.scrollY;
         if (Math.abs(y - cur) < 1.5) return; // our own glide
+        // On a touchscreen the browser reports scroll positions late and rounded, so the glide's own steps looked like the reader scrolling: the glide was dropped and started again,
+        // over and over (the tab stuck half open, everything flickering). While the glide runs and no finger is down, every scroll event is the glide's.
+        if (touchDevice && frame && !touching) return;
         if (y !== cur) dir = y > cur ? 1 : -1; // the browser scrolled (touch, keys, scrollbar, a link): follow it
         cur = target = y;
         clearTimeout(settle);
         settle = setTimeout(snap, 160);
       }, { passive: true });
-      window.addEventListener('touchstart', function () { touching = true; clearTimeout(settle); }, { passive: true });
+      // (a finger on the screen takes over at once: a glide that is under way stops where it is)
+      window.addEventListener('touchstart', function () { touching = true; clearTimeout(settle); if (frame) { cancelAnimationFrame(frame); frame = 0; } cur = target = window.scrollY; }, { passive: true });
       window.addEventListener('touchend', function () { touching = false; settle = setTimeout(snap, 160); }, { passive: true });
-      window.addEventListener('resize', function () { measure(); update(); });
+      // (On a touchscreen the browser's own bars slide away and back while the page scrolls, which changes the window's height without the window changing: the first screen is
+      // not laid out again for that, or it would jump about during the scroll. It is laid out again when the width changes, as when the device is turned.)
+      var touchDevice = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches, lastW = window.innerWidth;
+      window.addEventListener('resize', function () { if (touchDevice && window.innerWidth === lastW) return; lastW = window.innerWidth; measure(); update(); });
       measure();
       update();
       // Reload: the page comes back at the scroll position it was left at (kept in sessionStorage), and the tab is already as white as that position says.
