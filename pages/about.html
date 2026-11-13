@@ -22,6 +22,9 @@
         d.style.setProperty("--cover-scale", Math.max(w / 1440, h / 900));
         // the navigation bar sits as high as on the Work page and the case studies in a window shorter than 900px (80px from the top there, less in proportion below; never under 24px)
         d.style.setProperty("--nav-up", (w <= 648 ? 0 : 80 - Math.max(24, 80 * (h >= 540 ? Math.min(1, h / 900) : Math.max(0.15, (h - 360) / 300)))).toFixed(2) + "px");
+        // the first tab starts at the same height as the cards on the Work page (which sit in the middle of the window, scaled with it: see layout() in pages/work.html); 142px on a phone
+        var ts = w >= 1440 ? Math.max(w / 1440, h / 900) : (w >= 1284 ? 1 : (w - 48) / 1236);
+        if (w <= 648) d.style.removeProperty("--about-top"); else d.style.setProperty("--about-top", Math.max(60, (h - 900 * ts) / 2 + 200 * ts).toFixed(1) + "px");
       }
       s();
       addEventListener("resize", s); addEventListener("DOMContentLoaded", s); addEventListener("load", s); addEventListener("pageshow", s);
@@ -146,7 +149,7 @@
     /* About page (Figma node 1329:2812). Self-contained: every rule is prefixed .a2- */
     html, body { margin: 0; }
     body { min-height: 100vh; font-family: "Figtree", sans-serif; font-weight: 300; color: #5f5f5f; overflow-x: hidden; }
-    .a2-page { position: relative; z-index: 1; width: min(1250px, 100% - 48px); margin: 0 auto; padding: 142px 0 80px; }
+    .a2-page { position: relative; z-index: 1; width: min(1250px, 100% - 48px); margin: 0 auto; padding: var(--about-top, 142px) 0 80px; }
     .a2-page .page-nav { z-index: 10; }
 
     .a2-glass { position: relative; background: rgba(255,255,255,.15); border-radius: 40px; padding: 40px; box-sizing: border-box;
