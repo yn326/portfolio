@@ -27,11 +27,11 @@
         // the navigation bar sits as high as on the Work page and the case studies in a window shorter than 900px (80px from the top there, less in proportion below; never under 24px)
         var navUp = window.__navUp(w, h);
         d.style.setProperty("--nav-up", navUp.toFixed(2) + "px");
-        // The first tab starts where the Work page's cards start (same sums as layout() in pages/work.html), but never more than 120px under the navigation (the cards sit in the middle
+        // The first tab starts where the Work page's cards start (same sums as layout() in pages/work.html), but never more than 80px under the navigation (the cards sit in the middle
         // of the window, which in a tall window is far down). Up to 850px wide (one card per row on the Work page) both start at 142px.
         var navBottom = 80 - navUp + 22;
         if (w <= 850) d.style.removeProperty("--about-top");
-        else d.style.setProperty("--about-top", Math.min(window.__workTop(w, h), navBottom + 120).toFixed(1) + "px");
+        else d.style.setProperty("--about-top", Math.min(window.__workTop(w, h), navBottom + 80).toFixed(1) + "px");
       }
       s();
       addEventListener("resize", s); addEventListener("DOMContentLoaded", s); addEventListener("load", s); addEventListener("pageshow", s);
